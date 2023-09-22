@@ -8,8 +8,13 @@ const TOKEN = process.env.DISCORD_TOKEN;
 
 // Define Client
 const client = new Client({
-	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent],
-	partials: [Partials.Message, Partials.Reaction, Partials.Channel],
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildMessageReactions,
+	],
 	allowedMentions: {
 		parse: ['users', 'roles'],
 	},
@@ -18,6 +23,7 @@ const client = new Client({
 // Client Properties
 client.debug = false;
 client.colors = {
+	base: '#871824',
 	success: '#00ff00',
 	error: '#ff0000',
 	warning: '#ffff00',
