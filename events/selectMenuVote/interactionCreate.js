@@ -21,6 +21,7 @@ module.exports = {
 			.setColor(client.colors.base);
 		const replyEmbed = await interaction.reply({ embeds: [embed], fetchReply: true });
 		await replyEmbed.react('✅');
+		await sendConsoleMessage(API, 'say Discord Server restart vote initiated.');
 
 		// Await Reactions
 		const reactionFilter = (reaction, user) => {
