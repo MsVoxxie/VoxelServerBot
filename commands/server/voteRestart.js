@@ -1,10 +1,13 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { ActionRowBuilder, SelectMenuBuilder } = require('@discordjs/builders');
 
 const serverInstances = [{ name: 'All The Mods 9', id: 'atm9', port: '8084' }];
 
 module.exports = {
-	data: new SlashCommandBuilder().setName('vote_restart').setDescription('Vote Restart a Specific Server'),
+	data: new SlashCommandBuilder()
+		.setName('vote_restart')
+		.setDescription('Vote Restart a Specific Server')
+		.setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
 	options: {
 		devOnly: false,
 		disabled: false,

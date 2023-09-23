@@ -16,7 +16,7 @@ const client = new Client({
 		GatewayIntentBits.GuildMessageReactions,
 	],
 	allowedMentions: {
-		parse: ['users', 'roles'],
+		parse: [],
 	},
 });
 
@@ -39,6 +39,7 @@ require('./functions/helpers/timeFuncs')(client);
 require('./functions/database/util')(client);
 
 // Run Loaders
+require('./core/loaders/api/internalAPI')(client);
 require('./core/loaders/commandLoader')(client);
 require('./core/loaders/eventLoader')(client);
 
