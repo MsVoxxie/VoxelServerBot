@@ -12,6 +12,7 @@ module.exports = {
 		const SPLIT_VALUES = interaction.values[0].split('_');
 		const SERVER_PORT = SPLIT_VALUES[1];
 		const SERVER_NAME = SPLIT_VALUES[0].toUpperCase();
+		const API = await loadAPI(SERVER_PORT);
 
 		// Build Embed and Send
 		const embed = new EmbedBuilder()
@@ -35,10 +36,13 @@ module.exports = {
 			max: REQUIRED_VOTES,
 		});
 		collector.on('collect', async (reaction, user) => {
-			console.log('Collected!');
 			const currentVotes = replyEmbed.embeds[0].fields[0];
 			const updatedVotes = currentVotes.value++ + 1;
 
+			// Tell Server current votes
+			await sendConsoleMessage(API, `say Vote Status: ${updatedVotes}/${REQUIRED_VOTES}`);
+
+			// Build Embed
 			const embed = new EmbedBuilder()
 				.setTitle(`${SERVER_NAME} Restart Vote`)
 				.setDescription(`${interaction.member.displayName} would like to restart the server.`)
@@ -63,7 +67,6 @@ module.exports = {
 
 				try {
 					// Restart Server
-					const API = await loadAPI(SERVER_PORT);
 					await sendConsoleMessage(API, 'say Discord Server restart vote Passed, Restarting in 1 minute.');
 					await sleep(60 * 1000);
 					await sendConsoleMessage(API, 'say Server Restarting!');
