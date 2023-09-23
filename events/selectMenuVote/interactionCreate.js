@@ -81,6 +81,7 @@ module.exports = {
 					.setColor(client.colors.error);
 				await replyEmbed.edit({ embeds: [embed] });
 				await replyEmbed.reactions.removeAll();
+				await sendConsoleMessage(API, 'say Discord Server restart vote failed.');
 			}
 		});
 	},
