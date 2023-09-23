@@ -67,7 +67,7 @@ module.exports = {
 
 				try {
 					// Restart Server
-					await sendConsoleMessage(API, 'say Discord Server restart vote Passed, Restarting in 1 minute.');
+					await sendConsoleMessage(API, 'say Vote Passed, Restarting in 1 minute.');
 					await sleep(60 * 1000);
 					await sendConsoleMessage(API, 'say Server Restarting!');
 					await sleep(3 * 1000);
