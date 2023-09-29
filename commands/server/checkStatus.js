@@ -12,8 +12,12 @@ module.exports = {
 	},
 	async execute(client, interaction, settings) {
 		// Query Server
-		const QUERY = await Gamedig.query({ type: 'minecraft', host: process.env.SERVER_IP });
-		if (!QUERY) return interaction.reply('Server is Offline!');
+		let OFFLINE = false;
+		const QUERY = await Gamedig.query({ type: 'minecraft', host: process.env.SERVER_IP }).catch((err) => {
+			OFFLINE = true;
+			return interaction.reply('Server is Offline!');
+		});
+		if (OFFLINE) return;
 
 		// Format Data
 		const CONN_INFO = codeBlock('css', `IP: ${QUERY.connect}`);
