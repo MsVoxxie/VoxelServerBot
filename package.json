@@ -9,6 +9,7 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^7.0.1",
+    "gamedig": "^4.1.0",
     "moment": "^2.29.4",
     "moment-duration-format": "^2.3.2",
     "mongoose": "^7.5.2",
