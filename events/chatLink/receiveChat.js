@@ -12,13 +12,13 @@ module.exports = {
 		// Function for sanity
 		async function serverLink(USER = 'Placeholder', MESSAGE = 'Placeholder') {
 			// Get Avatar
-			const usedAvatar = `${USER === 'SERVER' ? '' : `https://mc-heads.net/avatar/${data.USER}`}`;
+			const userAvatar = `${USER === 'SERVER' ? '' : `https://mc-heads.net/avatar/${data.USER}`}`;
 
 			// Create and Send
 			const webhook = new WebhookClient({ url: process.env.CHATLINK_WEBHOOK });
 			webhook.send({
 				username: USER,
-				avatarURL: usedAvatar,
+				avatarURL: userAvatar,
 				content: `${MESSAGE.replace(/^<@!?(\d+)>$/, 'MENTION')}`,
 			});
 		}
