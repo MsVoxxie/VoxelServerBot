@@ -5,15 +5,22 @@ module.exports = {
 	name: 'receivedChat',
 	runType: 'infinity',
 	async execute(client, data) {
-		Logger.info(data);
-
 		// Send webhook
+		Logger.info(data);
 		await serverLink(data.USER, data.MESSAGE);
 
 		// Function for sanity
 		async function serverLink(USER = 'Placeholder', MESSAGE = 'Placeholder') {
+			// Get Avatar
+			const usedAvatar = `${USER === 'SERVER' ? '' : `https://mc-heads.net/avatar/${data.USER}`}`;
+
+			// Create and Send
 			const webhook = new WebhookClient({ url: process.env.CHATLINK_WEBHOOK });
-			webhook.send({ content: `<${USER}> ${MESSAGE.replace(/^<@!?(\d+)>$/, 'MENTION')}` });
+			webhook.send({
+				username: USER,
+				avatarURL: usedAvatar,
+				content: `${MESSAGE.replace(/^<@!?(\d+)>$/, 'MENTION')}`,
+			});
 		}
 	},
 };
