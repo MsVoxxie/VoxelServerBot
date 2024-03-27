@@ -5,6 +5,9 @@ module.exports = {
 	name: 'receivedChat',
 	runType: 'infinity',
 	async execute(client, data) {
+		// Check for Prestart
+		if (data.MESSAGE === 'Server PreStart') return;
+
 		// Send webhook
 		Logger.info(data);
 		await serverLink(data.USER, data.MESSAGE);
@@ -12,7 +15,7 @@ module.exports = {
 		// Function for sanity
 		async function serverLink(USER = 'Placeholder', MESSAGE = 'Placeholder') {
 			// Get Avatar
-			const userAvatar = `${USER === 'SERVER' ? '' : `https://mc-heads.net/avatar/${data.USER}`}`;
+			const userAvatar = `${blacklistedNames.includes(USER) ? '' : `https://mc-heads.net/avatar/${data.USER}`}`;
 
 			// Create and Send
 			const webhook = new WebhookClient({ url: process.env.CHATLINK_WEBHOOK });
@@ -24,3 +27,5 @@ module.exports = {
 		}
 	},
 };
+
+const blacklistedNames = ['SERVER', 'MC-ETERNAL', 'ATM9', 'STONEOPOLIS'];

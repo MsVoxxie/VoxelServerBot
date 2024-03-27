@@ -10,7 +10,7 @@ module.exports = {
 		if (message.channel.id !== process.env.CHATLINK_CHANNEL) return;
 
 		// Send it
-		const API = await loadAPI(8084);
+		const API = await loadAPI(8089);
 		await sendConsoleMessage(API, `say [D] <${message.member.displayName}> ${message.content}`);
 	},
 };
