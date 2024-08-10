@@ -13,7 +13,7 @@ module.exports = {
 	async execute(client, interaction, settings) {
 		// Query Server
 		let OFFLINE = false;
-		const QUERY = await Gamedig.query({ type: 'minecraft', host: process.env.SERVER_IP }).catch((err) => {
+		const QUERY = await Gamedig.query({ type: 'minecraft', host: process.env.SERVER_IP, port: 25565 }).catch((err) => {
 			OFFLINE = true;
 			return interaction.reply('Server is Offline!');
 		});
@@ -27,9 +27,9 @@ module.exports = {
 
 		// Build Embed
 		const embed = new EmbedBuilder()
-			.setTitle('ATM 9 Server Info')
+			.setTitle('LL7 Server Info')
 			.setColor(client.colors.base)
-			.setDescription(`${CONN_INFO}${SERVER_MOTD}${PLAYER_COUNT}${CURRENT_PLAYERS}`)
+			.setDescription(`${SERVER_MOTD}${PLAYER_COUNT}${CURRENT_PLAYERS}`)
 			.setTimestamp();
 
 		interaction.reply({ embeds: [embed] });

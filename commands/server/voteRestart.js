@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { ActionRowBuilder, SelectMenuBuilder } = require('@discordjs/builders');
 
-const serverInstances = [{ name: 'All The Mods 9', id: 'atm9', port: '8084' }];
+const serverInstances = [{ name: 'LL7', id: 'LL7', port: '8089' }];
 
 module.exports = {
 	data: new SlashCommandBuilder()

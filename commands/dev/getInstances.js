@@ -8,7 +8,7 @@ module.exports = {
 		disabled: false,
 	},
 	async execute(client, interaction, settings) {
-		const API = await loadAPI();
+		const API = await loadAPI(8080);
 		// Init API Instances
 		const instancesResult = await API.ADSModule.GetLocalInstancesAsync();
 		const friendlyInstances = instancesResult.map((i) => {
