@@ -5,7 +5,7 @@ const Logger = require('../logging/logger');
 async function mainAPI() {
 	const { AMP_URI, AMP_USER, AMP_PASS } = process.env;
 
-	const API = new ampAPI.AMPAPI(`${AMP_URI}:8080`);
+	const API = new ampAPI.AMPAPI(`${AMP_URI}`);
 
 	try {
 		// Stage One
@@ -34,7 +34,7 @@ async function instanceAPI(instanceID) {
 	const { AMP_URI, AMP_USER, AMP_PASS } = process.env;
 
 	if (!instanceID) throw new Error('A valid InstanceID must be provided.');
-	const API = new ampAPI.AMPAPI(`${AMP_URI}:8080/API/ADSModule/Servers/${instanceID}`);
+	const API = new ampAPI.AMPAPI(`${AMP_URI}/API/ADSModule/Servers/${instanceID}`);
 
 	try {
 		// Stage One
