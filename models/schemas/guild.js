@@ -1,6 +1,14 @@
 const { Schema, model } = require('mongoose');
 
 const chatLinkSchema = Schema({
+	webhookId: {
+		type: String,
+		required: true,
+	},
+	webhookToken: {
+		type: String,
+		required: true,
+	},
 	instanceFriendlyName: {
 		type: String,
 		required: true,
