@@ -27,6 +27,20 @@ module.exports = {
 
 		// Check if the server exists
 		const checkServer = await chatLink.findOne({ 'chatLinks.instanceId': server, 'chatLinks.channelId': channel.id });
+		const serverInstance = await instanceAPI(server);
+
+		// Get the triggerId for the event trigger
+		const scheduleData = await serverInstance.Core.GetScheduleDataAsync();
+		const filteredTriggers =
+			scheduleData.AvailableTriggers.find((t) => t.Description === 'A player sends a chat message') ||
+			scheduleData.PopulatedTriggers.find((t) => t.Description === 'A player sends a chat message');
+		const triggerId = filteredTriggers.Id;
+
+		// Get the task for the event trigger
+		const filteredTasks =
+			scheduleData.AvailableMethods.find((t) => t.Id === 'Event.WebRequestPlugin.MakePOSTRequest') ||
+			scheduleData.PopulatedMethods.find((t) => t.Id === 'Event.WebRequestPlugin.MakePOSTRequest');
+		const taskId = filteredTasks.Id;
 
 		// Check if the channel is valid
 		if (!checkServer) {
@@ -41,20 +55,27 @@ module.exports = {
 			if (!channel.permissionsFor(interaction.guild.members.me).has(PermissionFlagsBits.ManageWebhooks))
 				return interaction.reply({ content: 'I do not have permission to manage webhooks in this channel.', ephemeral: true });
 
-			// Add the event trigger for when a player sends a message and set it to enabled
-			const serverInstance = await instanceAPI(server);
-			await serverInstance.Core.AddEventTriggerAsync('dbc16e38-6bbf-4cea-a936-e395cfa66f46');
-			await serverInstance.Core.SetTriggerEnabledAsync('dbc16e38-6bbf-4cea-a936-e395cfa66f46', true);
+			// Add the trigger
+			await serverInstance.Core.AddEventTriggerAsync(triggerId).then((task) => {
+				Logger.info(`Added event trigger for ${channel.name} in ${interaction.guild.name}`);
+				console.log(task);
+			});
+			await serverInstance.Core.SetTriggerEnabledAsync(triggerId, true);
 
 			// Post request dictionary
 			const postDict = {
-				URI: 'https://vsb.voxxie.me/v1/server/link',
+				URI: `${process.env.SRV_API}/v1/server/link`,
 				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: '{@Message}', INSTANCE: '{@InstanceId}' }),
 				ContentType: 'application/json',
 			};
 
+			// Find the task with th
+
 			// Add the task to send the message to the api
-			await serverInstance.Core.AddTaskAsync('dbc16e38-6bbf-4cea-a936-e395cfa66f46', 'Event.WebRequestPlugin.MakePOSTRequest', postDict);
+			await serverInstance.Core.AddTaskAsync(triggerId, taskId, postDict).then((task) => {
+				Logger.info(`Added task for ${channel.name} in ${interaction.guild.name}`);
+				console.log(task);
+			});
 
 			// Fetch the webhooks in the channel
 			const webhooks = await channel.fetchWebhooks();
@@ -66,7 +87,7 @@ module.exports = {
 				webhookToken = clHook.token;
 			} else {
 				// Create the webhook
-				await channel.createWebhook({ name: `${friendlyName} Chat Link` }).then((wh) => {
+				await channel.createWebhook({ name: `${friendlyName} Chat Link`, avatar: `${process.env.SRV_API}/v1/client/static/logos/SrvLogoAlt.png` }).then((wh) => {
 					Logger.info(`Created webhook for ${channel.name} in ${interaction.guild.name}`);
 
 					webhookId = wh.id;
@@ -83,6 +104,7 @@ module.exports = {
 							webhookId,
 							webhookToken,
 							instanceModule: instance.instanceModule,
+							instanceName: instance.instanceName,
 							instanceFriendlyName: friendlyName,
 							instanceId: server,
 							channelId: channel.id,
@@ -101,17 +123,10 @@ module.exports = {
 
 			await chatLink.findOneAndUpdate({}, { $pull: { chatLinks: { instanceId: server } } });
 
-			// Remove the event trigger for when a player sends a message and it's task
-			const serverInstance = await instanceAPI(server);
-			const scheduleData = await serverInstance.Core.GetScheduleDataAsync();
-
 			try {
-				// Find the task with the Id of 'dbc16e38-6bbf-4cea-a936-e395cfa66f46'
-				const allTasks = scheduleData.PopulatedTriggers.find((t) => t.Id === 'dbc16e38-6bbf-4cea-a936-e395cfa66f46');
-				// Delete the task with the TaskMethodName of 'Event.WebRequestPlugin.MakePOSTRequest'
-				const postTask = allTasks.Tasks.find((t) => t.TaskMethodName === 'Event.WebRequestPlugin.MakePOSTRequest');
-				await serverInstance.Core.DeleteTaskAsync('dbc16e38-6bbf-4cea-a936-e395cfa66f46', postTask.Id);
-				await serverInstance.Core.DeleteTriggerAsync('dbc16e38-6bbf-4cea-a936-e395cfa66f46');
+				// Remove the trigger and task
+				await serverInstance.Core.DeleteTaskAsync(triggerId, taskId);
+				await serverInstance.Core.DeleteTriggerAsync(triggerId);
 			} catch (error) {
 				console.log(error);
 			}

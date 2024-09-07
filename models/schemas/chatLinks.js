@@ -13,6 +13,10 @@ const chatLinkSchema = Schema({
 		type: String,
 		required: true,
 	},
+	instanceName: {
+		type: String,
+		required: true,
+	},
 	instanceFriendlyName: {
 		type: String,
 		required: true,
