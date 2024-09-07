@@ -1,10 +1,10 @@
-async function loadAPI(Port) {
+async function loadAPI(instanceID) {
 	const ampAPI = require('@cubecoders/ampapi');
 	const Logger = require('../logging/logger');
 	const { AMP_URI, AMP_USER, AMP_PASS } = process.env;
 
-	if (!Port) throw new Error('A Port number Must be provided.');
-	const API = new ampAPI.AMPAPI(`${AMP_URI}:${Port}`);
+	if (!instanceID) throw new Error('A valid InstanceID must be provided.');
+	const API = new ampAPI.AMPAPI(`${AMP_URI}:8080/API/ADSModule/Servers/${instanceID}`);
 
 	try {
 		// Stage One
