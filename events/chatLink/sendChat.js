@@ -1,5 +1,5 @@
 const { Events } = require('discord.js');
-const { loadAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 
 module.exports = {
 	name: Events.MessageCreate,
@@ -14,7 +14,7 @@ module.exports = {
 
 		// Send messages to servers
 		for (const server of serverList) {
-			const API = await loadAPI(server.ID);
+			const API = await instanceAPI(server.ID);
 			await sendConsoleMessage(API, `tellraw @p ["",{"text":"[D]","color":"blue"},"<${message.member.displayName}> ${message.content}"]`);
 		}
 	},
