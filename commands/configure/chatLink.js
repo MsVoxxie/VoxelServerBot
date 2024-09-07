@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, WebhookClient } = require('discord.js');
-const { instanceAPI } = require('../../functions/ampAPI/apiFunctions');
+const { instanceAPI, fetchTriggerId, fetchEventId } = require('../../functions/ampAPI/apiFunctions');
 const Logger = require('../../functions/logging/logger');
 const { chatLink, ampInstances } = require('../../models');
 
@@ -29,18 +29,9 @@ module.exports = {
 		const checkServer = await chatLink.findOne({ 'chatLinks.instanceId': server, 'chatLinks.channelId': channel.id });
 		const serverInstance = await instanceAPI(server);
 
-		// Get the triggerId for the event trigger
-		const scheduleData = await serverInstance.Core.GetScheduleDataAsync();
-		const filteredTriggers =
-			scheduleData.AvailableTriggers.find((t) => t.Description === 'A player sends a chat message') ||
-			scheduleData.PopulatedTriggers.find((t) => t.Description === 'A player sends a chat message');
-		const triggerId = filteredTriggers.Id;
-
-		// Get the task for the event trigger
-		const filteredTasks =
-			scheduleData.AvailableMethods.find((t) => t.Id === 'Event.WebRequestPlugin.MakePOSTRequest') ||
-			scheduleData.PopulatedMethods.find((t) => t.Id === 'Event.WebRequestPlugin.MakePOSTRequest');
-		const taskId = filteredTasks.Id;
+		// Get the events and triggers
+		const chatMessageTrigger = await fetchTriggerId(server, 'A player sends a chat message');
+		const postRequestEvent = await fetchEventId(server, 'MakePOSTRequest');
 
 		// Check if the channel is valid
 		if (!checkServer) {
@@ -56,11 +47,8 @@ module.exports = {
 				return interaction.reply({ content: 'I do not have permission to manage webhooks in this channel.', ephemeral: true });
 
 			// Add the trigger
-			await serverInstance.Core.AddEventTriggerAsync(triggerId).then((task) => {
-				Logger.info(`Added event trigger for ${channel.name} in ${interaction.guild.name}`);
-				console.log(task);
-			});
-			await serverInstance.Core.SetTriggerEnabledAsync(triggerId, true);
+			await serverInstance.Core.AddEventTriggerAsync(chatMessageTrigger.Id);
+			await serverInstance.Core.SetTriggerEnabledAsync(chatMessageTrigger.Id, true);
 
 			// Post request dictionary
 			const postDict = {
@@ -69,13 +57,8 @@ module.exports = {
 				ContentType: 'application/json',
 			};
 
-			// Find the task with th
-
 			// Add the task to send the message to the api
-			await serverInstance.Core.AddTaskAsync(triggerId, taskId, postDict).then((task) => {
-				Logger.info(`Added task for ${channel.name} in ${interaction.guild.name}`);
-				console.log(task);
-			});
+			await serverInstance.Core.AddTaskAsync(chatMessageTrigger.Id, postRequestEvent.Id, postDict);
 
 			// Fetch the webhooks in the channel
 			const webhooks = await channel.fetchWebhooks();
@@ -125,8 +108,8 @@ module.exports = {
 
 			try {
 				// Remove the trigger and task
-				await serverInstance.Core.DeleteTaskAsync(triggerId, taskId);
-				await serverInstance.Core.DeleteTriggerAsync(triggerId);
+				await serverInstance.Core.DeleteTaskAsync(chatMessageTrigger.Id, postRequestEvent.Id);
+				await serverInstance.Core.DeleteTriggerAsync(chatMessageTrigger.Id);
 			} catch (error) {
 				console.log(error);
 			}

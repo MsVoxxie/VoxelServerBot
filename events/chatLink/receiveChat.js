@@ -23,14 +23,14 @@ module.exports = {
 			const chatLinkData = chatlinkFetch[0].chatLinks[0];
 			if (chatLinkData.instanceModule === 'Minecraft') {
 				userAvatar = `${chatLinkData.instanceName.includes(USER) ? '' : `https://mc-heads.net/head/${data.USER}`}`;
-				// Create and Send
-				const webhook = new WebhookClient({ id: chatLinkData.webhookId, token: chatLinkData.webhookToken });
-				webhook.send({
-					username: `${USER} | ${chatLinkData.instanceFriendlyName}`,
-					avatarURL: userAvatar || '',
-					content: `${MESSAGE.replace(/^<@!?(\d+)>$/, '<[MENTION REDACTED]>')}`,
-				});
 			}
+			// Create and Send
+			const webhook = new WebhookClient({ id: chatLinkData.webhookId, token: chatLinkData.webhookToken });
+			webhook.send({
+				username: `${USER} | ${chatLinkData.instanceFriendlyName}`,
+				avatarURL: userAvatar,
+				content: `${MESSAGE.replace(/^<@!?(\d+)>$/, '<[MENTION REDACTED]>')}`,
+			});
 		}
 	},
 };

@@ -58,6 +58,32 @@ async function instanceAPI(instanceID) {
 	}
 }
 
+// Fetch the trigger id of a specified eventTrigger
+async function fetchTriggerId(serverId, triggerDescription) {
+	const API = await instanceAPI(serverId);
+	const allTriggers = await API.Core.GetScheduleDataAsync();
+	let filteredTrigger =
+		allTriggers.AvailableTriggers.find((trigger) => trigger.Description === triggerDescription) ||
+		allTriggers.PopulatedTriggers.find((trigger) => trigger.Description === triggerDescription);
+	// Player sends a chat message is an outlying trigger that is not always available
+	if (triggerDescription === 'A player sends a chat message' && !filteredTrigger) {
+		filteredTrigger =
+			allTriggers.AvailableTriggers.find((trigger) => trigger.Description === 'A user sends a chat message') ||
+			allTriggers.PopulatedTriggers.find((trigger) => trigger.Description === 'A user sends a chat message');
+	}
+	if (!filteredTrigger) throw new Error(`No Trigger Found with the description: ${triggerDescription}`);
+	return { Id: filteredTrigger.Id, Description: filteredTrigger.Description };
+}
+
+// Fetch the trigger id of a specified eventTrigger
+async function fetchEventId(serverId, eventName) {
+	const API = await instanceAPI(serverId);
+	const allEvents = await API.Core.GetScheduleDataAsync();
+	const filteredEvent = allEvents.AvailableMethods.find((event) => event.Name === eventName) || allEvents.PopulatedMethods.find((event) => event.Name === eventName);
+	if (!filteredEvent) throw new Error(`No Event Found with the name: ${eventName}`);
+	return { Id: filteredEvent.Id, Description: filteredEvent.Description };
+}
+
 // Send a console message to a specific instance
 async function sendConsoleMessage(API, Message) {
 	if (!API) throw new Error('No Valid API Instance Provided.');
@@ -67,5 +93,7 @@ async function sendConsoleMessage(API, Message) {
 module.exports = {
 	mainAPI,
 	instanceAPI,
+	fetchTriggerId,
+	fetchEventId,
 	sendConsoleMessage,
 };
