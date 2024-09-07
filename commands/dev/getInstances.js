@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { mainAPI } = require('../../functions/ampAPI/apiFunctions');
+const { ampInstances } = require('../../models');
 
 module.exports = {
 	data: new SlashCommandBuilder().setName('get_instances').setDescription("Get Server Instance ID's"),
@@ -8,18 +8,14 @@ module.exports = {
 		disabled: false,
 	},
 	async execute(client, interaction, settings) {
-		const API = await mainAPI();
-		// Init API Instances
-		const instancesResult = await API.ADSModule.GetLocalInstancesAsync();
-		const friendlyInstances = instancesResult.map((i) => {
-			const friendly = {
-				InstanceName: i.InstanceName,
-				FriendlyName: i.FriendlyName,
-				InstanceID: i.InstanceID,
-				Port: i.Port,
-			};
-			return friendly;
-		});
-		console.log(friendlyInstances);
+		// Fetch all instances for AMP
+		const instances = await ampInstances.findOne({});
+		if (!instances) return interaction.reply({ content: 'No instances found in the database.', ephemeral: true });
+
+		// Tell the user that the information has been sent to the console.
+		await interaction.reply({ content: 'Check the console for the list of instances.', ephemeral: true });
+
+		// Log the instances to the console
+		console.log(instances.instances);
 	},
 };
