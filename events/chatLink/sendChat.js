@@ -1,4 +1,5 @@
 const { Events } = require('discord.js');
+const { chatLink } = require('../../models');
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 
 module.exports = {
@@ -7,14 +8,21 @@ module.exports = {
 	async execute(client, message) {
 		if (message.author.bot) return;
 		if (!message.content) return;
-		if (message.channel.id !== process.env.CHATLINK_CHANNEL) return;
 
-		// Ports to send messages to
-		const serverList = [{ ID: '8be4a730-3d0d-499c-9ca4-cad9b355f65f', name: 'projectarchitect2' }];
+		// Fetch the chat link data
+		const chatlinkFetch = await chatLink.findOne({ 'chatLinks.channelId': message.channel.id }).lean();
+		if (!chatlinkFetch) return;
 
-		// Send messages to servers
-		for (const server of serverList) {
-			const API = await instanceAPI(server.ID);
+		// Get the chat link data
+		const chatLinkData = chatlinkFetch.chatLinks[0];
+
+		// Check if the channel id matches the chat link channel id
+		if (chatLinkData.channelId !== message.channel.id) return;
+
+		// Check if the instance module is Minecraft
+		if (chatLinkData.instanceModule == 'Minecraft') {
+			// Send messages to server
+			const API = await instanceAPI(chatLinkData.instanceId);
 			await sendConsoleMessage(API, `tellraw @p ["",{"text":"[D]","color":"blue"},"<${message.member.displayName}> ${message.content}"]`);
 		}
 	},

@@ -11,7 +11,7 @@ module.exports = {
 
 		// Switchcase for the command name
 		switch (command.data.name) {
-			case 'setchatlink':
+			case 'managechatlink':
 				const focusedOption = interaction.options.getFocused();
 				const allInstances = await ampInstances.findOne({});
 
@@ -21,7 +21,7 @@ module.exports = {
 				// Map the results
 				const filteredResults = filteredChoice.map((i) => {
 					return {
-						name: `${i.instanceFriendlyName} | ${i.instanceId}`,
+						name: `${i.instanceFriendlyName} • ${i.instanceId} ${i.instanceSuspended ? '• Suspended' : ''}`,
 						value: `${i.instanceId} | ${i.instanceFriendlyName}`,
 					};
 				});

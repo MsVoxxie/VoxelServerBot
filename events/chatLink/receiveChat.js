@@ -1,5 +1,5 @@
 const { WebhookClient } = require('discord.js');
-const Logger = require('../../functions/logging/logger');
+const { chatLink } = require('../../models');
 
 module.exports = {
 	name: 'receivedChat',
@@ -9,20 +9,33 @@ module.exports = {
 		if (data.MESSAGE === 'Server PreStart') return;
 
 		// Send webhook
-		await serverLink(data.USER, data.MESSAGE);
+		await serverLink(data.USER, data.MESSAGE, data.INSTANCE);
 
 		// Function for sanity
-		async function serverLink(USER = 'Placeholder', MESSAGE = 'Placeholder') {
-			// Get Avatar
-			const userAvatar = `${blacklistedNames.includes(USER) ? '' : `https://mc-heads.net/head/${data.USER}`}`;
+		async function serverLink(USER = 'Placeholder', MESSAGE = 'Placeholder', INSTANCE = 'Placeholder') {
+			// Defintions
+			let userAvatar = '';
 
-			// Create and Send
-			const webhook = new WebhookClient({ url: process.env.CHATLINK_WEBHOOK });
-			webhook.send({
-				username: USER,
-				avatarURL: userAvatar,
-				content: `${MESSAGE.replace(/^<@!?(\d+)>$/, 'MENTION')}`,
-			});
+			// Fetch the instance ID from the database
+			const chatlinkFetch = await chatLink.findOne({ 'chatLinks.instanceId': INSTANCE }).lean();
+			if (!chatlinkFetch) return;
+
+			// Get the chat link data
+			const chatLinkData = chatlinkFetch.chatLinks[0];
+
+			console.log(USER, MESSAGE, INSTANCE);
+
+			// Get Avatar
+			if (chatLinkData.instanceModule === 'Minecraft') {
+				userAvatar = `${blacklistedNames.includes(USER) ? '' : `https://mc-heads.net/head/${data.USER}`}`;
+				// Create and Send
+				const webhook = new WebhookClient({ id: chatLinkData.webhookId, token: chatLinkData.webhookToken });
+				webhook.send({
+					username: USER,
+					avatarURL: userAvatar || '',
+					content: `${MESSAGE.replace(/^<@!?(\d+)>$/, 'MENTION')}`,
+				});
+			}
 		}
 	},
 };
