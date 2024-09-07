@@ -22,7 +22,7 @@ async function mainAPI() {
 		// Stage Two
 		APIInitOK = await API.initAsync();
 		if (!APIInitOK) return Logger.error('Stage 2 API init Failed');
-		Logger.success('AMP API Initialized');
+		// Logger.success('AMP API Initialized');
 		return API;
 	} catch (err) {
 		console.error(err);

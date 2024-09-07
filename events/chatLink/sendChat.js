@@ -9,21 +9,23 @@ module.exports = {
 		if (message.author.bot) return;
 		if (!message.content) return;
 
-		// Fetch the chat link data
-		const chatlinkFetch = await chatLink.findOne({ 'chatLinks.channelId': message.channel.id }).lean();
-		if (!chatlinkFetch) return;
+		// Fetch all matching chat links
+		const chatlinkFetch = await chatLink.find({ 'chatLinks.channelId': message.channel.id }).lean();
+		// const chatlinkFetch = await chatLink.find({ 'chatLinks.channelId': message.channel.id }).lean();
+		if (!chatlinkFetch.length) return;
 
-		// Get the chat link data
-		const chatLinkData = chatlinkFetch.chatLinks[0];
+		for (const chatLinkD of chatlinkFetch[0].chatLinks) {
+			const chatLinkData = chatLinkD;
 
-		// Check if the channel id matches the chat link channel id
-		if (chatLinkData.channelId !== message.channel.id) return;
+			// Check if the channel id matches the chat link channel id
+			if (chatLinkData.channelId !== message.channel.id) continue;
 
-		// Check if the instance module is Minecraft
-		if (chatLinkData.instanceModule == 'Minecraft') {
-			// Send messages to server
-			const API = await instanceAPI(chatLinkData.instanceId);
-			await sendConsoleMessage(API, `tellraw @p ["",{"text":"[D]","color":"blue"},"<${message.member.displayName}> ${message.content}"]`);
+			// Check if the instance module is Minecraft
+			if (chatLinkData.instanceModule === 'Minecraft') {
+				// Send messages to server
+				const API = await instanceAPI(chatLinkData.instanceId);
+				await sendConsoleMessage(API, `tellraw @p ["",{"text":"[D]","color":"blue"},"<${message.member.displayName}> ${message.content}"]`);
+			}
 		}
 	},
 };

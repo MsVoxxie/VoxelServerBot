@@ -18,13 +18,10 @@ module.exports = {
 
 			// Fetch the instance ID from the database
 			const chatlinkFetch = await chatLink.find({ 'chatLinks.instanceId': INSTANCE }).lean();
-			if (!chatlinkFetch) return;
+			if (!chatlinkFetch.length) return;
 
 			for (const chatLinkD of chatlinkFetch) {
 				const chatLinkData = chatLinkD.chatLinks[0];
-				// Get Avatar
-				console.log(chatLinkData.instanceModule);
-
 				if (chatLinkData.instanceModule === 'Minecraft') {
 					userAvatar = `${chatLinkData.instanceName.includes(USER) ? '' : `https://mc-heads.net/head/${data.USER}`}`;
 					// Create and Send
