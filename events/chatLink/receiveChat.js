@@ -26,7 +26,7 @@ module.exports = {
 				// Create and Send
 				const webhook = new WebhookClient({ id: chatLinkData.webhookId, token: chatLinkData.webhookToken });
 				webhook.send({
-					username: USER,
+					username: `${USER} | ${chatLinkData.instanceFriendlyName}`,
 					avatarURL: userAvatar || '',
 					content: `${MESSAGE.replace(/^<@!?(\d+)>$/, '<[MENTION REDACTED]>')}`,
 				});
