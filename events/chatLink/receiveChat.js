@@ -17,21 +17,19 @@ module.exports = {
 			let userAvatar = '';
 
 			// Fetch the instance ID from the database
-			const chatlinkFetch = await chatLink.find({ 'chatLinks.instanceId': INSTANCE }).lean();
+			chatlinkFetch = await chatLink.find({ 'chatLinks.instanceId': INSTANCE }, { chatLinks: { $elemMatch: { instanceId: INSTANCE } } }).lean();
 			if (!chatlinkFetch.length) return;
 
-			for (const chatLinkD of chatlinkFetch) {
-				const chatLinkData = chatLinkD.chatLinks[0];
-				if (chatLinkData.instanceModule === 'Minecraft') {
-					userAvatar = `${chatLinkData.instanceName.includes(USER) ? '' : `https://mc-heads.net/head/${data.USER}`}`;
-					// Create and Send
-					const webhook = new WebhookClient({ id: chatLinkData.webhookId, token: chatLinkData.webhookToken });
-					webhook.send({
-						username: USER,
-						avatarURL: userAvatar || '',
-						content: `${MESSAGE.replace(/^<@!?(\d+)>$/, 'MENTION')}`,
-					});
-				}
+			const chatLinkData = chatlinkFetch[0].chatLinks[0];
+			if (chatLinkData.instanceModule === 'Minecraft') {
+				userAvatar = `${chatLinkData.instanceName.includes(USER) ? '' : `https://mc-heads.net/head/${data.USER}`}`;
+				// Create and Send
+				const webhook = new WebhookClient({ id: chatLinkData.webhookId, token: chatLinkData.webhookToken });
+				webhook.send({
+					username: USER,
+					avatarURL: userAvatar || '',
+					content: `${MESSAGE.replace(/^<@!?(\d+)>$/, '<[MENTION REDACTED]>')}`,
+				});
 			}
 		}
 	},
