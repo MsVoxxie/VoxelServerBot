@@ -130,7 +130,6 @@ module.exports = {
 			const chatMessageTask = await fetchTriggerTaskId(server, 'A player sends a chat message', 'MakePOSTRequest');
 			const userJoinTask = await fetchTriggerTaskId(server, 'A player joins the server', 'MakePOSTRequest');
 			const userLeaveTask = await fetchTriggerTaskId(server, 'A player leaves the server', 'MakePOSTRequest');
-			const playerDeathTask = await fetchTriggerTaskId(server, 'A player commits suicide', 'MakePOSTRequest');
 
 			// Check that the bot can manage webhooks
 			if (!channel.permissionsFor(interaction.guild.members.me).has(PermissionFlagsBits.ManageWebhooks))
