@@ -41,9 +41,6 @@ module.exports = {
 		const userJoinTrigger = await fetchTriggerId(server, 'A player joins the server');
 		const userLeaveTrigger = await fetchTriggerId(server, 'A player leaves the server');
 
-		//! Player Death Trigger
-		const playerDeathTrigger = await fetchTriggerId(server, 'A player commits suicide');
-
 		// Check if the channel is valid
 		if (!checkServer) {
 			// Fetch the instance data from the database
@@ -67,17 +64,12 @@ module.exports = {
 			// Event Dictionary
 			const userJoinDictionary = {
 				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: 'is connecting', INSTANCE: '{@InstanceId}' }),
+				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: 'has connected', INSTANCE: '{@InstanceId}' }),
 				ContentType: 'application/json',
 			};
 			const userLeaveDictionary = {
 				URI: `${process.env.SRV_API}/v1/server/link`,
 				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: 'has disconnected', INSTANCE: '{@InstanceId}' }),
-				ContentType: 'application/json',
-			};
-			const userDeathDictionary = {
-				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: '{@Method}', INSTANCE: '{@InstanceId}' }),
 				ContentType: 'application/json',
 			};
 
@@ -94,11 +86,6 @@ module.exports = {
 			await serverInstance.Core.AddEventTriggerAsync(userLeaveTrigger.Id);
 			await serverInstance.Core.SetTriggerEnabledAsync(userLeaveTrigger.Id, true);
 			await serverInstance.Core.AddTaskAsync(userLeaveTrigger.Id, postRequestEvent.Id, userLeaveDictionary);
-
-			// //! Add the trigger for player death
-			await serverInstance.Core.AddEventTriggerAsync(playerDeathTrigger.Id);
-			await serverInstance.Core.SetTriggerEnabledAsync(playerDeathTrigger.Id, true);
-			await serverInstance.Core.AddTaskAsync(playerDeathTrigger.Id, postRequestEvent.Id, userDeathDictionary);
 
 			// Fetch the webhooks in the channel
 			const webhooks = await channel.fetchWebhooks();
@@ -162,10 +149,6 @@ module.exports = {
 
 			await serverInstance.Core.DeleteTaskAsync(userLeaveTrigger.Id, userLeaveTask.taskId);
 			await serverInstance.Core.DeleteTriggerAsync(userLeaveTrigger.Id);
-
-			//! Remove the trigger and task for player death
-			await serverInstance.Core.DeleteTaskAsync(playerDeathTrigger.Id, playerDeathTask.taskId);
-			await serverInstance.Core.DeleteTriggerAsync(playerDeathTrigger.Id);
 
 			// Fetch the webhooks in the channel
 			const webhooks = await channel.fetchWebhooks();
