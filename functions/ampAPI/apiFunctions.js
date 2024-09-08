@@ -75,13 +75,36 @@ async function fetchTriggerId(serverId, triggerDescription) {
 	return { Id: filteredTrigger.Id, Description: filteredTrigger.Description };
 }
 
-// Fetch the trigger id of a specified eventTrigger
-async function fetchEventId(serverId, eventName) {
+// Fetch the event name of a specified event
+async function fetchTaskId(serverId, taskName) {
 	const API = await instanceAPI(serverId);
 	const allEvents = await API.Core.GetScheduleDataAsync();
-	const filteredEvent = allEvents.AvailableMethods.find((event) => event.Name === eventName) || allEvents.PopulatedMethods.find((event) => event.Name === eventName);
-	if (!filteredEvent) throw new Error(`No Event Found with the name: ${eventName}`);
+	const filteredEvent = allEvents.AvailableMethods.find((event) => event.Name === taskName) || allEvents.PopulatedMethods.find((event) => event.Name === taskName);
+	if (!filteredEvent) throw new Error(`No Event Found with the name: ${taskName}`);
 	return { Id: filteredEvent.Id, Description: filteredEvent.Description };
+}
+
+// Fetch the trigger id of a specified eventTrigger
+async function fetchTriggerTaskId(serverId, triggerDescription, taskName) {
+	// Get the event id
+	const API = await instanceAPI(serverId);
+	const triggerId = await fetchTriggerId(serverId, triggerDescription);
+	const taskId = await fetchTaskId(serverId, taskName);
+	const allTriggers = await API.Core.GetScheduleDataAsync();
+
+	// Get the trigger
+	const fetchedTrigger = allTriggers.PopulatedTriggers.find((trigger) => trigger.Id === triggerId.Id);
+	if (!fetchedTrigger) throw new Error(`No Trigger Found with the id: ${triggerId.Id}`);
+
+	// Get the Task
+	const fetchedTask = fetchedTrigger.Tasks.find((task) => task.TaskMethodName === taskId.Id);
+
+	return {
+		taskId: fetchedTask.Id,
+		taskDescription: fetchedTask.TaskMethodName,
+		triggerId: fetchedTrigger.Id,
+		triggerDescription: fetchedTrigger.Description,
+	};
 }
 
 // Send a console message to a specific instance
@@ -93,7 +116,8 @@ async function sendConsoleMessage(API, Message) {
 module.exports = {
 	mainAPI,
 	instanceAPI,
+	fetchTaskId,
 	fetchTriggerId,
-	fetchEventId,
+	fetchTriggerTaskId,
 	sendConsoleMessage,
 };
