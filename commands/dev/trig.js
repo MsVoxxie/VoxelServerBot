@@ -18,7 +18,7 @@ module.exports = {
 
 		// await addEventTrigger(instanceId, triggerDescription).then((e) => console.log(e));
 		// await addTaskToTrigger(instanceId, triggerDescription, taskName, taskData).then((e) => console.log(e));
-		await removeTaskFromTrigger(instanceId, triggerDescription, taskName).then((e) => console.log(e));
-		await removeEventTrigger(instanceId, triggerDescription).then((e) => console.log(e));
+		// await removeTaskFromTrigger(instanceId, triggerDescription, taskName).then((e) => console.log(e));
+		// await removeEventTrigger(instanceId, triggerDescription).then((e) => console.log(e));
 	},
 };
