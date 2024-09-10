@@ -30,7 +30,7 @@ module.exports = {
 		const [server, friendlyName] = fetchedResult.split(' | ').map((i) => i.trim());
 
 		// Check if the server exists
-		const checkServer = await chatLink.findOne({ 'chatLinks.instanceId': server, 'chatLinks.channelId': channel.id });
+		const checkServer = await chatLink.findOne({ chatLinks: { $elemMatch: { instanceId: server, channelId: channel.id } } });
 
 		// Check if the channel is valid
 		if (!checkServer) {

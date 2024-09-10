@@ -17,28 +17,30 @@ module.exports = {
 			let userAvatar = '';
 
 			// Fetch the instance ID from the database
-			chatlinkFetch = await chatLink.find({ 'chatLinks.instanceId': INSTANCE }, { chatLinks: { $elemMatch: { instanceId: INSTANCE } } }).lean();
-			if (!chatlinkFetch.length) return;
+			const chatlinkFetch = await chatLink.findOne({ 'chatLinks.instanceId': INSTANCE }).lean();
+			// Filter the chatLinks array in JavaScript to only return matching instanceIds
+			const matchingChatLinks = chatlinkFetch.chatLinks.filter((link) => link.instanceId === INSTANCE);
+			if (!matchingChatLinks.length) return;
 
-			// Check if the instance module is Minecraft
-			const chatLinkData = chatlinkFetch[0].chatLinks[0];
-			if (chatLinkData.instanceModule === 'Minecraft') {
-				userAvatar = `${chatLinkData.instanceName.includes(USER) ? '' : `https://mc-heads.net/head/${data.USER}`}`;
+			for (const chatLinkD of matchingChatLinks) {
+				const chatLinkData = chatLinkD;
+
+				// Check if the instance module is Minecraft
+				if (chatLinkData.instanceModule === 'Minecraft') {
+					userAvatar = `${chatLinkData.instanceName.includes(USER) ? '' : `https://mc-heads.net/head/${data.USER}`}`;
+				}
+
+				// Message to Send
+				const message = `${MESSAGE.replace(/^<@!?(\d+)>$/, '<[MENTION REDACTED]>')}`;
+
+				// Create and Send
+				const webhook = new WebhookClient({ id: chatLinkData.webhookId, token: chatLinkData.webhookToken });
+				await webhook.send({
+					username: `${USER} | ${chatLinkData.instanceFriendlyName}`,
+					avatarURL: userAvatar,
+					content: message,
+				});
 			}
-
-			// Message to Send
-			const message = `${MESSAGE.replace(/^<@!?(\d+)>$/, '<[MENTION REDACTED]>')}`;
-			// Prevent spam
-			if (client.lastSentServerToDiscordMessage?.user === USER && client.lastSentServerToDiscordMessage?.message === message) return;
-
-			// Create and Send
-			const webhook = new WebhookClient({ id: chatLinkData.webhookId, token: chatLinkData.webhookToken });
-			await webhook.send({
-				username: `${USER} | ${chatLinkData.instanceFriendlyName}`,
-				avatarURL: userAvatar,
-				content: message,
-			});
-			client.lastSentServerToDiscordMessage = { user: USER, message: message };
 		}
 	},
 };
