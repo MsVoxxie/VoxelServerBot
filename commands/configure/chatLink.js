@@ -1,5 +1,6 @@
+const { addEventTrigger, addTaskToTrigger, removeEventTrigger, removeTaskFromTrigger } = require('../../functions/ampAPI/eventFunctions');
 const { instanceAPI, fetchTriggerId, fetchTaskId, fetchTriggerTaskId } = require('../../functions/ampAPI/apiFunctions');
-const { SlashCommandBuilder, PermissionFlagsBits, WebhookClient } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { chatLink, ampInstances } = require('../../models');
 const Logger = require('../../functions/logging/logger');
 
@@ -30,16 +31,6 @@ module.exports = {
 
 		// Check if the server exists
 		const checkServer = await chatLink.findOne({ 'chatLinks.instanceId': server, 'chatLinks.channelId': channel.id });
-		const serverInstance = await instanceAPI(server);
-
-		// Get the events and triggers
-		//! Chat Message Triggers
-		const chatMessageTrigger = await fetchTriggerId(server, 'A player sends a chat message');
-		const postRequestEvent = await fetchTaskId(server, 'MakePOSTRequest');
-
-		//! User Join and Leave Triggers
-		const userJoinTrigger = await fetchTriggerId(server, 'A player joins the server');
-		const userLeaveTrigger = await fetchTriggerId(server, 'A player leaves the server');
 
 		// Check if the channel is valid
 		if (!checkServer) {
@@ -75,21 +66,26 @@ module.exports = {
 
 			//!Add the trigger for the chat message
 			Logger.info(`Adding chat link for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			await serverInstance.Core.AddEventTriggerAsync(chatMessageTrigger.Id);
-			await serverInstance.Core.SetTriggerEnabledAsync(chatMessageTrigger.Id, true);
-			await serverInstance.Core.AddTaskAsync(chatMessageTrigger.Id, postRequestEvent.Id, chatMessageDictionary);
-			Logger.success(`Added chat link for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			await addEventTrigger(server, 'A player sends a chat message');
+			await addTaskToTrigger(server, 'A player sends a chat message', 'MakePOSTRequest', chatMessageDictionary).then((e) => {
+				if (!e.success) return Logger.error(e.desc);
+				Logger.success(`Added chat link for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			});
 
-			// //! Add the triggers for user join and leave
+			//! Add the triggers for user join
 			Logger.info(`Adding user join and leave triggers for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			await serverInstance.Core.AddEventTriggerAsync(userJoinTrigger.Id);
-			await serverInstance.Core.SetTriggerEnabledAsync(userJoinTrigger.Id, true);
-			await serverInstance.Core.AddTaskAsync(userJoinTrigger.Id, postRequestEvent.Id, userJoinDictionary);
+			await addEventTrigger(server, 'A player joins the server');
+			await addTaskToTrigger(server, 'A player joins the server', 'MakePOSTRequest', userJoinDictionary).then((e) => {
+				if (!e.success) return Logger.error(e.desc);
+				Logger.success(`Added user join trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			});
 
-			await serverInstance.Core.AddEventTriggerAsync(userLeaveTrigger.Id);
-			await serverInstance.Core.SetTriggerEnabledAsync(userLeaveTrigger.Id, true);
-			await serverInstance.Core.AddTaskAsync(userLeaveTrigger.Id, postRequestEvent.Id, userLeaveDictionary);
-			Logger.success(`Added user join and leave triggers for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			//! Add the triggers for user leave
+			await addEventTrigger(server, 'A player leaves the server');
+			await addTaskToTrigger(server, 'A player leaves the server', 'MakePOSTRequest', userLeaveDictionary).then((e) => {
+				if (!e.success) return Logger.error(e.desc);
+				Logger.success(`Added user leave trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			});
 
 			// Fetch the webhooks in the channel
 			const webhooks = await channel.fetchWebhooks();
@@ -97,8 +93,9 @@ module.exports = {
 			// Find the chat link webhook
 			const clHook = webhooks.find((w) => w.name === `${friendlyName} Chat Link`);
 			if (clHook) {
-				webhookId = clHook.id;
-				webhookToken = clHook.token;
+				// webhookId = clHook.id;
+				// webhookToken = clHook.token;
+				return interaction.followUp({ content: 'A chat link already exists for this server in this channel.', ephemeral: true });
 			} else {
 				// Create the webhook
 				Logger.info(`Creating webhook for ${instance.instanceFriendlyName} in ${channel.name} in ${interaction.guild.name}`);
@@ -131,32 +128,41 @@ module.exports = {
 			await interaction.followUp({ content: `Chat link set for ${friendlyName} in <#${channel.id}>.`, ephemeral: true });
 			Logger.success('Chat link successfully linked!');
 		} else {
-			// Remove the chat link
-			const chatMessageTask = await fetchTriggerTaskId(server, 'A player sends a chat message', 'MakePOSTRequest');
-			const userJoinTask = await fetchTriggerTaskId(server, 'A player joins the server', 'MakePOSTRequest');
-			const userLeaveTask = await fetchTriggerTaskId(server, 'A player leaves the server', 'MakePOSTRequest');
-
 			// Check that the bot can manage webhooks
 			if (!channel.permissionsFor(interaction.guild.members.me).has(PermissionFlagsBits.ManageWebhooks))
 				return interaction.followUp({ content: 'I do not have permission to manage webhooks in this channel.', ephemeral: true });
 
-			// Remove the chat link from the database
-			await chatLink.findOneAndUpdate({}, { $pull: { chatLinks: { instanceId: server } } });
+			//! Check if any other chat links exist for this server, if so, dont remove the triggers and tasks
+			// Fetch only the matching instanceId
+			const otherChatLinks = await chatLink.find({ 'chatLinks.instanceId': server }).lean();
+			const instanceIds = otherChatLinks[0].chatLinks.map((c) => c.instanceId);
+			const duplicateIds = instanceIds.filter((id) => id === server);
 
-			//! Remove the trigger and task for sending chat messages
-			Logger.info(`Removing chat link for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-			await serverInstance.Core.DeleteTaskAsync(chatMessageTrigger.Id, chatMessageTask.taskId);
-			await serverInstance.Core.DeleteTriggerAsync(chatMessageTrigger.Id);
-			Logger.success(`Removed chat link for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+			// If there are no duplicates, remove the triggers and tasks
+			if (duplicateIds.length === 1) {
+				//! Remove the trigger and task for sending chat messages
+				Logger.info(`Removing chat link for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				await removeTaskFromTrigger(server, 'A player sends a chat message', 'MakePOSTRequest');
+				await removeEventTrigger(server, 'A player sends a chat message').then((e) => {
+					if (!e.success) return Logger.error(e.desc);
+					Logger.success(`Removed chat link for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				});
 
-			//! Remove the triggers and tasks for user join and leave
-			Logger.info(`Removing user join and leave triggers for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-			await serverInstance.Core.DeleteTaskAsync(userJoinTrigger.Id, userJoinTask.taskId);
-			await serverInstance.Core.DeleteTriggerAsync(userJoinTrigger.Id);
+				//! Remove the triggers and tasks for user join
+				Logger.info(`Removing user join and leave triggers for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				await removeTaskFromTrigger(server, 'A player joins the server', 'MakePOSTRequest');
+				await removeEventTrigger(server, 'A player joins the server').then((e) => {
+					if (!e.success) return Logger.error(e.desc);
+					Logger.success(`Removed user join trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				});
 
-			await serverInstance.Core.DeleteTaskAsync(userLeaveTrigger.Id, userLeaveTask.taskId);
-			await serverInstance.Core.DeleteTriggerAsync(userLeaveTrigger.Id);
-			Logger.success(`Removed user join and leave triggers for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				//! Remove the triggers and tasks for user leave
+				await removeTaskFromTrigger(server, 'A player leaves the server', 'MakePOSTRequest');
+				await removeEventTrigger(server, 'A player leaves the server').then((e) => {
+					if (!e.success) return Logger.error(e.desc);
+					Logger.success(`Removed user leave trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				});
+			}
 
 			// Fetch the webhooks in the channel
 			const webhooks = await channel.fetchWebhooks();
@@ -167,6 +173,9 @@ module.exports = {
 				await clHook.delete();
 				Logger.success(`Removed webhook for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
 			}
+
+			// Remove the chat link from the database
+			await chatLink.findOneAndUpdate({}, { $pull: { chatLinks: { instanceId: server, channelId: channel.id } } });
 
 			await interaction.followUp({ content: `Chat link removed for ${friendlyName} from <#${channel.id}>.`, ephemeral: true });
 			Logger.success('Chat link successfully removed!');
