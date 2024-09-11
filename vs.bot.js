@@ -30,6 +30,7 @@ client.colors = {
 };
 
 // Define Collections
+client.cooldowns = new Collection();
 client.commands = new Collection();
 client.events = new Collection();
 

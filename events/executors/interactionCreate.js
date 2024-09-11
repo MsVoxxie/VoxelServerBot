@@ -1,4 +1,4 @@
-const { Events } = require('discord.js');
+const { Events, Collection } = require('discord.js');
 const Logger = require('../../functions/logging/logger');
 
 module.exports = {
@@ -22,6 +22,27 @@ module.exports = {
 				if (command.options.disabled) {
 					return interaction.reply({ content: 'This command is disabled.', ephemeral: true });
 				}
+
+				// Check if command is on cooldown
+				if (!client.cooldowns.has(command.data.name)) {
+					client.cooldowns.set(command.data.name, new Collection());
+				}
+
+				const now = Date.now();
+				const timestamps = client.cooldowns.get(command.data.name);
+				const cooldownAmount = (command.options.cooldown || 3) * 1000;
+
+				if (timestamps.has(interaction.user.id)) {
+					const expireTime = timestamps.get(interaction.user.id) + cooldownAmount;
+
+					if (now < expireTime) {
+						const timeLeft = (expireTime - now) / 1000;
+						return interaction.reply({ content: `Please wait ${timeLeft.toFixed(1)}s to use this command again.`, ephemeral: true });
+					}
+				}
+
+				timestamps.set(interaction.user.id, now);
+				setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
 
 				// Execute Command
 				if (interaction.guild) {
