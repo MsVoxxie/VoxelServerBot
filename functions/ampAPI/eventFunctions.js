@@ -108,9 +108,33 @@ async function removeTaskFromTrigger(instanceId, triggerDescription, taskName) {
 	return { desc: `Removed task "${taskDesc}" from trigger "${triggerDesc}" in instance ${instanceId}.`, success: true };
 }
 
+//! Get a config node by its name
+async function getConfigNode(instanceId, configNode) {
+	// Get the instances API
+	const API = await instanceAPI(instanceId);
+
+	// Fetch the config node
+	const configData = await API.Core.GetConfigAsync(configNode);
+
+	return { node: configData.Node, currentValue: configData.CurrentValue };
+}
+
+//! Set a config node by its name
+async function setConfigNode(instanceId, configNode, configValue) {
+	// Get the instances API
+	const API = await instanceAPI(instanceId);
+
+	// Set the config node
+	const configData = await API.Core.SetConfigAsync(configNode, configValue);
+
+	return { success: configData.Status };
+}
+
 module.exports = {
 	addEventTrigger,
 	addTaskToTrigger,
 	removeEventTrigger,
 	removeTaskFromTrigger,
+	getConfigNode,
+	setConfigNode,
 };

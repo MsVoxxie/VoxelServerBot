@@ -33,7 +33,7 @@ async function instanceAPI(instanceID) {
 		API.sessionId = loginResult.sessionID;
 		APIInitOK = await API.initAsync();
 		if (!APIInitOK) return Logger.error('Stage 2 API init Failed');
-		// Logger.success('AMP API Initialized');
+		if (!API) throw new Error('Invalid API or the instance is offline.');
 		return API;
 	} catch (err) {
 		console.error(err);

@@ -5,6 +5,10 @@ const guildSchema = Schema({
 		type: String,
 		required: true,
 	},
+	requestChannel: {
+		type: String,
+		required: true,
+	},
 });
 
 module.exports = model('guild', guildSchema);
