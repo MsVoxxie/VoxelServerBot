@@ -27,7 +27,13 @@ module.exports = {
 
 				// Check if the instance module is Minecraft
 				if (chatLinkData.instanceModule === 'Minecraft') {
-					userAvatar = `${chatLinkData.instanceName.includes(USER) ? '' : `https://mc-heads.net/head/${data.USER}`}`;
+					// If USER === 'SERVER' then ignore the avatar
+					if (USER === 'SERVER') {
+						userAvatar = '';
+					} else {
+						// Get the user avatar
+						userAvatar = `https://mc-heads.net/head/${data.USER}`;
+					}
 				}
 
 				// Message to Send

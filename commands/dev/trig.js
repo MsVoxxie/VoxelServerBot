@@ -7,18 +7,18 @@ module.exports = {
 		disabled: false,
 	},
 	async execute(client, interaction, settings) {
-		const instanceId = 'c0545cf8-0e24-4779-8f4b-8383516723d4';
+		const instanceId = '5f0dc49e-0a5b-4198-b17b-e8c3ff56b519';
 		const triggerDescription = 'A player sends a chat message';
 		const taskName = 'MakePOSTRequest';
-		const taskData = {
-			URI: `${process.env.SRV_API}/v1/server/link`,
-			Payload: JSON.stringify({ USER: '{@User}', MESSAGE: '{@Message}', INSTANCE: '{@InstanceId}' }),
-			ContentType: 'application/json',
-		};
 
-		// await addEventTrigger(instanceId, triggerDescription).then((e) => console.log(e));
-		// await addTaskToTrigger(instanceId, triggerDescription, taskName, taskData).then((e) => console.log(e));
-		// await removeTaskFromTrigger(instanceId, triggerDescription, taskName).then((e) => console.log(e));
-		// await removeEventTrigger(instanceId, triggerDescription).then((e) => console.log(e));
+		// const taskData = {
+		// 	URI: `${process.env.SRV_API}/v1/server/link`,
+		// 	Payload: JSON.stringify({ USER: '{@InstanceName}', MESSAGE: 'Server {@State}', INSTANCE: '{@InstanceId}' }),
+		// 	ContentType: 'application/json',
+		// };
+
+		// await addEventTrigger(instanceId, 'The application state changes');
+		// await addTaskToTrigger(instanceId, 'The application state changes', 'IfCondition', { ValueToCheck: '{@State}', Operation: '3', ValueToCompare: 'Pre' });
+		// await addTaskToTrigger(instanceId, 'The application state changes', 'MakePOSTRequest', taskData);
 	},
 };

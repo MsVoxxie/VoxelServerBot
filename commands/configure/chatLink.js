@@ -64,6 +64,12 @@ module.exports = {
 				ContentType: 'application/json',
 			};
 
+			const appStateDictionary = {
+				URI: `${process.env.SRV_API}/v1/server/link`,
+				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: '{@State}', INSTANCE: '{@InstanceId}' }),
+				ContentType: 'application/json',
+			};
+
 			//!Add the trigger for the chat message
 			Logger.info(`Adding chat link for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			await addEventTrigger(server, 'A player sends a chat message');
@@ -85,6 +91,14 @@ module.exports = {
 			await addTaskToTrigger(server, 'A player leaves the server', 'MakePOSTRequest', userLeaveDictionary).then((e) => {
 				if (!e.success) return Logger.error(e.desc);
 				Logger.success(`Added user leave trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			});
+
+			//! Add the triggers for app state
+			await addEventTrigger(server, 'The application state changes');
+			await addTaskToTrigger(server, 'The application state changes', 'IfCondition', { ValueToCheck: '{@State}', Operation: '3', ValueToCompare: 'Pre' });
+			await addTaskToTrigger(server, 'The application state changes', 'MakePOSTRequest', appStateDictionary).then((e) => {
+				if (!e.success) return Logger.error(e.desc);
+				Logger.success(`Added app state trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			});
 
 			// Fetch the webhooks in the channel
@@ -161,6 +175,13 @@ module.exports = {
 				await removeEventTrigger(server, 'A player leaves the server').then((e) => {
 					if (!e.success) return Logger.error(e.desc);
 					Logger.success(`Removed user leave trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				});
+
+				//! Remove the triggers and tasks for app state
+				await removeTaskFromTrigger(server, 'The application state changes', 'MakePOSTRequest');
+				await removeEventTrigger(server, 'The application state changes').then((e) => {
+					if (!e.success) return Logger.error(e.desc);
+					Logger.success(`Removed app state trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
 				});
 			}
 

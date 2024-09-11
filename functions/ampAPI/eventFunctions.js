@@ -9,7 +9,7 @@ async function addEventTrigger(instanceId, triggerDescription) {
 	const scheduleData = await API.Core.GetScheduleDataAsync();
 	// Fetch available triggers
 	const fetchedTrigger = scheduleData.AvailableTriggers.filter((trigger) => trigger.Description === triggerDescription);
-	if (!fetchedTrigger.length) return { desc: `No Trigger Found with the description: ${triggerDescription} Or it's already in use.`, success: false };
+	if (!fetchedTrigger.length) return { desc: `No Trigger Found with the description: ${triggerDescription} Or it's already in use.`, success: false, exists: true };
 
 	// Obtain the triggerId and triggerDescription
 	const [triggerId, triggerDesc] = [fetchedTrigger[0].Id, fetchedTrigger[0].Description];
@@ -29,6 +29,7 @@ async function addTaskToTrigger(instanceId, triggerDescription, taskName, taskDa
 
 	// Get all schedule data
 	const scheduleData = await API.Core.GetScheduleDataAsync();
+
 	// Fetch populated triggers
 	const fetchedTrigger = scheduleData.PopulatedTriggers.filter((trigger) => trigger.Description === triggerDescription);
 	if (!fetchedTrigger.length) return { desc: `No Trigger Found with the description: ${triggerDescription}.`, success: false };
@@ -42,7 +43,7 @@ async function addTaskToTrigger(instanceId, triggerDescription, taskName, taskDa
 
 	// Check if the task is already in the trigger
 	const fetchedTaskInTrigger = fetchedTrigger[0].Tasks.find((task) => task.TaskMethodName === fetchedTask[0].Id);
-	if (fetchedTaskInTrigger && !allowDuplicates) return { desc: `Task "${fetchedTask[0].Description}" is already in trigger "${triggerDesc}".`, success: false };
+	if (fetchedTaskInTrigger && !allowDuplicates) return { desc: `Task "${fetchedTask[0].Description}" is already in trigger "${triggerDesc}".`, success: false, exists: true };
 
 	// Obtain the taskId
 	const [taskId, taskDesc] = [fetchedTask[0].Id, fetchedTask[0].Description];
