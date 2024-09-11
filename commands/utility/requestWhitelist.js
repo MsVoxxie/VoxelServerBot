@@ -7,7 +7,7 @@ module.exports = {
 		.addStringOption((option) => option.setName('server').setDescription('The server to request whitelisting on').setRequired(true).setAutocomplete(true))
 		.addStringOption((option) => option.setName('username').setDescription('Your minecraft username (Case Sensitive, Space_Sensitive)').setRequired(true)),
 	options: {
-		cooldown: 30,
+		cooldown: 60,
 		devOnly: false,
 		disabled: false,
 	},
