@@ -49,7 +49,7 @@ module.exports = {
 		const API = await instanceAPI(instanceId);
 		await sendConsoleMessage(
 			API,
-			`tellraw @p ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Request Received ","color":"yellow"},"→ ",{"text":"${username}","color":"dark_purple"}]`
+			`tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Request Received ","color":"yellow"},"→ ",{"text":"${username}","color":"dark_purple"}]`
 		);
 	},
 };

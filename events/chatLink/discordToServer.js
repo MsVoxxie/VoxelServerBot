@@ -24,7 +24,7 @@ module.exports = {
 			if (chatLinkData.instanceModule === 'Minecraft') {
 				// Send messages to server
 				const API = await instanceAPI(chatLinkData.instanceId);
-				await sendConsoleMessage(API, `tellraw @p ["",{"text":"[D]","color":"blue"},"<${message.member.displayName}> ${message.content}"]`);
+				await sendConsoleMessage(API, `tellraw @a ["",{"text":"[D]","color":"blue"},"<${message.member.displayName}> ${message.content}"]`);
 			} else {
 				// Send messages to server
 				const API = await instanceAPI(chatLinkData.instanceId);

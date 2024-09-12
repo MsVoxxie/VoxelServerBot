@@ -23,7 +23,7 @@ module.exports = {
 					// Accept the whitelist request
 					const API = await instanceAPI(instanceId);
 					await sendConsoleMessage(API, `whitelist add ${minecraftUsername}`);
-					await sendConsoleMessage(API, `tellraw @p ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Added ","color":"green"},{"text":"${minecraftUsername}","color":"aqua"}]`);
+					await sendConsoleMessage(API, `tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Added ","color":"green"},{"text":"${minecraftUsername}","color":"aqua"}]`);
 
 					// Edit the embed to show the request has been accepted
 					const embed = new EmbedBuilder()
@@ -48,7 +48,7 @@ module.exports = {
 					// Show the deny message
 					const API = await instanceAPI(instanceId);
 					await sendConsoleMessage(API, `whitelist remove ${minecraftUsername}`);
-					await sendConsoleMessage(API, `tellraw @p ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Denied ","color":"dark_red"},{"text":"${minecraftUsername}","color":"aqua"}]`)
+					await sendConsoleMessage(API, `tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Denied ","color":"dark_red"},{"text":"${minecraftUsername}","color":"aqua"}]`)
 
 					// Edit the embed to show the request has been denied
 					const embed = new EmbedBuilder()
