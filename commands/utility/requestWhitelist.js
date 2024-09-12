@@ -9,7 +9,7 @@ module.exports = {
 		.addStringOption((option) => option.setName('server').setDescription('The server to request whitelisting on').setRequired(true).setAutocomplete(true))
 		.addStringOption((option) => option.setName('username').setDescription('Your minecraft username (Case Sensitive, Space_Sensitive)').setRequired(true)),
 	options: {
-		cooldown: 60,
+		cooldown: 0,
 		devOnly: false,
 		disabled: false,
 	},
@@ -29,8 +29,8 @@ module.exports = {
 
 		// Create Buttons
 		const verificationButtons = new ActionRowBuilder().addComponents(
-			new ButtonBuilder().setLabel('Confirm').setStyle(ButtonStyle.Success).setCustomId(`accept_${interaction.member.id}_${username}_${instanceId}_${friendlyName}`),
-			new ButtonBuilder().setLabel('Deny').setStyle(ButtonStyle.Danger).setCustomId(`deny_${interaction.member.id}_${username}_${instanceId}_${friendlyName}`)
+			new ButtonBuilder().setLabel('Confirm').setStyle(ButtonStyle.Success).setCustomId(`accept|${interaction.member.id}|${username}|${instanceId}|${friendlyName}`),
+			new ButtonBuilder().setLabel('Deny').setStyle(ButtonStyle.Danger).setCustomId(`deny|${interaction.member.id}|${username}|${instanceId}|${friendlyName}`)
 		);
 
 		// Build the embed
