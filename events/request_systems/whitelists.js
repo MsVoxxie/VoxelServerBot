@@ -22,13 +22,16 @@ module.exports = {
 				try {
 					// Accept the whitelist request
 					const API = await instanceAPI(instanceId);
-					await sendConsoleMessage(API, `whitelist add ${minecraftUsername}`);
-					await sendConsoleMessage(API, `tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Added ","color":"green"},{"text":"${minecraftUsername}","color":"aqua"}]`);
+					await sendConsoleMessage(API, `whitelist add ${minecraftUsername.trim()}`);
+					await sendConsoleMessage(
+						API,
+						`tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Added ","color":"green"},{"text":"${minecraftUsername.trim()}","color":"aqua"}]`
+					);
 
 					// Edit the embed to show the request has been accepted
 					const embed = new EmbedBuilder()
 						.setTitle('Whitelist Request')
-						.setDescription(`**Server:** ${friendlyName}\n**Username:** ${minecraftUsername}\n**Status:** Accepted`)
+						.setDescription(`**Server:** ${friendlyName}\n**Username:** ${minecraftUsername.trim()}\n**Status:** Accepted`)
 						.setFooter({ text: `Accepted by ${staffMember.displayName}`, iconURL: staffMember.displayAvatarURL() })
 						.setColor(Colors.Green)
 						.setTimestamp();
@@ -44,16 +47,18 @@ module.exports = {
 
 			case 'deny':
 				try {
-
 					// Show the deny message
 					const API = await instanceAPI(instanceId);
 					await sendConsoleMessage(API, `whitelist remove ${minecraftUsername}`);
-					await sendConsoleMessage(API, `tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Denied ","color":"dark_red"},{"text":"${minecraftUsername}","color":"aqua"}]`)
+					await sendConsoleMessage(
+						API,
+						`tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Denied ","color":"dark_red"},{"text":"${minecraftUsername.trim()}","color":"aqua"}]`
+					);
 
 					// Edit the embed to show the request has been denied
 					const embed = new EmbedBuilder()
 						.setTitle('Whitelist Request')
-						.setDescription(`**Server:** ${friendlyName}\n**Username:** ${minecraftUsername}\n**Status:** Denied`)
+						.setDescription(`**Server:** ${friendlyName}\n**Username:** ${minecraftUsername.trim()}\n**Status:** Denied`)
 						.setFooter({ text: `Denied by ${staffMember.displayName}`, iconURL: staffMember.displayAvatarURL() })
 						.setColor(Colors.Red)
 						.setTimestamp();

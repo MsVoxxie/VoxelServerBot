@@ -1,5 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { addEventTrigger, addTaskToTrigger, removeEventTrigger, removeTaskFromTrigger, getConfigNode, setConfigNode } = require('../../functions/ampAPI/eventFunctions');
+const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+
 module.exports = {
 	data: new SlashCommandBuilder().setName('triggers').setDescription('Test the trigger functions'),
 	options: {
@@ -7,14 +9,9 @@ module.exports = {
 		disabled: false,
 	},
 	async execute(client, interaction, settings) {
-		const instanceId = '5f0dc49e-0a5b-4198-b17b-e8c3ff56b519';
+		const instanceId = '0c07c0ae-bf66-4f9f-8c38-1873ba4c7321';
 
-		const whitelistEnabled = await getConfigNode(instanceId, 'MinecraftModule.Game.Whitelist');
-
-		if (whitelistEnabled.currentValue) {
-			await setConfigNode(instanceId, 'MinecraftModule.Game.Whitelist', 'false');
-		} else {
-			await setConfigNode(instanceId, 'MinecraftModule.Game.Whitelist', 'true');
-		}
+		const API = await instanceAPI(instanceId);
+		console.log(API);
 	},
 };
