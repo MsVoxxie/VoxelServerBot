@@ -33,10 +33,6 @@ module.exports = {
 				try {
 					// Accept the whitelist request
 					await sendConsoleMessage(API, `whitelist add ${minecraftUsername.trim().toString()}`);
-					await sendConsoleMessage(
-						API,
-						`tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Added ","color":"green"},{"text":"${minecraftUsername.trim()}","color":"aqua"}]`
-					);
 
 					// Wait 1 second to allow the console to update
 					await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -67,6 +63,11 @@ module.exports = {
 						await member.send(`Your whitelist request has failed for ${friendlyName}.\n**Reason:** The player does not exist.`);
 						return;
 					}
+
+					await sendConsoleMessage(
+						API,
+						`tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Added ","color":"green"},{"text":"${minecraftUsername.trim()}","color":"aqua"}]`
+					);
 
 					// Edit the embed to show the request has been accepted
 					const embed = new EmbedBuilder()
