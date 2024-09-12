@@ -68,6 +68,12 @@ module.exports = (client) => {
 		res.status(200).send({ message: 'Success!' });
 	});
 
+	// Receive AI Requests
+	srv.post('/v1/server/ai', async (req, res) => {
+		client.emit('receivedAi', req.body);
+		res.status(200).send({ message: 'Success!' });
+	});
+
 	srv.listen(Port, () => {
 		Logger.success(`API Running on port ${Port}`);
 	});
