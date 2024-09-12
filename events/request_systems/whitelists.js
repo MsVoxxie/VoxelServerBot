@@ -22,7 +22,7 @@ module.exports = {
 				try {
 					// Accept the whitelist request
 					const API = await instanceAPI(instanceId);
-					await sendConsoleMessage(API, `whitelist add ${minecraftUsername.trim()}`);
+					await sendConsoleMessage(API, `whitelist add ${minecraftUsername.trim().toString()}`);
 					await sendConsoleMessage(
 						API,
 						`tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Added ","color":"green"},{"text":"${minecraftUsername.trim()}","color":"aqua"}]`
