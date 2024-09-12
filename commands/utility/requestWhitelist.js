@@ -1,5 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
+const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { getConfigNode } = require('../../functions/ampAPI/eventFunctions');
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('whitelist_request')
@@ -42,5 +44,12 @@ module.exports = {
 		// Send the message
 		await requestChannel.send({ embeds: [embed], components: [verificationButtons] });
 		await interaction.reply({ content: 'Your request has been sent, Please wait to be accepted.', ephemeral: true });
+
+		// Send a message to the server
+		const API = await instanceAPI(instanceId);
+		await sendConsoleMessage(
+			API,
+			`tellraw @p ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Request Received ","color":"yellow"},"→ ",{"text":"${username}","color":"dark_purple"}]`
+		);
 	},
 };
