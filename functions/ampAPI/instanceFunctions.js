@@ -150,8 +150,7 @@ async function getInstanceStatus(instanceId) {
 
 	// If the module is Minecraft set the performance to TPS, otherwise set it to FPS
 	if (performance) {
-		if (instanceData.module === 'Minecraft') performance.Unit = 'TPS';
-		else performance.Unit = 'FPS';
+		performance.Unit = 'TPS';
 	}
 
 	// Make the status data more readable
