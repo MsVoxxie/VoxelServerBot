@@ -18,20 +18,27 @@ module.exports = {
 
 		// Get the instance status
 		const instanceInfo = await getInstanceStatus(instanceId);
-		if (!instanceInfo.success) return interaction.reply({ content: 'An error occurred while fetching the instance status.', ephemeral: true });
+		if (!instanceInfo.success) return interaction.reply({ content: 'This instance is offline.', ephemeral: true });
+
+		// Build performance data
+		const performanceData = `${
+			instanceInfo.status.performance
+				? `**Perf:** ${instanceInfo.status.performance.RawValue}/${instanceInfo.status.performance.MaxValue} ${instanceInfo.status.performance.Unit}`
+				: ''
+		}`;
 
 		// Build the embed
-		const embed = new EmbedBuilder().setTitle(friendlyName).setDescription(
-			`**Uptime:** ${instanceInfo.status.uptime}
+		const embed = new EmbedBuilder()
+			.setTitle(friendlyName)
+			.setColor(client.colors.base)
+			.setTimestamp()
+			.setDescription(
+				`**Uptime:** ${instanceInfo.status.uptime}
             **Active Users:** ${instanceInfo.status.users.RawValue}/${instanceInfo.status.users.MaxValue}
             **CPU Usage:** ${instanceInfo.status.cpu.Percent}%
             **Memory Usage:** ${instanceInfo.status.memory.RawValue}/${instanceInfo.status.memory.MaxValue} (${instanceInfo.status.memory.Percent}%)
-            ${
-							instanceInfo.status.performance
-								? `**Perf:** ${instanceInfo.status.performance.RawValue}/${instanceInfo.status.performance.MaxValue} ${instanceInfo.status.performance.Unit}`
-								: ''
-						}`
-		);
+            ${performanceData}`
+			);
 
 		// Send the embed
 		await interaction.reply({ embeds: [embed] });

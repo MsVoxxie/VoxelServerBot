@@ -146,14 +146,15 @@ async function getInstanceStatus(instanceId) {
 	const instanceData = instancesData.instances.find((i) => i.instanceId === instanceId);
 
 	// Performance is variable and can be FPS or TPS, so we need to check for both
-	let performance = statusData.Metrics['TPS'] || statusData.Metrics['FPS'];
+	let performance = statusData.Metrics['TPS'] || statusData.Metrics['FPS'] || null;
 
 	// If the module is Minecraft set the performance to TPS, otherwise set it to FPS
-	if (instanceData.instanceModule === 'Minecraft') {
-		performance.Unit = 'TPS';
-	} else {
-		performance.Unit = 'FPS';
+	if (performance) {
+		if (instanceData.module === 'Minecraft') performance.Unit = 'TPS';
+		else performance.Unit = 'FPS';
 	}
+
+	console.log(performance);
 
 	// Make the status data more readable
 	const status = {
