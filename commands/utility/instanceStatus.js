@@ -29,7 +29,7 @@ module.exports = {
 
 		// Build the embed
 		const embed = new EmbedBuilder()
-			.setTitle(friendlyName)
+			.setTitle(`${friendlyName}'s Status`)
 			.setColor(client.colors.base)
 			.setTimestamp()
 			.setDescription(
