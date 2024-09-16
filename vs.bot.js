@@ -1,3 +1,5 @@
+const cron = require('node-cron');
+
 // Configuration File
 const dotenv = require('dotenv');
 dotenv.config();
@@ -43,6 +45,11 @@ require('./functions/database/util')(client);
 require('./core/loaders/api/internalAPI')(client);
 require('./core/loaders/commandLoader')(client);
 require('./core/loaders/eventLoader')(client);
+
+// Every 15 minutes
+cron.schedule('*/15 * * * *', async () => {
+	client.emit('fifteenMinutes');
+});
 
 // Login
 client.login(TOKEN);
