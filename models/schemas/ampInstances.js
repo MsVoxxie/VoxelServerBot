@@ -7,6 +7,10 @@ const instanceSchema = Schema({
 		required: true,
 	},
 	// Instance information
+	instanceRunning: {
+		type: Boolean,
+		required: true,
+	},
 	instanceModule: {
 		type: String,
 		required: true,

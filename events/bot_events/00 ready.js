@@ -28,6 +28,7 @@ module.exports = {
 			// Create a friendly object
 			const friendly = {
 				instanceId: i.InstanceID,
+				instanceRunning: i.Running,
 				instanceModule: i.Module,
 				instanceName: i.InstanceName,
 				instanceFriendlyName: i.FriendlyName,

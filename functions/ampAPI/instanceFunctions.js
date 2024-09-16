@@ -154,8 +154,6 @@ async function getInstanceStatus(instanceId) {
 		else performance.Unit = 'FPS';
 	}
 
-	console.log(performance);
-
 	// Make the status data more readable
 	const status = {
 		cpu: statusData.Metrics['CPU Usage'],

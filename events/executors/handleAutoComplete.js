@@ -17,7 +17,8 @@ module.exports = {
 				// Filter the instances
 				const filteredChoiceChatLink = allInstances.instances
 					.filter((i) => i.instanceName.toLowerCase().includes(focusedOption.toLowerCase()))
-					.filter((i) => i.instanceSuspended === false);
+					.filter((i) => i.instanceSuspended === false)
+					.filter((i) => i.instanceRunning === true);
 
 				// Map the results
 				const filteredResultsChatLink = filteredChoiceChatLink.map((i) => {
@@ -36,7 +37,8 @@ module.exports = {
 				// Filter the instances
 				const filteredChoiceStatus = allInstances.instances
 					.filter((i) => i.instanceName.toLowerCase().includes(focusedOption.toLowerCase()))
-					.filter((i) => i.instanceSuspended === false);
+					.filter((i) => i.instanceSuspended === false)
+					.filter((i) => i.instanceRunning === true);
 
 				// Map the results
 				const filteredResultsStatus = filteredChoiceStatus.map((i) => {
@@ -56,6 +58,7 @@ module.exports = {
 				const filteredChoiceWhitelist = allInstances.instances
 					.filter((i) => i.instanceName.toLowerCase().includes(focusedOption.toLowerCase()))
 					.filter((i) => i.instanceSuspended === false)
+					.filter((i) => i.instanceRunning === true)
 					.filter((i) => i.instanceModule === 'Minecraft');
 
 				// Map the results
