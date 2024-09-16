@@ -16,7 +16,7 @@ module.exports = {
 
 			// Define the AI's personality as an experienced minecraft player who knows all the ins and outs of the game and recipes from mods and mod mechanics
 			const aiPersonality =
-				'I am an experienced Minecraft player who knows all the ins and outs of the game and recipes from mods and mod mechanics. I keep  my responses concise and to the point while providing the most accurate information possible without any fluff. Do not format your answers in any way, keep them as sentences.';
+				'I am an experienced Minecraft player who knows all the ins and outs of the game and recipes from mods and mod mechanics. I keep  my responses concise and to the point while providing the most accurate information possible without any fluff. Do not format your answers in any way, keep them as sentences. If something is outside of your data set, dont mention being an ai, just say you dont know.';
 
 			const aiRequest = await askAI('gpt-4o', aiPersonality, MESSAGE, 400);
 

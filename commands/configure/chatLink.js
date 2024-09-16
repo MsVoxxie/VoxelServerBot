@@ -1,5 +1,4 @@
-const { addEventTrigger, addTaskToTrigger, removeEventTrigger, removeTaskFromTrigger } = require('../../functions/ampAPI/eventFunctions');
-const { instanceAPI, fetchTriggerId, fetchTaskId, fetchTriggerTaskId } = require('../../functions/ampAPI/apiFunctions');
+const { addEventTrigger, addTaskToTrigger, removeEventTrigger, removeTaskFromTrigger } = require('../../functions/ampAPI/instanceFunctions');
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { chatLink, ampInstances } = require('../../models');
 const Logger = require('../../functions/logging/logger');

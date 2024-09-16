@@ -1,4 +1,5 @@
 const { instanceAPI } = require('./apiFunctions');
+const { ampInstances } = require('../../models');
 
 //* Add an event trigger to an instance
 async function addEventTrigger(instanceId, triggerDescription) {
@@ -123,11 +124,47 @@ async function getConfigNode(instanceId, configNode) {
 async function setConfigNode(instanceId, configNode, configValue) {
 	// Get the instances API
 	const API = await instanceAPI(instanceId);
+	if (!API) return { desc: 'Invalid instanceId.', success: false };
 
 	// Set the config node
 	const configData = await API.Core.SetConfigAsync(configNode, configValue);
 
 	return { success: configData.Status };
+}
+
+//! Get the current status of an instance
+async function getInstanceStatus(instanceId) {
+	// Get the instances API
+	const API = await instanceAPI(instanceId);
+	if (!API) return { desc: 'Invalid instanceId.', success: false };
+
+	// Get the status of the instance
+	const statusData = await API.Core.GetStatusAsync();
+
+	// Get the instance module
+	const instancesData = await ampInstances.findOne({ 'instances.instanceId': instanceId }).lean();
+	const instanceData = instancesData.instances.find((i) => i.instanceId === instanceId);
+
+	// Performance is variable and can be FPS or TPS, so we need to check for both
+	let performance = statusData.Metrics['TPS'] || statusData.Metrics['FPS'];
+
+	// If the module is Minecraft set the performance to TPS, otherwise set it to FPS
+	if (instanceData.instanceModule === 'Minecraft') {
+		performance.Unit = 'TPS';
+	} else {
+		performance.Unit = 'FPS';
+	}
+
+	// Make the status data more readable
+	const status = {
+		cpu: statusData.Metrics['CPU Usage'],
+		memory: statusData.Metrics['Memory Usage'],
+		users: statusData.Metrics['Active Users'],
+		uptime: statusData.Uptime,
+		performance,
+	};
+
+	return { status, success: true };
 }
 
 module.exports = {
@@ -137,4 +174,5 @@ module.exports = {
 	removeTaskFromTrigger,
 	getConfigNode,
 	setConfigNode,
+	getInstanceStatus,
 };

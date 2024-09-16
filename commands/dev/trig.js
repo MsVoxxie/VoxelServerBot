@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { addEventTrigger, addTaskToTrigger, removeEventTrigger, removeTaskFromTrigger, getConfigNode, setConfigNode } = require('../../functions/ampAPI/eventFunctions');
+const { getInstanceStatus } = require('../../functions/ampAPI/instanceFunctions');
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 
 module.exports = {
@@ -9,9 +9,9 @@ module.exports = {
 		disabled: false,
 	},
 	async execute(client, interaction, settings) {
-		const instanceId = '0c07c0ae-bf66-4f9f-8c38-1873ba4c7321';
+		const instanceId = '8be4a730-3d0d-499c-9ca4-cad9b355f65f';
 
-		const API = await instanceAPI(instanceId);
-		console.log(API);
+		const status = await getInstanceStatus(instanceId);
+		console.log(status);
 	},
 };

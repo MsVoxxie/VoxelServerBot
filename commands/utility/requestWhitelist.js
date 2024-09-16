@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
-const { getConfigNode } = require('../../functions/ampAPI/eventFunctions');
+const { getConfigNode } = require('../../functions/ampAPI/instanceFunctions');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -9,7 +9,7 @@ module.exports = {
 		.addStringOption((option) => option.setName('server').setDescription('The server to request whitelisting on').setRequired(true).setAutocomplete(true))
 		.addStringOption((option) => option.setName('username').setDescription('Your minecraft username (Case Sensitive, Space_Sensitive)').setRequired(true)),
 	options: {
-		cooldown: 0,
+		cooldown: 30,
 		devOnly: false,
 		disabled: false,
 	},

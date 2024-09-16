@@ -15,12 +15,12 @@ module.exports = {
 		switch (command.data.name) {
 			case 'managechatlink':
 				// Filter the instances
-				const filteredChoice = allInstances.instances
+				const filteredChoiceChatLink = allInstances.instances
 					.filter((i) => i.instanceName.toLowerCase().includes(focusedOption.toLowerCase()))
 					.filter((i) => i.instanceSuspended === false);
 
 				// Map the results
-				const filteredResults = filteredChoice.map((i) => {
+				const filteredResultsChatLink = filteredChoiceChatLink.map((i) => {
 					return {
 						name: `${i.instanceFriendlyName} • ${i.instanceId}`,
 						value: `${i.instanceId} | ${i.instanceFriendlyName}`,
@@ -28,7 +28,26 @@ module.exports = {
 				});
 
 				// Reply with all of the instances
-				await interaction.respond(filteredResults.slice(0, 25)).catch(() => {});
+				await interaction.respond(filteredResultsChatLink.slice(0, 25)).catch(() => {});
+
+				break;
+
+			case 'instance_status':
+				// Filter the instances
+				const filteredChoiceStatus = allInstances.instances
+					.filter((i) => i.instanceName.toLowerCase().includes(focusedOption.toLowerCase()))
+					.filter((i) => i.instanceSuspended === false);
+
+				// Map the results
+				const filteredResultsStatus = filteredChoiceStatus.map((i) => {
+					return {
+						name: `${i.instanceFriendlyName} • ${i.instanceId}`,
+						value: `${i.instanceId} | ${i.instanceFriendlyName}`,
+					};
+				});
+
+				// Reply with all of the instances
+				await interaction.respond(filteredResultsStatus.slice(0, 25)).catch(() => {});
 
 				break;
 
