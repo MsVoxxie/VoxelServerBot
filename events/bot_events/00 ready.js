@@ -1,8 +1,8 @@
 const moment = require('moment');
 const { Events } = require('discord.js');
-const { botData, ampInstances } = require('../../models');
-const { mainAPI } = require('../../functions/ampAPI/apiFunctions');
+const { botData } = require('../../models');
 const Logger = require('../../functions/logging/logger');
+const { updateDatabaseInstances } = require('../../functions/ampAPI/updateDatabase');
 
 module.exports = {
 	name: Events.ClientReady,
@@ -18,32 +18,7 @@ module.exports = {
 			{ upsert: true }
 		);
 
-		// Fetch all instances for AMP
-		const API = await mainAPI();
-		const instancesResult = await API.ADSModule.GetLocalInstancesAsync();
-		let friendlyInstances = instancesResult.map((i) => {
-			// If the instance is named ADS, skip it as it's the main instance
-			if (i.InstanceName === 'ADS01') return;
-
-			// Create a friendly object
-			const friendly = {
-				instanceId: i.InstanceID,
-				instanceRunning: i.Running,
-				instanceModule: i.Module,
-				instanceName: i.InstanceName,
-				instanceFriendlyName: i.FriendlyName,
-				instanceSuspended: i.Suspended,
-				instancePort: i.Port,
-			};
-
-			// Return the friendly object
-			return friendly;
-		});
-
-		// Remove undefined from friendlyInstances array
-		friendlyInstances = friendlyInstances.filter((i) => i !== undefined).sort((a, b) => a.instancePort - b.instancePort);
-
-		// Push to database
-		await ampInstances.findOneAndUpdate({}, { instances: friendlyInstances }, { upsert: true });
+		// Update the database with the instances
+		await updateDatabaseInstances();
 	},
 };

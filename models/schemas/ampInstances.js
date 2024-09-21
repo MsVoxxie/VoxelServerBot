@@ -27,7 +27,7 @@ const instanceSchema = Schema({
 		type: Boolean,
 		default: false,
 	},
-	instancePort: {
+	applicationPort: {
 		type: Number,
 		required: true,
 	},

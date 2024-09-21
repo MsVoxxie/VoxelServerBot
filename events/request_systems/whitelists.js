@@ -1,5 +1,6 @@
 const { Events, PermissionFlagsBits, Colors, EmbedBuilder } = require('discord.js');
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { SERVER_IP } = process.env;
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -12,7 +13,7 @@ module.exports = {
 		// Declarations
 		const staffMember = interaction.member;
 		const message = interaction.message;
-		const [action, memberId, minecraftUsername, instanceId, friendlyName] = interaction.customId.split('|');
+		const [action, memberId, minecraftUsername, instanceId, applicationPort, friendlyName] = interaction.customId.split('|');
 		if (action !== 'accept' && action !== 'deny') return;
 
 		// Check if the staff member has the manage_members permission
@@ -80,7 +81,7 @@ module.exports = {
 
 					// Send a message to the user
 					const member = interaction.guild.members.cache.get(memberId);
-					await member.send(`Your whitelist request has been accepted for ${friendlyName}.`);
+					await member.send(`Whitelist request accepted for ${friendlyName}.\n**Server IP:** \`${SERVER_IP}:${applicationPort}\`\nHave fun!`);
 				} catch (error) {
 					console.error(error);
 				}

@@ -46,9 +46,9 @@ require('./core/loaders/api/internalAPI')(client);
 require('./core/loaders/commandLoader')(client);
 require('./core/loaders/eventLoader')(client);
 
-// Every 15 minutes
-cron.schedule('*/15 * * * *', async () => {
-	client.emit('fifteenMinutes');
+// Every 1 minute
+cron.schedule('*/1 * * * *', async () => {
+	client.emit('oneMinute');
 });
 
 // Login

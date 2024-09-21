@@ -65,7 +65,7 @@ module.exports = {
 				const filteredResultsWhitelist = filteredChoiceWhitelist.map((i) => {
 					return {
 						name: `${i.instanceFriendlyName}`,
-						value: `${i.instanceId} | ${i.instanceFriendlyName}`,
+						value: `${i.instanceId} | ${i.applicationPort} | ${i.instanceFriendlyName}`,
 					};
 				});
 

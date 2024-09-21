@@ -18,7 +18,7 @@ module.exports = {
 		const server = interaction.options.getString('server');
 		const username = interaction.options.getString('username');
 
-		const [instanceId, friendlyName] = server.split(' | ').map((i) => i.trim());
+		const [instanceId, applicationPort, friendlyName] = server.split(' | ').map((i) => i.trim());
 
 		// Get the whitelist status
 		const whitelistEnabled = await getConfigNode(instanceId, 'MinecraftModule.Game.Whitelist');
@@ -29,8 +29,14 @@ module.exports = {
 
 		// Create Buttons
 		const verificationButtons = new ActionRowBuilder().addComponents(
-			new ButtonBuilder().setLabel('Confirm').setStyle(ButtonStyle.Success).setCustomId(`accept|${interaction.member.id}|${username}|${instanceId}|${friendlyName}`),
-			new ButtonBuilder().setLabel('Deny').setStyle(ButtonStyle.Danger).setCustomId(`deny|${interaction.member.id}|${username}|${instanceId}|${friendlyName}`)
+			new ButtonBuilder()
+				.setLabel('Confirm')
+				.setStyle(ButtonStyle.Success)
+				.setCustomId(`accept|${interaction.member.id}|${username}|${instanceId}|${applicationPort}|${friendlyName}`),
+			new ButtonBuilder()
+				.setLabel('Deny')
+				.setStyle(ButtonStyle.Danger)
+				.setCustomId(`deny|${interaction.member.id}|${username}|${instanceId}|${applicationPort}|${friendlyName}`)
 		);
 
 		// Build the embed
