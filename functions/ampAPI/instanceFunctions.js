@@ -10,7 +10,8 @@ async function addEventTrigger(instanceId, triggerDescription) {
 	const scheduleData = await API.Core.GetScheduleDataAsync();
 	// Fetch available triggers
 	const fetchedTrigger = scheduleData.AvailableTriggers.filter((trigger) => trigger.Description === triggerDescription);
-	if (!fetchedTrigger.length) return { desc: `No Trigger Found with the description: ${triggerDescription} Or it's already in use.`, success: false, exists: true };
+
+	if (!fetchedTrigger.length) return { desc: `No trigger found with the description: ${triggerDescription} Or it's already in use.`, success: false, exists: true };
 
 	// Obtain the triggerId and triggerDescription
 	const [triggerId, triggerDesc] = [fetchedTrigger[0].Id, fetchedTrigger[0].Description];
@@ -33,7 +34,7 @@ async function addTaskToTrigger(instanceId, triggerDescription, taskName, taskDa
 
 	// Fetch populated triggers
 	const fetchedTrigger = scheduleData.PopulatedTriggers.filter((trigger) => trigger.Description === triggerDescription);
-	if (!fetchedTrigger.length) return { desc: `No Trigger Found with the description: ${triggerDescription}.`, success: false };
+	if (!fetchedTrigger.length) return { desc: `No trigger found with the description: ${triggerDescription}.`, success: false };
 
 	// Obtain the triggerId
 	const [triggerId, triggerDesc] = [fetchedTrigger[0].Id, fetchedTrigger[0].Description];
@@ -143,7 +144,6 @@ async function getInstanceStatus(instanceId) {
 
 	// Get the instance module
 	const instancesData = await ampInstances.findOne({ 'instances.instanceId': instanceId }).lean();
-	const instanceData = instancesData.instances.find((i) => i.instanceId === instanceId);
 
 	// Performance is variable and can be FPS or TPS, so we need to check for both
 	let performance = statusData.Metrics['TPS'] || statusData.Metrics['FPS'] || null;
