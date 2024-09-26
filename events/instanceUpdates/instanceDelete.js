@@ -21,7 +21,7 @@ module.exports = {
 				.setFooter({ text: 'VoxelServers' })
 				.setColor(Colors.Red)
 				.setTimestamp()
-				.setDescription(`Instance: **${instance.instanceFriendlyName}** (${instance.instanceName})`);
+				.setDescription(`Instance: **${instance.instanceFriendlyName}** (${instance.instanceName})\nDeleted: **${client.relTimestamp(Date.now())}**`);
 
 			// Create and Send
 			const webhook = new WebhookClient({ id: updatesChannel.webhookId, token: updatesChannel.webhookToken });

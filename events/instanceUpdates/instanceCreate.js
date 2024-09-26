@@ -22,7 +22,10 @@ module.exports = {
 				.setColor(Colors.Green)
 				.setTimestamp()
 				.setDescription(
-					`Instance: **${instance.instanceFriendlyName}** (${instance.instanceName})\nModule: ***${instance.instanceModule}***\nRunning: ***${instance.instanceRunning}***`
+					`Instance: **${instance.instanceFriendlyName}** (${instance.instanceName})
+					Module: ***${instance.instanceModule}***
+					Running: ***${instance.instanceRunning}***
+					Created: **${client.relTimestamp(Date.now())}**`
 				);
 
 			// Create and Send
