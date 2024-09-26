@@ -19,6 +19,8 @@ module.exports = {
 		);
 
 		// Update the database with the instances
-		await updateDatabaseInstances();
+		const { instanceCount, allInstances } = await updateDatabaseInstances();
+		client.totalInstances = instanceCount;
+		client.oldInstances = allInstances;
 	},
 };

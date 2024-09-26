@@ -26,9 +26,9 @@ const client = new Client({
 client.debug = false;
 client.colors = {
 	base: '#871824',
-	success: '#00ff00',
+	success: '#9dff00',
 	error: '#ff0000',
-	warning: '#ffff00',
+	warning: '#ffcc00',
 };
 
 // Define Collections

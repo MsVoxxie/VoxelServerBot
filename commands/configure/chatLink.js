@@ -5,7 +5,7 @@ const Logger = require('../../functions/logging/logger');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('managechatlink')
+		.setName('chatlink')
 		.setDescription('Manage the chat link for a specified server and channel.')
 		.addStringOption((option) => option.setName('server').setDescription('The server to set the chat link for.').setRequired(true).setAutocomplete(true))
 		.addChannelOption((option) => option.setName('channel').setDescription('The channel to set the chat link for.').setRequired(true)),

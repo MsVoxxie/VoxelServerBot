@@ -13,7 +13,7 @@ module.exports = {
 
 		// Switchcase for the command name
 		switch (command.data.name) {
-			case 'managechatlink':
+			case 'chatlink':
 				// Filter the instances
 				const filteredChoiceChatLink = allInstances.instances
 					.filter((i) => i.instanceName.toLowerCase().includes(focusedOption.toLowerCase()))

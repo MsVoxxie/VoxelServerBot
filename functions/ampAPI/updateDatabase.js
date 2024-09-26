@@ -33,13 +33,16 @@ async function updateDatabaseInstances() {
 		instancesArray.push(friendly);
 	}
 
+	// Get current number of instances from the array
+	const instanceCount = instancesArray.length;
+
 	// Remove undefined from friendlyInstances array
 	const friendlyInstances = instancesArray.filter((i) => i !== undefined).sort((a, b) => a.instancePort - b.instancePort);
 
 	// Push to database
 	await ampInstances.findOneAndUpdate({}, { instances: friendlyInstances }, { upsert: true }).catch((err) => console.error(err));
 	logger.info('Database updated with fresh instance data.');
-	return { success: true };
+	return { success: true, instanceCount, allInstances: friendlyInstances };
 }
 
 module.exports = { updateDatabaseInstances };
