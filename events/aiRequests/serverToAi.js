@@ -26,7 +26,7 @@ module.exports = {
 			await sendConsoleMessage(API, `tellraw @a ["","[",{"text":"MinecraftPro87","color":"gold"},"] ",{"text":"${aiRequest}","color":"yellow"}]`);
 
 			// Send the answer to discord
-			await serverLink('MinecraftPro87', `### ${aiRequest}`, INSTANCE);
+			await serverLink('MinecraftPro87', `### [A] ${aiRequest}`, INSTANCE);
 		}
 	},
 };
