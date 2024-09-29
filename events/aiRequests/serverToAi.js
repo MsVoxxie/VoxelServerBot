@@ -1,4 +1,5 @@
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { serverLink } = require('../../functions/helpers/messageDiscord');
 const { askAI } = require('../../functions/helpers/aiRequest');
 
 module.exports = {
@@ -23,6 +24,9 @@ module.exports = {
 			// Send messages to server
 			const API = await instanceAPI(INSTANCE);
 			await sendConsoleMessage(API, `tellraw @a ["","[",{"text":"MinecraftPro87","color":"gold"},"] ",{"text":"${aiRequest}","color":"yellow"}]`);
+
+			// Send the answer to discord
+			await serverLink('MinecraftPro87', `### ${aiRequest}`, INSTANCE);
 		}
 	},
 };
