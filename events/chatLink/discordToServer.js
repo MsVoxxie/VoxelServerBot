@@ -25,6 +25,10 @@ module.exports = {
 				// Send messages to server
 				const API = await instanceAPI(chatLinkData.instanceId);
 				await sendConsoleMessage(API, `tellraw @a ["",{"text":"[D]","color":"blue"},"<${message.member.displayName}> ${message.content}"]`);
+
+				// Play a sound to get the attention of the players but randomize the pitch with a minimum of 0.8 and a maximum of 1.3
+				const pitch = Math.random() * (1.3 - 0.8) + 0.8;
+				await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @p 0 0 0 1 ${pitch} 0.035`);
 			} else {
 				// Send messages to server
 				const API = await instanceAPI(chatLinkData.instanceId);
