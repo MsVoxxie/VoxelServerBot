@@ -69,6 +69,15 @@ module.exports = {
 				ContentType: 'application/json',
 			};
 
+			// User first join Dictionary
+			const userFirstJoinDictionary = {
+				URI: `${process.env.SRV_API}/v1/server/link`,
+				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: 'joined for the first time', INSTANCE: '{@InstanceId}' }),
+				ContentType: 'application/json',
+			};
+
+			// Console input dictionary
+
 			//!Add the trigger for the chat message
 			Logger.info(`Adding chat link for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			await addEventTrigger(server, 'A player sends a chat message');
@@ -77,9 +86,30 @@ module.exports = {
 				Logger.success(`Added chat link for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			});
 
+			//! Add the trigger for user first join
+			Logger.info(`Adding user first join trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			await addEventTrigger(server, 'A player joins the server for the first time');
+			await addTaskToTrigger(server, 'A player joins the server for the first time', 'MakePOSTRequest', userFirstJoinDictionary).then((e) => {
+				if (!e.success) return Logger.error(e.desc);
+				Logger.success(`Added user first join trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			});
+			// Add a console input to the Minecraft server to play a sound to get the attention of the players
+			await addTaskToTrigger(server, 'A player joins the server for the first time', 'SendConsole', {
+				Input: 'playsound minecraft:block.bell.resonate player @a 0 0 0 1 2 0.25',
+			});
+			// Send a message welcoming the player to the server
+			await addTaskToTrigger(
+				server,
+				'A player joins the server for the first time',
+				'SendConsole',
+				{ Input: 'tellraw @p ["",{"text":"Welcome ","color":"gold"},{"text":"to the server","color":"aqua"},", ",{"text":"{@User}","color":"green"},"!"]' },
+				true
+			);
+
 			//! Add the triggers for user join
 			Logger.info(`Adding user join and leave triggers for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			await addEventTrigger(server, 'A player joins the server');
+			await addTaskToTrigger(server, 'A player joins the server', 'SendConsole', { Input: 'playsound minecraft:block.conduit.activate player @a 0 0 0 1 2 0.25' });
 			await addTaskToTrigger(server, 'A player joins the server', 'MakePOSTRequest', userJoinDictionary).then((e) => {
 				if (!e.success) return Logger.error(e.desc);
 				Logger.success(`Added user join trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
@@ -87,6 +117,7 @@ module.exports = {
 
 			//! Add the triggers for user leave
 			await addEventTrigger(server, 'A player leaves the server');
+			await addTaskToTrigger(server, 'A player leaves the server', 'SendConsole', { Input: 'playsound minecraft:block.conduit.deactivate player @a 0 0 0 1 2 0.25' });
 			await addTaskToTrigger(server, 'A player leaves the server', 'MakePOSTRequest', userLeaveDictionary).then((e) => {
 				if (!e.success) return Logger.error(e.desc);
 				Logger.success(`Added user leave trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
@@ -161,9 +192,20 @@ module.exports = {
 					Logger.success(`Removed chat link for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
 				});
 
+				//! Remove the trigger and task for user first join
+				Logger.info(`Removing user first join trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				await removeTaskFromTrigger(server, 'A player joins the server for the first time', 'MakePOSTRequest');
+				await removeTaskFromTrigger(server, 'A player joins the server for the first time', 'SendConsole');
+				await removeTaskFromTrigger(server, 'A player joins the server for the first time', 'SendConsole');
+				await removeEventTrigger(server, 'A player joins the server for the first time').then((e) => {
+					if (!e.success) return Logger.error(e.desc);
+					Logger.success(`Removed user first join trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				});
+
 				//! Remove the triggers and tasks for user join
 				Logger.info(`Removing user join and leave triggers for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
 				await removeTaskFromTrigger(server, 'A player joins the server', 'MakePOSTRequest');
+				await removeTaskFromTrigger(server, 'A player joins the server', 'SendConsole');
 				await removeEventTrigger(server, 'A player joins the server').then((e) => {
 					if (!e.success) return Logger.error(e.desc);
 					Logger.success(`Removed user join trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
@@ -171,6 +213,7 @@ module.exports = {
 
 				//! Remove the triggers and tasks for user leave
 				await removeTaskFromTrigger(server, 'A player leaves the server', 'MakePOSTRequest');
+				await removeTaskFromTrigger(server, 'A player leaves the server', 'SendConsole');
 				await removeEventTrigger(server, 'A player leaves the server').then((e) => {
 					if (!e.success) return Logger.error(e.desc);
 					Logger.success(`Removed user leave trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
