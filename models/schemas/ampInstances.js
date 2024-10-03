@@ -31,6 +31,10 @@ const instanceSchema = Schema({
 		type: Number,
 		required: true,
 	},
+	minecraftVersion: {
+		type: String,
+		required: false,
+	},
 });
 
 const ampInstanceSchema = Schema({

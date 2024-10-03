@@ -1,10 +1,12 @@
 const { ampInstances } = require('../../models');
 const logger = require('../logging/logger');
 const { mainAPI } = require('./apiFunctions');
+const { getConfigNode } = require('./instanceFunctions');
 
 // Create a function that will update the database with the instances
 async function updateDatabaseInstances() {
 	const instancesArray = [];
+	let gameVersion;
 
 	// Fetch all instances for AMP
 	const API = await mainAPI();
@@ -18,6 +20,13 @@ async function updateDatabaseInstances() {
 		const instanceEndpoint = await API.ADSModule.GetApplicationEndpointsAsync(i.InstanceID);
 		const applicationPort = instanceEndpoint[0].Endpoint.split(':')[1];
 
+		// If the instance module is Minecraft, Try to determine the game version.
+		if (i.Module === 'Minecraft' && i.Running) {
+			const forgeVersion = await getConfigNode(i.InstanceID, 'MinecraftModule.Minecraft.SpecificForgeVersion');
+			// Get the game version out of the forge version, it looks like this "43.4.2 (mc 1.19.2)"
+			gameVersion = forgeVersion.currentValue.split(' ')[2].replace(')', '').replace('(', '');
+		}
+
 		// Create a friendly object
 		const friendly = {
 			instanceId: i.InstanceID,
@@ -26,6 +35,7 @@ async function updateDatabaseInstances() {
 			instanceName: i.InstanceName,
 			instanceFriendlyName: i.FriendlyName,
 			instanceSuspended: i.Suspended,
+			minecraftVersion: gameVersion,
 			applicationPort,
 		};
 
