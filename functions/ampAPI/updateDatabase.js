@@ -16,6 +16,9 @@ async function updateDatabaseInstances() {
 		// If the instance is named ADS, skip it as it's the main instance
 		if (i.InstanceName === 'ADS01') continue;
 
+		// If the instance welcome message includes hidden, skip it
+		if (i.WelcomeMessage?.includes('hidden')) continue;
+
 		// Fetch the port from the API
 		const instanceEndpoint = await API.ADSModule.GetApplicationEndpointsAsync(i.InstanceID);
 		const applicationPort = instanceEndpoint[0].Endpoint.split(':')[1];
@@ -24,7 +27,7 @@ async function updateDatabaseInstances() {
 		if (i.Module === 'Minecraft' && i.Running) {
 			const forgeVersion = await getConfigNode(i.InstanceID, 'MinecraftModule.Minecraft.SpecificForgeVersion');
 			// Get the game version out of the forge version, it looks like this "43.4.2 (mc 1.19.2)"
-			gameVersion = forgeVersion.currentValue.split(' ')[2].replace(')', '').replace('(', '');
+			gameVersion = forgeVersion?.currentValue.split(' ')[2].replace(')', '').replace('(', '') || 'Unknown';
 		}
 
 		// Create a friendly object
