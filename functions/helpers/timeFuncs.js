@@ -1,4 +1,5 @@
 const moment = require('moment');
+const momentTZ = require('moment-timezone');
 
 module.exports = (client) => {
 	// Timestamp
@@ -49,5 +50,21 @@ module.exports = (client) => {
 			parts.push(seconds + ' ' + (seconds > 1 ? 'seconds' : 'second'));
 		}
 		return parts;
+	};
+
+	// UTC Timezone to Toronto
+	client.toTorontoUnix = (date) => {
+		const utcDate = momentTZ.tz(date, 'M/D/YYYY h:mm:ss A', 'UTC');
+		const torontoTimestamp = utcDate.tz('America/Toronto').unix();
+		return torontoTimestamp;
+	};
+
+	// Server Start Time
+	client.serverStartTime = (startTime) => {
+		const unixTime = client.toTorontoUnix(startTime);
+		const convertedTime = new Date(unixTime * 1000);
+		const currentTime = Date.now();
+		const duration = client.getDuration(convertedTime, currentTime);
+		return duration.join(', ');
 	};
 };

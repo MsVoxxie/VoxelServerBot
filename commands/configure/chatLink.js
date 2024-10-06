@@ -65,7 +65,7 @@ module.exports = {
 
 			const appStateDictionary = {
 				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: '{@State}', INSTANCE: '{@InstanceId}' }),
+				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: '{@State}', INSTANCE: '{@InstanceId}', START: '{@StartTime}' }),
 				ContentType: 'application/json',
 			};
 
