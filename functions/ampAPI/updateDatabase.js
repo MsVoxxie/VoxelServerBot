@@ -2,6 +2,7 @@ const { ampInstances } = require('../../models');
 const logger = require('../logging/logger');
 const { mainAPI } = require('./apiFunctions');
 const { getConfigNode } = require('./instanceFunctions');
+const { getImageSource } = require('../helpers/getSourceImage');
 
 // Create a function that will update the database with the instances
 async function updateDatabaseInstances() {
@@ -27,8 +28,11 @@ async function updateDatabaseInstances() {
 		if (i.Module === 'Minecraft' && i.Running) {
 			const forgeVersion = await getConfigNode(i.InstanceID, 'MinecraftModule.Minecraft.SpecificForgeVersion');
 			// Get the game version out of the forge version, it looks like this "43.4.2 (mc 1.19.2)"
-			gameVersion = forgeVersion?.currentValue.split(' ')[2].replace(')', '').replace('(', '') || 'Unknown';
+			gameVersion = forgeVersion?.currentValue.split(' ')[2]?.replace(')', '').replace('(', '') || 'Unknown';
 		}
+
+		// Grab the instances banner image
+		const bannerImage = await getImageSource(i.DisplayImageSource);
 
 		// Create a friendly object
 		const friendly = {
@@ -37,6 +41,7 @@ async function updateDatabaseInstances() {
 			instanceModule: i.Module,
 			instanceName: i.InstanceName,
 			instanceFriendlyName: i.FriendlyName,
+			instanceDisplaySource: bannerImage,
 			instanceSuspended: i.Suspended,
 			minecraftVersion: gameVersion,
 			applicationPort,

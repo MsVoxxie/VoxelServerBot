@@ -9,5 +9,11 @@ module.exports = {
 		devOnly: true,
 		disabled: false,
 	},
-	async execute(client, interaction, settings) {},
+	async execute(client, interaction, settings) {
+		const instanceID = 'a4183b92-8629-442f-a616-eb49aa71afaf';
+
+		const inst = await instanceAPI(instanceID);
+
+		console.log(inst);
+	},
 };

@@ -23,6 +23,10 @@ const instanceSchema = Schema({
 		type: String,
 		required: true,
 	},
+	instanceDisplaySource: {
+		type: String,
+		required: true,
+	},
 	instanceSuspended: {
 		type: Boolean,
 		default: false,

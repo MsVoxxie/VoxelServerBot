@@ -19,6 +19,7 @@ module.exports = {
 			const embed = new EmbedBuilder()
 				.setTitle('Instance Created')
 				.setFooter({ text: 'VoxelServers' })
+				.setImage(instance.instanceDisplaySource)
 				.setColor(Colors.Green)
 				.setTimestamp()
 				.setDescription(
