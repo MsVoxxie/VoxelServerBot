@@ -36,7 +36,9 @@ async function instanceAPI(instanceID) {
 		if (!API) throw new Error('Invalid API or the instance is offline.');
 		return API;
 	} catch (err) {
-		console.error(err);
+		if (client.debug) {
+			console.error(err);
+		}
 	}
 }
 

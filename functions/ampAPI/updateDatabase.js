@@ -59,7 +59,7 @@ async function updateDatabaseInstances() {
 
 	// Push to database
 	await ampInstances.findOneAndUpdate({}, { instances: friendlyInstances }, { upsert: true }).catch((err) => console.error(err));
-	logger.info('Database updated with fresh instance data.');
+	// logger.info('Database updated with fresh instance data.');
 	return { success: true, instanceCount, allInstances: friendlyInstances };
 }
 

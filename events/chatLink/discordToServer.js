@@ -14,8 +14,6 @@ module.exports = {
 		// const chatlinkFetch = await chatLink.find({ 'chatLinks.channelId': message.channel.id }).lean();
 		if (!chatlinkFetch.length) return;
 
-		console.log(chatlinkFetch[0].chatLinks);
-
 		for (const chatLinkD of chatlinkFetch[0].chatLinks) {
 			const chatLinkData = chatLinkD;
 
