@@ -72,6 +72,26 @@ module.exports = {
 				// Reply with all of the instances
 				await interaction.respond(filteredResultsWhitelist.slice(0, 25)).catch(() => {});
 				break;
+
+			case 'rcon':
+				// Filter the instances
+				const filteredRconChoiceStatus = allInstances.instances
+					.filter((i) => i.instanceName.toLowerCase().includes(focusedOption.toLowerCase()))
+					.filter((i) => i.instanceSuspended === false)
+					.filter((i) => i.instanceRunning === true);
+
+				// Map the results
+				const filteredRconResultsStatus = filteredRconChoiceStatus.map((i) => {
+					return {
+						name: `${i.instanceFriendlyName} • ${i.instanceId}`,
+						value: `${i.instanceId} | ${i.instanceFriendlyName}`,
+					};
+				});
+
+				// Reply with all of the instances
+				await interaction.respond(filteredRconResultsStatus.slice(0, 25)).catch(() => {});
+
+				break;
 		}
 	},
 };

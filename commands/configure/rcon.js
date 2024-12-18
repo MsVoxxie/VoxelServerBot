@@ -1,11 +1,11 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { getInstanceStatus } = require('../../functions/ampAPI/instanceFunctions');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('rcon')
 		.setDescription('Execute an RCON command on the specified server')
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 		.addStringOption((option) => option.setName('server').setDescription('The server to execute the RCON command on').setRequired(true).setAutocomplete(true))
 		.addStringOption((option) => option.setName('command').setDescription('The RCON command to execute').setRequired(true)),
 	options: {
@@ -19,10 +19,6 @@ module.exports = {
 		const command = interaction.options.getString('command');
 		const [instanceId, friendlyName] = server.split(' | ').map((i) => i.trim());
 
-		// Get the instance status
-		const instanceInfo = await getInstanceStatus(instanceId);
-		if (!instanceInfo.success) return interaction.reply({ content: 'This instance is offline.', ephemeral: true });
-
 		// Send the rcon command
 		const API = await instanceAPI(instanceId);
 		await sendConsoleMessage(API, command);
@@ -30,7 +26,7 @@ module.exports = {
 		// Build the embed
 		const embed = new EmbedBuilder()
 			.setTitle('RCON Command Executed')
-			.setDescription(`**Server:** ${friendlyName}\n**Command:** ${command}`)
+			.setDescription(`**Server:** ${friendlyName}\n**Command:** \`${command}\``)
 			.setColor(client.colors.success)
 			.setTimestamp();
 
