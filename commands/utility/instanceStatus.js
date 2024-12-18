@@ -1,10 +1,11 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { getInstanceStatus } = require('../../functions/ampAPI/instanceFunctions');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('instance_status')
 		.setDescription('Check the status of an instance')
+		.setDefaultMemberPermissions(PermissionFlagsBits.SendMessages)
 		.addStringOption((option) => option.setName('server').setDescription('The server to request whitelisting on').setRequired(true).setAutocomplete(true)),
 	options: {
 		cooldown: 30,
@@ -33,10 +34,12 @@ module.exports = {
 			.setColor(client.colors.base)
 			.setTimestamp()
 			.setDescription(
-			`**Uptime:** ${instanceInfo.status.uptime}
+				`**Uptime:** ${instanceInfo.status.uptime}
             **Active Users:** ${instanceInfo.status.users.RawValue}/${instanceInfo.status.users.MaxValue}
             **CPU Usage:** ${instanceInfo.status.cpu.Percent}%
-            **Memory Usage:** ${instanceInfo.status.memory.RawValue.toLocaleString()}/${instanceInfo.status.memory.MaxValue.toLocaleString()} (${instanceInfo.status.memory.Percent}%)
+            **Memory Usage:** ${instanceInfo.status.memory.RawValue.toLocaleString()}/${instanceInfo.status.memory.MaxValue.toLocaleString()} (${
+					instanceInfo.status.memory.Percent
+				}%)
             ${performanceData}`
 			);
 

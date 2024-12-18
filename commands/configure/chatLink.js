@@ -7,10 +7,11 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('chatlink')
 		.setDescription('Manage the chat link for a specified server and channel.')
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
 		.addStringOption((option) => option.setName('server').setDescription('The server to set the chat link for.').setRequired(true).setAutocomplete(true))
 		.addChannelOption((option) => option.setName('channel').setDescription('The channel to set the chat link for.').setRequired(true)),
 	options: {
-		devOnly: true,
+		devOnly: false,
 		disabled: false,
 	},
 	async execute(client, interaction, settings) {

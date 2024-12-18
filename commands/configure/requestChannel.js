@@ -1,9 +1,10 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { Guild } = require('../../models');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('set_request_channel')
 		.setDescription('Set the channel for whitelist requests')
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
 		.addChannelOption((option) => option.setName('channel').setDescription('The channel to set as the whitelist request channel').setRequired(true)),
 	options: {
 		devOnly: false,

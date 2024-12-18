@@ -6,9 +6,10 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('updateschannel')
 		.setDescription('Manage the updates channel')
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
 		.addChannelOption((option) => option.setName('channel').setDescription('The channel to send updates to.').setRequired(true)),
 	options: {
-		devOnly: true,
+		devOnly: false,
 		disabled: false,
 	},
 	async execute(client, interaction, settings) {

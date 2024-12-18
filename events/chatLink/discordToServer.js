@@ -37,7 +37,7 @@ module.exports = {
 				try {
 					// Send messages to server
 					const API = await instanceAPI(chatLinkData.instanceId);
-					await sendConsoleMessage(API, `say [D] <${message.member.displayName}> ${message.content}`);
+					await sendConsoleMessage(API, `say "[D] <${message.member.displayName}> ${message.content}"`);
 				} catch (error) {
 					continue;
 				}
