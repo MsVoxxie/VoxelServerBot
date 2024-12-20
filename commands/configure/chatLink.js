@@ -77,7 +77,12 @@ module.exports = {
 				ContentType: 'application/json',
 			};
 
-			// Console input dictionary
+			// Backup Dictionarys
+			const backupStartDictionary = {
+				URI: `${process.env.SRV_API}/v1/server/link`,
+				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'Backup has started', INSTANCE: '{@InstanceId}' }),
+				ContentType: 'application/json',
+			};
 
 			//!Add the trigger for the chat message
 			Logger.info(`Adding chat link for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
@@ -117,6 +122,7 @@ module.exports = {
 			});
 
 			//! Add the triggers for user leave
+			Logger.info(`Adding user leave trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			await addEventTrigger(server, 'A player leaves the server');
 			await addTaskToTrigger(server, 'A player leaves the server', 'SendConsole', { Input: 'playsound minecraft:block.conduit.deactivate player @a 0 0 0 1 2 0.25' });
 			await addTaskToTrigger(server, 'A player leaves the server', 'MakePOSTRequest', userLeaveDictionary).then((e) => {
@@ -125,11 +131,20 @@ module.exports = {
 			});
 
 			//! Add the triggers for app state
+			Logger.info(`Adding app state trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			await addEventTrigger(server, 'The application state changes');
 			await addTaskToTrigger(server, 'The application state changes', 'IfCondition', { ValueToCheck: '{@State}', Operation: '3', ValueToCompare: 'Pre' });
 			await addTaskToTrigger(server, 'The application state changes', 'MakePOSTRequest', appStateDictionary).then((e) => {
 				if (!e.success) return Logger.error(e.desc);
 				Logger.success(`Added app state trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			});
+
+			//! Add the triggers for backups
+			Logger.info(`Adding backup start trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			await addEventTrigger(server, 'A backup has started.');
+			await addTaskToTrigger(server, 'A backup has started.', 'MakePOSTRequest', backupStartDictionary).then((e) => {
+				if (!e.success) return Logger.error(e.desc);
+				Logger.success(`Added backup start trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			});
 
 			// Fetch the webhooks in the channel
@@ -213,6 +228,7 @@ module.exports = {
 				});
 
 				//! Remove the triggers and tasks for user leave
+				Logger.info(`Removing user leave trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
 				await removeTaskFromTrigger(server, 'A player leaves the server', 'MakePOSTRequest');
 				await removeTaskFromTrigger(server, 'A player leaves the server', 'SendConsole');
 				await removeEventTrigger(server, 'A player leaves the server').then((e) => {
@@ -221,10 +237,19 @@ module.exports = {
 				});
 
 				//! Remove the triggers and tasks for app state
+				Logger.info(`Removing app state trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
 				await removeTaskFromTrigger(server, 'The application state changes', 'MakePOSTRequest');
 				await removeEventTrigger(server, 'The application state changes').then((e) => {
 					if (!e.success) return Logger.error(e.desc);
 					Logger.success(`Removed app state trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				});
+
+				//! Remove the triggers and tasks for backups
+				Logger.info(`Removing backup start trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				await removeTaskFromTrigger(server, 'A backup has started.', 'MakePOSTRequest');
+				await removeEventTrigger(server, 'A backup has started.').then((e) => {
+					if (!e.success) return Logger.error(e.desc);
+					Logger.success(`Removed backup start trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
 				});
 			}
 
