@@ -80,7 +80,7 @@ module.exports = {
 			// Backup Dictionarys
 			const backupStartDictionary = {
 				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'Backup has started', INSTANCE: '{@InstanceId}' }),
+				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'A Backup has started', INSTANCE: '{@InstanceId}' }),
 				ContentType: 'application/json',
 			};
 
