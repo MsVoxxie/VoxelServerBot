@@ -84,6 +84,12 @@ module.exports = {
 				ContentType: 'application/json',
 			};
 
+			const backupFinishDictionary = {
+				URI: `${process.env.SRV_API}/v1/server/link`,
+				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'A Backup has finished archiving', INSTANCE: '{@InstanceId}' }),
+				ContentType: 'application/json',
+			};
+
 			//!Add the trigger for the chat message
 			Logger.info(`Adding chat link for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			await addEventTrigger(server, 'A player sends a chat message');
@@ -145,6 +151,10 @@ module.exports = {
 			await addTaskToTrigger(server, 'A backup has started.', 'MakePOSTRequest', backupStartDictionary).then((e) => {
 				if (!e.success) return Logger.error(e.desc);
 				Logger.success(`Added backup start trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			});
+			await addTaskToTrigger(server, 'A backup finishes archiving.', 'MakePOSTRequest', backupFinishDictionary).then((e) => {
+				if (!e.success) return Logger.error(e.desc);
+				Logger.success(`Added backup finish trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			});
 
 			// Fetch the webhooks in the channel
@@ -250,6 +260,10 @@ module.exports = {
 				await removeEventTrigger(server, 'A backup has started.').then((e) => {
 					if (!e.success) return Logger.error(e.desc);
 					Logger.success(`Removed backup start trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				});
+				await removeTaskFromTrigger(server, 'A backup finishes archiving.', 'MakePOSTRequest').then((e) => {
+					if (!e.success) return Logger.error(e.desc);
+					Logger.success(`Removed backup finish trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
 				});
 			}
 
