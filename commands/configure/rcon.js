@@ -32,5 +32,11 @@ module.exports = {
 
 		// Send the embed
 		await interaction.reply({ embeds: [embed] });
+
+		// Inform the server members of the command being executed
+		await sendConsoleMessage(
+			API,
+			`tellraw @a ["","[",{"text":"RCON","color":"dark_red"},"] ",{"text":"Executing Command: ","color":"blue"},{"text":"${command}","color":"gold"}]`
+		);
 	},
 };
