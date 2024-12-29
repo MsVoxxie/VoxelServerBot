@@ -1,5 +1,4 @@
 const { ampInstances } = require('../../models');
-const logger = require('../logging/logger');
 const { mainAPI } = require('./apiFunctions');
 const { getConfigNode } = require('./instanceFunctions');
 const { getImageSource } = require('../helpers/getSourceImage');
@@ -8,6 +7,7 @@ const { getImageSource } = require('../helpers/getSourceImage');
 async function updateDatabaseInstances() {
 	const instancesArray = [];
 	let gameVersion;
+	let mcMotd;
 
 	// Fetch all instances for AMP
 	const API = await mainAPI();
@@ -26,8 +26,8 @@ async function updateDatabaseInstances() {
 
 		// If the instance module is Minecraft, Try to determine the game version.
 		if (i.Module === 'Minecraft' && i.Running) {
+			// Get the game version
 			const forgeVersion = await getConfigNode(i.InstanceID, 'MinecraftModule.Minecraft.SpecificForgeVersion');
-			// Get the game version out of the forge version, it looks like this "43.4.2 (mc 1.19.2)"
 			gameVersion = forgeVersion?.currentValue.split(' ')[2]?.replace(')', '').replace('(', '') || 'Unknown';
 		}
 

@@ -1,3 +1,5 @@
+const { updateDatabaseInstances } = require('../../functions/ampAPI/updateDatabase');
+const { getConfigNode } = require('../../functions/ampAPI/instanceFunctions');
 const { serverLink } = require('../../functions/helpers/messageDiscord');
 
 // Track users that have received a join message
@@ -17,8 +19,9 @@ module.exports = {
 
 		// If the USER is SERVER and the MESSAGE is Ready, Let's get the time it took to start the server
 		if (data.USER === 'SERVER' && data.MESSAGE === 'Ready') {
+			const currentMOTD = await getConfigNode(data.INSTANCE, 'MinecraftModule.Minecraft.ServerMOTD');
 			const serverStart = client.serverStartTime(data.START);
-			message = `Ready, took ${serverStart}`;
+			message = `Ready, took ${serverStart}\n${currentMOTD}`;
 		}
 
 		// Allow only the first join message to be sent for each user //! This Sucks
