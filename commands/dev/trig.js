@@ -1,7 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { getInstanceStatus } = require('../../functions/ampAPI/instanceFunctions');
-const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
-const { addEventTrigger, addTaskToTrigger, removeEventTrigger, removeTaskFromTrigger } = require('../../functions/ampAPI/instanceFunctions');
+const { getConfigNode } = require('../../functions/ampAPI/instanceFunctions');
 
 module.exports = {
 	data: new SlashCommandBuilder().setName('triggers').setDescription('Test the trigger functions').setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
@@ -10,9 +8,9 @@ module.exports = {
 		disabled: false,
 	},
 	async execute(client, interaction, settings) {
-		const instanceID = 'a4183b92-8629-442f-a616-eb49aa71afaf';
+		const instanceID = 'c66361cb-a5d3-47a4-bcdc-a55f13d8e091';
 
-		const inst = await instanceAPI(instanceID);
+		const inst = await getConfigNode(instanceID, 'MinecraftModule.Minecraft.ServerMOTD');
 
 		console.log(inst);
 	},
