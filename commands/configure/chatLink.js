@@ -90,6 +90,19 @@ module.exports = {
 				ContentType: 'application/json',
 			};
 
+			// Crash Dictionaries
+			const unResponsiveDictionary = {
+				URI: `${process.env.SRV_API}/v1/server/link`,
+				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'Server is unresponsive and has been terminated', INSTANCE: '{@InstanceId}' }),
+				ContentType: 'application/json',
+			};
+
+			const crashDictionary = {
+				URI: `${process.env.SRV_API}/v1/server/link`,
+				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'Server has crashed', INSTANCE: '{@InstanceId}' }),
+				ContentType: 'application/json',
+			};
+
 			//!Add the trigger for the chat message
 			Logger.info(`Adding chat link for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			await addEventTrigger(server, 'A player sends a chat message');
@@ -155,6 +168,20 @@ module.exports = {
 			await addTaskToTrigger(server, 'A backup finishes archiving.', 'MakePOSTRequest', backupFinishDictionary).then((e) => {
 				if (!e.success) return Logger.error(e.desc);
 				Logger.success(`Added backup finish trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			});
+
+			//! Add the triggers for crashes
+			Logger.info(`Adding crash triggers for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			await addEventTrigger(server, 'The Minecraft Server watchdog forced a shutdown (server unresponsive)');
+			await addTaskToTrigger(server, 'The Minecraft Server watchdog forced a shutdown (server unresponsive)', 'MakePOSTRequest', unResponsiveDictionary).then((e) => {
+				if (!e.success) return Logger.error(e.desc);
+				Logger.success(`Added crash trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			});
+
+			await addEventTrigger(server, 'The Minecraft Server stops unexpectedly');
+			await addTaskToTrigger(server, 'The Minecraft Server stops unexpectedly', 'MakePOSTRequest', crashDictionary).then((e) => {
+				if (!e.success) return Logger.error(e.desc);
+				Logger.success(`Added crash trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			});
 
 			// Fetch the webhooks in the channel
@@ -264,6 +291,20 @@ module.exports = {
 				await removeTaskFromTrigger(server, 'A backup finishes archiving.', 'MakePOSTRequest').then((e) => {
 					if (!e.success) return Logger.error(e.desc);
 					Logger.success(`Removed backup finish trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				});
+
+				//! Remove the triggers and tasks for crashes
+				Logger.info(`Removing crash triggers for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				await removeTaskFromTrigger(server, 'The Minecraft Server watchdog forced a shutdown (server unresponsive)', 'MakePOSTRequest');
+				await removeEventTrigger(server, 'The Minecraft Server watchdog forced a shutdown (server unresponsive)').then((e) => {
+					if (!e.success) return Logger.error(e.desc);
+					Logger.success(`Removed crash trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				});
+
+				await removeTaskFromTrigger(server, 'The Minecraft Server stops unexpectedly', 'MakePOSTRequest');
+				await removeEventTrigger(server, 'The Minecraft Server stops unexpectedly').then((e) => {
+					if (!e.success) return Logger.error(e.desc);
+					Logger.success(`Removed crash trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
 				});
 			}
 
