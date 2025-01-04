@@ -165,6 +165,21 @@ async function getInstanceStatus(instanceId) {
 	return { status, success: true };
 }
 
+//! Get the currently online players of an instance
+async function getOnlinePlayers(instanceId) {
+	// Get the instances API
+	const API = await instanceAPI(instanceId);
+	if (!API) return { desc: 'Invalid instanceId.', success: false };
+
+	// Get the online players
+	const playersData = await API.Core.GetUserListAsync();
+
+	// Map the players to an array
+	const players = Object.entries(playersData).map(([uuid, name]) => ({ uuid, name }));
+
+	return { players, success: true };
+}
+
 module.exports = {
 	addEventTrigger,
 	addTaskToTrigger,
@@ -173,4 +188,5 @@ module.exports = {
 	getConfigNode,
 	setConfigNode,
 	getInstanceStatus,
+	getOnlinePlayers,
 };

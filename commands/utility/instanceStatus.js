@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
-const { getInstanceStatus } = require('../../functions/ampAPI/instanceFunctions');
+const { getInstanceStatus, getOnlinePlayers } = require('../../functions/ampAPI/instanceFunctions');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -19,6 +19,8 @@ module.exports = {
 
 		// Get the instance status
 		const instanceInfo = await getInstanceStatus(instanceId);
+		const instanceUserList = await getOnlinePlayers(instanceId);
+
 		if (!instanceInfo.success) return interaction.reply({ content: 'This instance is offline.', ephemeral: true });
 
 		// Build performance data
@@ -41,7 +43,11 @@ module.exports = {
 					instanceInfo.status.memory.Percent
 				}%)
             ${performanceData}`
-			);
+			)
+			.addFields({
+				name: 'Online Players',
+				value: instanceUserList.players.map((player) => player.name).join(', ') || 'No players online',
+			});
 
 		// Send the embed
 		await interaction.reply({ embeds: [embed] });
