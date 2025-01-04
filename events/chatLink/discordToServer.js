@@ -27,10 +27,9 @@ module.exports = {
 			// Check if the instance module is Minecraft
 			if (chatLinkData.instanceModule === 'Minecraft') {
 				try {
-					// Send each part of the message
-					for (const part of messageParts) {
+					for (let i = 0; i < messageParts.length; i++) {
 						const API = await instanceAPI(chatLinkData.instanceId);
-						await sendConsoleMessage(API, `tellraw @a ["",{"text":"[D]","color":"blue"},"<${message.member.displayName}> ${part}"]`);
+						await sendConsoleMessage(API, `tellraw @a ["",{"text":"[D]","color":"blue"},"<${message.member.displayName}> (${i + 1}/${messageParts.length}) ${messageParts[i]}"]`);
 					}
 
 					// Play a sound to get the attention of the players but randomize the pitch with a minimum of 0.8 and a maximum of 1.3
@@ -42,9 +41,9 @@ module.exports = {
 			} else {
 				try {
 					// Send each part of the message
-					for (const part of messageParts) {
+					for (let i = 0; i < messageParts.length; i++) {
 						const API = await instanceAPI(chatLinkData.instanceId);
-						await sendConsoleMessage(API, `say "[D] <${message.member.displayName}> ${part}"`);
+						await sendConsoleMessage(API, `say "[D] <${message.member.displayName}> (${i + 1}/${messageParts.length}) ${messageParts[i]}"`);
 					}
 				} catch (error) {
 					continue;
