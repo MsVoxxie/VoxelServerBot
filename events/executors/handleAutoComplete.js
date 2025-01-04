@@ -33,7 +33,7 @@ module.exports = {
 
 				break;
 
-			case 'instance_status':
+			case 'serverinfo':
 				// Filter the instances
 				const filteredChoiceStatus = allInstances.instances
 					.filter((i) => i.instanceName.toLowerCase().includes(focusedOption.toLowerCase()))
