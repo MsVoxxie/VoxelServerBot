@@ -17,6 +17,7 @@ module.exports = {
 
 		// Split the message into parts if it exceeds the max length
 		const messageParts = splitSentence(message.content, 200);
+		let counter = ' ';
 
 		for (const chatLinkD of chatlinkFetch[0].chatLinks) {
 			const chatLinkData = chatLinkD;
@@ -28,8 +29,12 @@ module.exports = {
 			if (chatLinkData.instanceModule === 'Minecraft') {
 				try {
 					for (let i = 0; i < messageParts.length; i++) {
+						// only add the count if there are more than 1 message parts
+						if (messageParts.length > 1) counter = ` (${i + 1}/${messageParts.length}) `;
+
+						// Send each part of the message
 						const API = await instanceAPI(chatLinkData.instanceId);
-						await sendConsoleMessage(API, `tellraw @a ["",{"text":"[D]","color":"blue"},"<${message.member.displayName}> (${i + 1}/${messageParts.length}) ${messageParts[i]}"]`);
+						await sendConsoleMessage(API, `tellraw @a ["",{"text":"[D]","color":"blue"},"<${message.member.displayName}>${counter}${messageParts[i]}"]`);
 					}
 
 					// Play a sound to get the attention of the players but randomize the pitch with a minimum of 0.8 and a maximum of 1.3
@@ -40,10 +45,13 @@ module.exports = {
 				}
 			} else {
 				try {
+					// only add the count if there are more than 1 message parts
+					if (messageParts.length > 1) counter = `(${i + 1}/${messageParts.length})` || '';
+
 					// Send each part of the message
 					for (let i = 0; i < messageParts.length; i++) {
 						const API = await instanceAPI(chatLinkData.instanceId);
-						await sendConsoleMessage(API, `say "[D] <${message.member.displayName}> (${i + 1}/${messageParts.length}) ${messageParts[i]}"`);
+						await sendConsoleMessage(API, `say "[D] <${message.member.displayName}>${counter}${messageParts[i]}"`);
 					}
 				} catch (error) {
 					continue;
