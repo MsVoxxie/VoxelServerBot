@@ -46,7 +46,7 @@ module.exports = {
 			} else {
 				try {
 					// only add the count if there are more than 1 message parts
-					if (messageParts.length > 1) counter = `(${i + 1}/${messageParts.length})` || '';
+					if (messageParts.length > 1) counter = `(${i + 1}/${messageParts.length})`;
 
 					// Send each part of the message
 					for (let i = 0; i < messageParts.length; i++) {
