@@ -3,8 +3,8 @@ const { getInstanceStatus, getOnlinePlayers } = require('../../functions/ampAPI/
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('instance_status')
-		.setDescription('Check the status of an instance')
+		.setName('serverinfo')
+		.setDescription('Check information about a server')
 		.setDefaultMemberPermissions(PermissionFlagsBits.SendMessages)
 		.addStringOption((option) => option.setName('server').setDescription('The server to request whitelisting on').setRequired(true).setAutocomplete(true)),
 	options: {
