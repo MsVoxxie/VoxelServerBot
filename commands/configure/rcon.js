@@ -9,7 +9,7 @@ module.exports = {
 		.addStringOption((option) => option.setName('server').setDescription('The server to execute the RCON command on').setRequired(true).setAutocomplete(true))
 		.addStringOption((option) => option.setName('command').setDescription('The RCON command to execute').setRequired(true)),
 	options: {
-		cooldown: 30,
+		cooldown: 5,
 		devOnly: false,
 		disabled: false,
 	},
