@@ -141,9 +141,7 @@ async function getInstanceStatus(instanceId) {
 
 	// Get the status of the instance
 	const statusData = await API.Core.GetStatusAsync();
-
-	// Get the instance module
-	const instancesData = await ampInstances.findOne({ 'instances.instanceId': instanceId }).lean();
+	if (!statusData) return { desc: 'Failed to get status data.', success: false };
 
 	// Performance is variable and can be FPS or TPS, so we need to check for both
 	let performance = statusData.Metrics['TPS'] || statusData.Metrics['FPS'] || null;

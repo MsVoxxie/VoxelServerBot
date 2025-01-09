@@ -51,5 +51,10 @@ cron.schedule('*/1 * * * *', async () => {
 	client.emit('oneMinute');
 });
 
+// Every 5 minutes
+cron.schedule('*/5 * * * *', async () => {
+	client.emit('fiveMinutes');
+});
+
 // Login
 client.login(TOKEN);

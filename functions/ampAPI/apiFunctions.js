@@ -16,7 +16,7 @@ async function mainAPI() {
 		// Logger.success('AMP API Initialized');
 		return API;
 	} catch (err) {
-		console.error(err);
+		// console.error(err);
 	}
 }
 
@@ -36,7 +36,7 @@ async function instanceAPI(instanceID) {
 		if (!API) throw new Error('Invalid API or the instance is offline.');
 		return API;
 	} catch (err) {
-		console.error(err);
+		// console.error(err);
 	}
 }
 
