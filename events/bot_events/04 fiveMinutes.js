@@ -15,16 +15,22 @@ module.exports = {
 			// Fetch the channel
 			const channel = client.channels.cache.get(chatLinkData.channelId);
 			const instance = chatLinkData.instanceId;
+			let channelDesc;
 
 			// Fetch the instance status
 			const instanceStatus = await getInstanceStatus(instance);
 			if (!instanceStatus.success) {
-				await channel.setTopic('Server is Offline or Restarting');
-				continue;
+				channelDesc = 'Server is Offline or Restarting';
+			} else {
+				channelDesc = `Online Users: ${instanceStatus.status.users.RawValue} / ${instanceStatus.status.users.MaxValue}\nUptime: ${instanceStatus.status.uptime}`;
 			}
 
+			// Check if the channel description is the saem as the server status to prevent api spam
+			const currentDesc = channel.topic;
+			if (currentDesc === channelDesc) continue;
+
 			// Update the channel description
-			await channel.setTopic(`Online Users: ${instanceStatus.status.users.RawValue} / ${instanceStatus.status.users.MaxValue}\nUptime: ${instanceStatus.status.uptime}`);
+			await channel.setTopic(channelDesc);
 		}
 	},
 };
