@@ -23,7 +23,7 @@ const client = new Client({
 });
 
 // Client Properties
-client.debug = false;
+client.debug = true;
 client.colors = {
 	base: '#871824',
 	success: '#9dff00',

@@ -1,4 +1,4 @@
-const { addEventTrigger, addTaskToTrigger, removeEventTrigger, removeTaskFromTrigger } = require('../../functions/ampAPI/instanceFunctions');
+const { addEventTrigger, addTaskToTrigger, changeTaskOrder, removeEventTrigger, removeTaskFromTrigger } = require('../../functions/ampAPI/instanceFunctions');
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { chatLink, ampInstances } = require('../../models');
 const Logger = require('../../functions/logging/logger');
@@ -48,58 +48,70 @@ module.exports = {
 			// Chat Message Dictionary
 			const chatMessageDictionary = {
 				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: '{@Message}', INSTANCE: '{@InstanceId}' }),
+				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: '{@Message}', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
 				ContentType: 'application/json',
 			};
 
 			// Event Dictionary
 			const userJoinDictionary = {
 				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: 'has connected', INSTANCE: '{@InstanceId}' }),
+				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: 'has connected', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
 				ContentType: 'application/json',
 			};
 			const userLeaveDictionary = {
 				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: 'has disconnected', INSTANCE: '{@InstanceId}' }),
+				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: 'has disconnected', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
 				ContentType: 'application/json',
 			};
 
 			const appStateDictionary = {
 				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: '{@State}', INSTANCE: '{@InstanceId}', START: '{@StartTime}' }),
+				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: '{@State}', INSTANCE: '{@InstanceId}', START: '{@StartTime}', EVENT: '{@TriggerName}' }),
 				ContentType: 'application/json',
 			};
 
 			// User first join Dictionary
 			const userFirstJoinDictionary = {
 				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: 'joined for the first time', INSTANCE: '{@InstanceId}' }),
+				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: 'joined for the first time', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
 				ContentType: 'application/json',
 			};
 
 			// Backup Dictionarys
 			const backupStartDictionary = {
 				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'A Backup has started', INSTANCE: '{@InstanceId}' }),
+				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'A Backup has started', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
 				ContentType: 'application/json',
 			};
 
 			const backupFinishDictionary = {
 				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'A Backup has finished archiving', INSTANCE: '{@InstanceId}' }),
+				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'A Backup has finished archiving', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
 				ContentType: 'application/json',
 			};
 
 			// Crash Dictionaries
 			const unResponsiveDictionary = {
 				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'Server is unresponsive and has been terminated', INSTANCE: '{@InstanceId}' }),
+				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'Server is unresponsive and has been terminated', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
 				ContentType: 'application/json',
 			};
 
 			const crashDictionary = {
 				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'Server has crashed', INSTANCE: '{@InstanceId}' }),
+				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: "I've crashed", INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
+				ContentType: 'application/json',
+			};
+
+			// Server Lagging Dictionary
+			const serverLaggingDictionary = {
+				URI: `${process.env.SRV_API}/v1/server/link`,
+				Payload: JSON.stringify({
+					USER: 'SERVER',
+					MESSAGE: 'I seem to be lagging, {@MillisecondsBehind}ms or {@TicksSkipped} ticks behind',
+					INSTANCE: '{@InstanceId}',
+					EVENT: '{@TriggerName}',
+				}),
 				ContentType: 'application/json',
 			};
 
@@ -170,6 +182,13 @@ module.exports = {
 				Logger.success(`Added backup finish trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			});
 
+			//! Change the order of the backup finish task
+			Logger.info(`Changing the order of the backup finish task for ${friendlyName} in ${channel.name} in ${interaction.guild.name}`);
+			await changeTaskOrder(server, 'A backup finishes archiving.', 'MakePOSTRequest', 5).then((e) => {
+				if (!e.success) return Logger.error(e.desc);
+				Logger.success(`Changed the order of the backup finish task for ${friendlyName} in ${channel.name} in ${interaction.guild.name}`);
+			});
+
 			//! Add the triggers for crashes
 			Logger.info(`Adding crash triggers for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			await addEventTrigger(server, 'The Minecraft Server watchdog forced a shutdown (server unresponsive)');
@@ -182,6 +201,15 @@ module.exports = {
 			await addTaskToTrigger(server, 'The Minecraft Server stops unexpectedly', 'MakePOSTRequest', crashDictionary).then((e) => {
 				if (!e.success) return Logger.error(e.desc);
 				Logger.success(`Added crash trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			});
+
+			//! Add the triggers for server lagging
+			Logger.info(`Adding server lagging trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
+			await addEventTrigger(server, 'The Minecraft server is unable to keep up');
+			await addTaskToTrigger(server, 'The Minecraft server is unable to keep up', 'IfCondition', { ValueToCheck: '{@TicksSkipped}', Operation: '4', ValueToCompare: '200' });
+			await addTaskToTrigger(server, 'The Minecraft server is unable to keep up', 'MakePOSTRequest', serverLaggingDictionary).then((e) => {
+				if (!e.success) return Logger.error(e.desc);
+				Logger.success(`Added server lagging trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			});
 
 			// Fetch the webhooks in the channel
@@ -276,6 +304,7 @@ module.exports = {
 				//! Remove the triggers and tasks for app state
 				Logger.info(`Removing app state trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
 				await removeTaskFromTrigger(server, 'The application state changes', 'MakePOSTRequest');
+				await removeTaskFromTrigger(server, 'The application state changes', 'IfCondition');
 				await removeEventTrigger(server, 'The application state changes').then((e) => {
 					if (!e.success) return Logger.error(e.desc);
 					Logger.success(`Removed app state trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
@@ -305,6 +334,15 @@ module.exports = {
 				await removeEventTrigger(server, 'The Minecraft Server stops unexpectedly').then((e) => {
 					if (!e.success) return Logger.error(e.desc);
 					Logger.success(`Removed crash trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				});
+
+				//! Remove the triggers and tasks for server lagging
+				Logger.info(`Removing server lagging trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
+				await removeTaskFromTrigger(server, 'The Minecraft server is unable to keep up', 'MakePOSTRequest');
+				await removeTaskFromTrigger(server, 'The Minecraft server is unable to keep up', 'IfCondition');
+				await removeEventTrigger(server, 'The Minecraft server is unable to keep up').then((e) => {
+					if (!e.success) return Logger.error(e.desc);
+					Logger.success(`Removed server lagging trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
 				});
 			}
 

@@ -1,7 +1,7 @@
+const { saveEvent } = require('../../../functions/helpers/saveEvents');
 const Logger = require('../../../functions/logging/logger');
-const RateLimit = require('express-rate-limit');
+// const RateLimit = require('express-rate-limit');
 const { botData } = require('../../../models');
-const bodyParser = require('body-parser');
 const router = require('./router');
 const Port = process.env.API_PORT;
 const moment = require('moment');
@@ -12,22 +12,18 @@ const cors = require('cors');
 const srv = e();
 
 module.exports = (client) => {
-	// Rate Limit
-	const limiter = RateLimit({
-		windowMs: 1 * 60 * 1000,
-		max: 5,
-	});
+	// Rate Limit | Unused
+	// const limiter = RateLimit({
+	// 	windowMs: 1 * 60 * 1000,
+	// 	max: 5,
+	// });
 
 	// Set Proxy
 	srv.set('trust proxy', process.env.API_PROXY);
 
-	// JSON Parser
-	const jsonParser = bodyParser.json();
-
-	// Set "Use"
 	// srv.use(limiter);
 	srv.use(cors());
-	srv.use(jsonParser);
+	srv.use(e.json());
 	srv.use('/', router);
 
 	// Get the static data
@@ -64,8 +60,35 @@ module.exports = (client) => {
 
 	// Receive Messages
 	srv.post('/v1/server/link', async (req, res) => {
+		// Escape any incoming quotes
+		req.body.MESSAGE.replace(/\"/g, '\\"');
+
+		// Log the body for debugging
+		if (client.debug) {
+			Logger.info(req.body);
+		}
+
+		// Pull the EVENT type from the body and strip it down to the event name
+		const rawEvent = req.body.EVENT;
+		const splitEvent = rawEvent.split('.')[2];
+		// Make the first letter lowercase to match my standard
+		const formattedEvent = splitEvent.charAt(0).toLowerCase() + splitEvent.slice(1);
+
+		// Emit the event
+		client.emit(formattedEvent, {
+			USER: req.body.USER,
+			MESSAGE: req.body.MESSAGE,
+			INSTANCE: req.body.INSTANCE,
+			EVENT: formattedEvent,
+			START: req.body.START || null,
+		});
+
+		// Generic Event Emitter -- To be deprecated
 		client.emit('receivedChat', req.body);
 		res.status(200).send({ message: 'Success!' });
+
+		// Save the event to the database, This is entirely because im forgetful :)
+		await saveEvent(formattedEvent);
 	});
 
 	// Receive AI Requests

@@ -12,7 +12,7 @@ setInterval(() => {
 
 module.exports = {
 	name: 'receivedChat',
-	runType: 'infinity',
+	runType: 'disabled',
 	async execute(client, data) {
 		let message = data.MESSAGE;
 

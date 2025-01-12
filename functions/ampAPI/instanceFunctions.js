@@ -57,6 +57,38 @@ async function addTaskToTrigger(instanceId, triggerDescription, taskName, taskDa
 	return { desc: `Added task "${taskDesc}" to trigger "${triggerDesc}" in instance ${instanceId}.`, success: true };
 }
 
+//* Change the order of tasks in an event trigger
+async function changeTaskOrder(instanceId, triggerDescription, taskName, newOrder) {
+	// Get the instances API
+	const API = await instanceAPI(instanceId);
+
+	// Get all schedule data
+	const scheduleData = await API.Core.GetScheduleDataAsync();
+	// Fetch populated triggers
+	const fetchedTrigger = scheduleData.PopulatedTriggers.filter((trigger) => trigger.Description === triggerDescription);
+	if (!fetchedTrigger.length) return { desc: `No active trigger found with the description: ${triggerDescription}.`, success: false };
+
+	// Obtain the triggerId
+	const [triggerId, triggerDesc] = [fetchedTrigger[0].Id, fetchedTrigger[0].Description];
+
+	// Fetch available tasks
+	const fetchedTask = scheduleData.AvailableMethods.filter((task) => task.Name === taskName);
+	if (!fetchedTask.length) return { desc: `No active task found with the name: ${taskName}.`, success: false };
+
+	// Get the trigger from the task
+	const fetchedTaskInTrigger = fetchedTrigger[0].Tasks.find((task) => task.TaskMethodName === fetchedTask[0].Id);
+	if (!fetchedTaskInTrigger) return { desc: `Task "${fetchedTask[0].Description}" is not in trigger "${triggerDesc}".`, success: false };
+
+	// Obtain the taskId
+	const [taskId, taskDesc] = [fetchedTaskInTrigger.Id, fetchedTask[0].Description];
+
+	// Change the order of the task
+	await API.Core.ChangeTaskOrderAsync(triggerId, taskId, newOrder);
+
+	// Return with success
+	return { desc: `Changed the order of task "${taskDesc}" in trigger "${triggerDesc}" to ${newOrder} in instance ${instanceId}.`, success: true };
+}
+
 //! Remove an event trigger from an instance
 async function removeEventTrigger(instanceId, triggerDescription) {
 	// Get the instances API
@@ -110,7 +142,7 @@ async function removeTaskFromTrigger(instanceId, triggerDescription, taskName) {
 	return { desc: `Removed task "${taskDesc}" from trigger "${triggerDesc}" in instance ${instanceId}.`, success: true };
 }
 
-//! Get a config node by its name
+//* Get a config node by its name
 async function getConfigNode(instanceId, configNode) {
 	// Get the instances API
 	const API = await instanceAPI(instanceId);
@@ -121,7 +153,7 @@ async function getConfigNode(instanceId, configNode) {
 	return { node: configData.Node, currentValue: configData.CurrentValue };
 }
 
-//! Set a config node by its name
+//* Set a config node by its name
 async function setConfigNode(instanceId, configNode, configValue) {
 	// Get the instances API
 	const API = await instanceAPI(instanceId);
@@ -133,7 +165,7 @@ async function setConfigNode(instanceId, configNode, configValue) {
 	return { success: configData.Status };
 }
 
-//! Get the current status of an instance
+//* Get the current status of an instance
 async function getInstanceStatus(instanceId) {
 	// Get the instances API
 	const API = await instanceAPI(instanceId);
@@ -163,7 +195,7 @@ async function getInstanceStatus(instanceId) {
 	return { status, success: true };
 }
 
-//! Get the currently online players of an instance
+//* Get the currently online players of an instance
 async function getOnlinePlayers(instanceId) {
 	// Get the instances API
 	const API = await instanceAPI(instanceId);
@@ -181,6 +213,7 @@ async function getOnlinePlayers(instanceId) {
 module.exports = {
 	addEventTrigger,
 	addTaskToTrigger,
+	changeTaskOrder,
 	removeEventTrigger,
 	removeTaskFromTrigger,
 	getConfigNode,
