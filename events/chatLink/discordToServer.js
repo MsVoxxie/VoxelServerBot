@@ -32,9 +32,12 @@ module.exports = {
 						// only add the count if there are more than 1 message parts
 						if (messageParts.length > 1) counter = ` (${i + 1}/${messageParts.length}) `;
 
+						// Store formatted message for shorter code
+						const formattedMessage = `<${message.member.displayName}>${counter}${messageParts[i]}`;
+
 						// Send each part of the message
 						const API = await instanceAPI(chatLinkData.instanceId);
-						await sendConsoleMessage(API, `tellraw @a ["",{"text":"[D] ","color":"blue"},"<${message.member.displayName}>${counter}${messageParts[i]}"]`);
+						await sendConsoleMessage(API, `tellraw @a ["",{"text":"[D] ","color":"blue"},"${formattedMessage}"]`);
 
 						// Play a sound to get the attention of the players but randomize the pitch with a minimum of 0.8 and a maximum of 1.3
 						const pitch = Math.random() * (1.3 - 0.8) + 0.8;
