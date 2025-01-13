@@ -8,6 +8,6 @@ module.exports = {
 		const { USER, INSTANCE, MESSAGE } = data;
 
 		// Send off the message to Discord
-		await serverLink(USER, MESSAGE, INSTANCE);
+		await serverLink(USER, MESSAGE, INSTANCE, 'Alert', true);
 	},
 };

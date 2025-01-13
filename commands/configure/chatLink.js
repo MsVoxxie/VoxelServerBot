@@ -206,7 +206,7 @@ module.exports = {
 			//! Add the triggers for server lagging
 			Logger.info(`Adding server lagging trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
 			await addEventTrigger(server, 'The Minecraft server is unable to keep up');
-			await addTaskToTrigger(server, 'The Minecraft server is unable to keep up', 'IfCondition', { ValueToCheck: '{@TicksSkipped}', Operation: '4', ValueToCompare: '200' });
+			await addTaskToTrigger(server, 'The Minecraft server is unable to keep up', 'IfCondition', { ValueToCheck: '{@TicksSkipped}', Operation: '4', ValueToCompare: '300' });
 			await addTaskToTrigger(server, 'The Minecraft server is unable to keep up', 'MakePOSTRequest', serverLaggingDictionary).then((e) => {
 				if (!e.success) return Logger.error(e.desc);
 				Logger.success(`Added server lagging trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
