@@ -62,7 +62,7 @@ async function serverLink(USER = 'Placeholder', MESSAGE = 'Placeholder', INSTANC
 				);
 
 				// If the message is an alert, play a sound
-				if (TYPE === 'Alert') await alertSoundMC(API);
+				await alertSoundMC(API, TYPE);
 			} else {
 				await sendConsoleMessage(API, `say "[${TYPE}] <${USER}> ${MESSAGE}"`);
 			}
@@ -74,12 +74,27 @@ module.exports = {
 	serverLink,
 };
 
-async function alertSoundMC(API) {
+async function alertSoundMC(API, type = 'notice' || 'alert') {
 	// Randomized variance added to the pitch, max of 0.2 and min of 0.1
 	const pitch = Math.random() * (0.2 - 0.1) + 0.1;
-	await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${0.75 + pitch} 0.25`);
-	await new Promise((resolve) => setTimeout(resolve, 100));
-	await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${0.75 + pitch} 0.25`);
-	await new Promise((resolve) => setTimeout(resolve, 250));
-	await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${1 + pitch} 0.25`);
+
+	switch (type) {
+		case 'alert':
+			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${0.75 + pitch} 0.25`);
+			await new Promise((resolve) => setTimeout(resolve, 100));
+			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${0.75 + pitch} 0.25`);
+			await new Promise((resolve) => setTimeout(resolve, 250));
+			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${1 + pitch} 0.25`);
+			break;
+
+		case 'notice':
+			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${2 + pitch} 0.25`);
+			await new Promise((resolve) => setTimeout(resolve, 50));
+			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${2 + pitch} 0.25`);
+			await new Promise((resolve) => setTimeout(resolve, 50));
+			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${1.5 + pitch} 0.25`);
+
+		default:
+			return;
+	}
 }

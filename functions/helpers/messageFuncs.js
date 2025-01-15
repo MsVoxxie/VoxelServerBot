@@ -22,6 +22,35 @@ function splitSentence(input, maxLength) {
 	return parts;
 }
 
+async function alertSoundMC(API, type = 'notice' || 'alert') {
+	// Require the sendConsoleMessage function
+	const { sendConsoleMessage } = require('../ampAPI/apiFunctions');
+
+	// Randomized variance added to the pitch, max of 0.2 and min of 0.1
+	const pitch = Math.random() * (0.2 - 0.1) + 0.1;
+
+	switch (type) {
+		case 'alert':
+			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${0.75 + pitch} 0.25`);
+			await new Promise((resolve) => setTimeout(resolve, 50));
+			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${0.75 + pitch} 0.25`);
+			await new Promise((resolve) => setTimeout(resolve, 100));
+			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${1 + pitch} 0.25`);
+			break;
+
+		case 'notice':
+			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${1.8 + pitch} 0.25`);
+			await new Promise((resolve) => setTimeout(resolve, 50));
+			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${1.8 + pitch} 0.25`);
+			await new Promise((resolve) => setTimeout(resolve, 50));
+			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${1.3 + pitch} 0.25`);
+
+		default:
+			return;
+	}
+}
+
 module.exports = {
 	splitSentence,
+	alertSoundMC,
 };

@@ -92,6 +92,26 @@ module.exports = {
 				await interaction.respond(filteredRconResultsStatus.slice(0, 25)).catch(() => {});
 
 				break;
+
+			case 'server':
+				// Filter the instances
+				const filteredExecuteChoiceStatus = allInstances.instances
+					.filter((i) => i.instanceName.toLowerCase().includes(focusedOption.toLowerCase()))
+					.filter((i) => i.instanceSuspended === false)
+					.filter((i) => i.instanceRunning === true);
+
+				// Map the results
+				const filteredExecuteResultsStatus = filteredExecuteChoiceStatus.map((i) => {
+					return {
+						name: `${i.instanceFriendlyName} • ${i.instanceId}`,
+						value: `${i.instanceId} | ${i.instanceFriendlyName} | ${i.instanceModule}`,
+					};
+				});
+
+				// Reply with all of the instances
+				await interaction.respond(filteredExecuteResultsStatus.slice(0, 25)).catch(() => {});
+
+				break;
 		}
 	},
 };
