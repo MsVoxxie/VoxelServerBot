@@ -17,7 +17,7 @@ module.exports = {
 		// Only allow this to be sent every 5 minutes
 		if (lastSent.has(INSTANCE) && Date.now() - lastSent.get(INSTANCE) < 300000) return;
 		// Send off the message to Discord
-		await serverLink(USER, MESSAGE, INSTANCE, 'Alert', true);
+		await serverLink(USER, MESSAGE, INSTANCE, 'alert', true);
 
 		// Update the last sent time
 		lastSent.set(INSTANCE, Date.now());
