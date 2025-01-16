@@ -1,4 +1,4 @@
-const { Events, PermissionFlagsBits, Colors, EmbedBuilder } = require('discord.js');
+const { Events, PermissionFlagsBits, Colors, EmbedBuilder, MessageFlags } = require('discord.js');
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { SERVER_IP } = process.env;
 
@@ -20,7 +20,7 @@ module.exports = {
 		if (!staffMember.permissions.has(PermissionFlagsBits.ManageRoles)) return;
 
 		const API = await instanceAPI(instanceId);
-		if (!API) interaction.followUp({ content: 'An error occurred while trying to fetch the instance API.', ephemeral: true });
+		if (!API) interaction.followUp({ content: 'An error occurred while trying to fetch the instance API.', flags: MessageFlags.Ephemeral });
 
 		// GetUpdates to clear the console
 		await API.Core.GetUpdatesAsync();

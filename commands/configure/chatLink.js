@@ -1,5 +1,5 @@
 const { addEventTrigger, addTaskToTrigger, changeTaskOrder, removeEventTrigger, removeTaskFromTrigger } = require('../../functions/ampAPI/instanceFunctions');
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { chatLink, ampInstances } = require('../../models');
 const Logger = require('../../functions/logging/logger');
 
@@ -36,14 +36,14 @@ module.exports = {
 		if (!checkServer) {
 			// Fetch the instance data from the database
 			const instanceData = await ampInstances.findOne({ 'instances.instanceId': server });
-			if (!instanceData) return interaction.followUp({ content: 'The server you specified does not exist.', ephemeral: true });
+			if (!instanceData) return interaction.followUp({ content: 'The server you specified does not exist.', flags: MessageFlags.Ephemeral });
 			// Get the specific instance data
 			const instance = instanceData.instances.find((i) => i.instanceId === server);
-			if (!instance) return interaction.followUp({ content: 'The server you specified does not exist.', ephemeral: true });
+			if (!instance) return interaction.followUp({ content: 'The server you specified does not exist.', flags: MessageFlags.Ephemeral });
 
 			// Check that the bot can manage webhooks
 			if (!channel.permissionsFor(interaction.guild.members.me).has(PermissionFlagsBits.ManageWebhooks))
-				return interaction.followUp({ content: 'I do not have permission to manage webhooks in this channel.', ephemeral: true });
+				return interaction.followUp({ content: 'I do not have permission to manage webhooks in this channel.', flags: MessageFlags.Ephemeral });
 
 			// Chat Message Dictionary
 			const chatMessageDictionary = {
@@ -220,7 +220,7 @@ module.exports = {
 			if (clHook) {
 				// webhookId = clHook.id;
 				// webhookToken = clHook.token;
-				return interaction.followUp({ content: 'A chat link already exists for this server in this channel.', ephemeral: true });
+				return interaction.followUp({ content: 'A chat link already exists for this server in this channel.', flags: MessageFlags.Ephemeral });
 			} else {
 				// Create the webhook
 				Logger.info(`Creating webhook for ${instance.instanceFriendlyName} in ${channel.name} in ${interaction.guild.name}`);
@@ -250,12 +250,12 @@ module.exports = {
 				{ upsert: true }
 			);
 
-			await interaction.followUp({ content: `Chat link set for ${friendlyName} in <#${channel.id}>.`, ephemeral: true });
+			await interaction.followUp({ content: `Chat link set for ${friendlyName} in <#${channel.id}>.`, flags: MessageFlags.Ephemeral });
 			Logger.success('Chat link successfully linked!');
 		} else {
 			// Check that the bot can manage webhooks
 			if (!channel.permissionsFor(interaction.guild.members.me).has(PermissionFlagsBits.ManageWebhooks))
-				return interaction.followUp({ content: 'I do not have permission to manage webhooks in this channel.', ephemeral: true });
+				return interaction.followUp({ content: 'I do not have permission to manage webhooks in this channel.', flags: MessageFlags.Ephemeral });
 
 			//! Check if any other chat links exist for this server, if so, dont remove the triggers and tasks
 			// Fetch only the matching instanceId
@@ -359,7 +359,7 @@ module.exports = {
 			// Remove the chat link from the database
 			await chatLink.findOneAndUpdate({}, { $pull: { chatLinks: { instanceId: server, channelId: channel.id } } });
 
-			await interaction.followUp({ content: `Chat link removed for ${friendlyName} from <#${channel.id}>.`, ephemeral: true });
+			await interaction.followUp({ content: `Chat link removed for ${friendlyName} from <#${channel.id}>.`, flags: MessageFlags.Ephemeral });
 			Logger.success('Chat link successfully removed!');
 		}
 	},

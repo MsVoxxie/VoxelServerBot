@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { getConfigNode } = require('../../functions/ampAPI/instanceFunctions');
 
@@ -23,7 +23,7 @@ module.exports = {
 
 		// Get the whitelist status
 		const whitelistEnabled = await getConfigNode(instanceId, 'MinecraftModule.Game.Whitelist');
-		if (!whitelistEnabled.currentValue) return interaction.reply({ content: 'Whitelisting is not enabled on this server.', ephemeral: true });
+		if (!whitelistEnabled.currentValue) return interaction.reply({ content: 'Whitelisting is not enabled on this server.', flags: MessageFlags.Ephemeral });
 
 		// Fetch the request channel
 		const requestChannel = await interaction.guild.channels.fetch(settings.requestChannel);
@@ -50,7 +50,7 @@ module.exports = {
 
 		// Send the message
 		await requestChannel.send({ embeds: [embed], components: [verificationButtons] });
-		await interaction.reply({ content: 'Your request has been sent, Please wait to be accepted.', ephemeral: true });
+		await interaction.reply({ content: 'Your request has been sent, Please wait to be accepted.', flags: MessageFlags.Ephemeral });
 
 		// Send a message to the server
 		const API = await instanceAPI(instanceId);

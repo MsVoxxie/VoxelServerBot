@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { alertSoundMC } = require('../../functions/helpers/messageFuncs');
 
@@ -57,15 +57,19 @@ module.exports = {
 		switch (command) {
 			case 'start':
 				console.log('Starting server');
+				await interaction.reply({ content: `Server ${friendlyName} has been started`, flags: MessageFlags.Ephemeral });
 				break;
 			case 'stop':
 				console.log('Stopping server');
+				await interaction.reply({ content: `Server ${friendlyName} has been stopped`, flags: MessageFlags.Ephemeral });
 				break;
 			case 'restart':
 				console.log('Restarting server');
+				await interaction.reply({ content: `Server ${friendlyName} has been restarted`, flags: MessageFlags.Ephemeral });
 				break;
 			case 'kill':
 				console.log('Killing server');
+				await interaction.reply({ content: `Server ${friendlyName} has been killed`, flags: MessageFlags.Ephemeral });
 				break;
 			case 'message':
 				const message = interaction.options.getString('message');
@@ -100,6 +104,7 @@ module.exports = {
 						await sendConsoleMessage(API, `say "[${type}] ${message}"`);
 						break;
 				}
+				await interaction.reply({ content: `Message sent to ${friendlyName}`, flags: MessageFlags.Ephemeral });
 				break;
 		}
 	},

@@ -1,4 +1,4 @@
-const { Events, Collection } = require('discord.js');
+const { Events, Collection, MessageFlags } = require('discord.js');
 const Logger = require('../../functions/logging/logger');
 
 module.exports = {
@@ -14,13 +14,13 @@ module.exports = {
 				// Check if command is dev only
 				if (command.options.devOnly) {
 					if (!process.env.DEVELOPERS.includes(interaction.user.id)) {
-						return interaction.reply({ content: 'This command is for developers only.', ephemeral: true });
+						return interaction.reply({ content: 'This command is for developers only.', flags: MessageFlags.Ephemeral });
 					}
 				}
 
 				// Check if command is disabled
 				if (command.options.disabled) {
-					return interaction.reply({ content: 'This command is disabled.', ephemeral: true });
+					return interaction.reply({ content: 'This command is disabled.', flags: MessageFlags.Ephemeral });
 				}
 
 				// Check if command is on cooldown
@@ -37,7 +37,7 @@ module.exports = {
 
 					if (now < expireTime) {
 						const timeLeft = (expireTime - now) / 1000;
-						return interaction.reply({ content: `Please wait ${timeLeft.toFixed(1)}s to use this command again.`, ephemeral: true });
+						return interaction.reply({ content: `Please wait ${timeLeft.toFixed(1)}s to use this command again.`, flags: MessageFlags.Ephemeral });
 					}
 				}
 
@@ -52,7 +52,7 @@ module.exports = {
 					await command.execute(client, interaction);
 				}
 			} catch (error) {
-				interaction.reply({ content: `An error occurred executing ${interaction.commandName}`, ephemeral: true });
+				interaction.reply({ content: `An error occurred executing ${interaction.commandName}`, flags: MessageFlags.Ephemeral });
 				Logger.error(`Error executing ${interaction.commandName}`);
 				Logger.error(error);
 			}

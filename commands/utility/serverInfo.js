@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { getInstanceStatus, getOnlinePlayers } = require('../../functions/ampAPI/instanceFunctions');
 
 module.exports = {
@@ -21,7 +21,7 @@ module.exports = {
 		const instanceInfo = await getInstanceStatus(instanceId);
 		const instanceUserList = await getOnlinePlayers(instanceId);
 
-		if (!instanceInfo.success) return interaction.reply({ content: 'This instance is offline.', ephemeral: true });
+		if (!instanceInfo.success) return interaction.reply({ content: 'This instance is offline.', flags: MessageFlags.Ephemeral });
 
 		// Build performance data
 		const performanceData = `${

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { Guild } = require('../../models');
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -15,7 +15,7 @@ module.exports = {
 		const channel = interaction.options.getChannel('channel');
 
 		await Guild.findOneAndUpdate({ guildId: interaction.guild.id }, { requestChannel: channel.id }, { upsert: true }).then(() => {
-			interaction.reply({ content: `Whitelist requests will now be sent to ${channel}.`, ephemeral: true });
+			interaction.reply({ content: `Whitelist requests will now be sent to ${channel}.`, flags: MessageFlags.Ephemeral });
 		});
 	},
 };
