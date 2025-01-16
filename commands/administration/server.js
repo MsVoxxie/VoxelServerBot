@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { alertSoundMC } = require('../../functions/helpers/messageFuncs');
 
@@ -47,6 +47,9 @@ module.exports = {
 		disabled: false,
 	},
 	async execute(client, interaction, settings) {
+		// Defer the reply
+		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
 		// Fetch options
 		const server = interaction.options.getString('server');
 		const command = interaction.options.getSubcommand();
@@ -56,20 +59,47 @@ module.exports = {
 		// Switch statement to determine the command to run
 		switch (command) {
 			case 'start':
-				console.log('Starting server');
-				await interaction.reply({ content: `Server ${friendlyName} has been started`, flags: MessageFlags.Ephemeral });
+				// Start the server
+				await API.Core.StartAsync()
+					.then(async () => {
+						await interaction.followUp({ content: `Server ${friendlyName} has been started` });
+					})
+					.catch(async (err) => {
+						await interaction.followUp({ content: `Failed to start server ${friendlyName}` });
+						console.error(err);
+					});
 				break;
 			case 'stop':
-				console.log('Stopping server');
-				await interaction.reply({ content: `Server ${friendlyName} has been stopped`, flags: MessageFlags.Ephemeral });
+				await API.Core.StopAsync()
+					.then(async () => {
+						await interaction.followUp({ content: `Server ${friendlyName} has been stopped` });
+					})
+					.catch(async (err) => {
+						await interaction.followUp({ content: `Failed to stop server ${friendlyName}` });
+						console.error(err);
+					});
 				break;
 			case 'restart':
-				console.log('Restarting server');
-				await interaction.reply({ content: `Server ${friendlyName} has been restarted`, flags: MessageFlags.Ephemeral });
+				await API.Core.RestartAsync()
+					.then(async () => {
+						await interaction.followUp({ content: `Server ${friendlyName} has been restarted` });
+					})
+					.catch(async (err) => {
+						await interaction.followUp({ content: `Failed to restart server ${friendlyName}` });
+						console.error(err);
+					});
+
 				break;
 			case 'kill':
-				console.log('Killing server');
-				await interaction.reply({ content: `Server ${friendlyName} has been killed`, flags: MessageFlags.Ephemeral });
+				await API.Core.KillAsync()
+					.then(async () => {
+						await interaction.followUp({ content: `Server ${friendlyName} has been killed` });
+					})
+					.catch(async (err) => {
+						await interaction.followUp({ content: `Failed to kill server ${friendlyName}` });
+						console.error(err);
+					});
+
 				break;
 			case 'message':
 				const message = interaction.options.getString('message');
@@ -104,7 +134,7 @@ module.exports = {
 						await sendConsoleMessage(API, `say "[${type}] ${message}"`);
 						break;
 				}
-				await interaction.reply({ content: `Message sent to ${friendlyName}`, flags: MessageFlags.Ephemeral });
+				await interaction.followUp({ content: `Message sent to ${friendlyName}`, flags: MessageFlags.Ephemeral });
 				break;
 		}
 	},

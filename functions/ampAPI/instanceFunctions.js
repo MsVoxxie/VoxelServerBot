@@ -1,4 +1,4 @@
-const { instanceAPI } = require('./apiFunctions');
+const { instanceAPI, mainAPI } = require('./apiFunctions');
 const { ampInstances } = require('../../models');
 
 //* Add an event trigger to an instance
@@ -183,8 +183,30 @@ async function getInstanceStatus(instanceId) {
 		performance.Unit = 'TPS';
 	}
 
+	// Assign the numerical state as a string with an object
+	const currentState = {
+		0: 'Stopped',
+		5: 'PreStart',
+		7: 'Configuring',
+		10: 'Starting',
+		20: 'Running',
+		30: 'Restarting',
+		40: 'Stopping',
+		45: 'PreparingForSleep',
+		50: 'Sleeping',
+		60: 'Waiting',
+		70: 'Installing',
+		75: 'Updating',
+		80: 'AwaitingUserInput',
+		100: 'Failed',
+		200: 'Suspended',
+		250: 'Maintainence',
+		999: 'Indeterminate',
+	};
+
 	// Make the status data more readable
 	const status = {
+		state: currentState[statusData.State],
 		cpu: statusData.Metrics['CPU Usage'],
 		memory: statusData.Metrics['Memory Usage'],
 		users: statusData.Metrics['Active Users'],
@@ -210,6 +232,47 @@ async function getOnlinePlayers(instanceId) {
 	return { players, success: true };
 }
 
+//* Get the status of every instance and it's server
+async function fetchInstanceStatuses() {
+	const instanceApi = await mainAPI();
+	const instances = await instanceApi.ADSModule.GetLocalInstancesAsync();
+	const dataArray = [];
+
+	// Async loop through the instances
+	for await (const i of instances) {
+		// If the instance is named ADS, skip it as it's the main instance
+		if (i.InstanceName === 'ADS01') continue;
+		const instanceInfo = {
+			instanceId: i.InstanceID,
+			instanceName: i.InstanceName,
+			instanceFriendlyName: i.FriendlyName,
+			instanceRunning: i.Running,
+			instanceSuspended: i.Suspended,
+			instanceModule: i.Module,
+		};
+
+		// Get the server info
+		const serverData = await getInstanceStatus(i.InstanceID);
+		const serverInfo = {
+			state: serverData?.status?.state || null,
+			cpu: serverData?.status?.cpu || null,
+			memory: serverData?.status?.memory || null,
+			users: serverData?.status?.users || null,
+			uptime: serverData?.status?.uptime || null,
+			performance: serverData?.status?.performance || null,
+		};
+
+		// Combine the data for cleaner output
+		const formattedOutput = {
+			instanceInfo,
+			serverInfo: Object.values(serverInfo).every((v) => v === null) ? { state: 'Offline' } : serverInfo,
+		};
+
+		dataArray.push(formattedOutput);
+	}
+	return { instances: dataArray, success: true };
+}
+
 module.exports = {
 	addEventTrigger,
 	addTaskToTrigger,
@@ -220,4 +283,5 @@ module.exports = {
 	setConfigNode,
 	getInstanceStatus,
 	getOnlinePlayers,
+	fetchInstanceStatuses,
 };

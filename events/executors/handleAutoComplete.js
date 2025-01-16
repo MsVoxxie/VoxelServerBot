@@ -1,5 +1,6 @@
 const { Events } = require('discord.js');
 const { ampInstances } = require('../../models');
+const { fetchInstanceStatuses } = require('../../functions/ampAPI/instanceFunctions');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -94,22 +95,25 @@ module.exports = {
 				break;
 
 			case 'server':
+				// Fetch all of the instances
+				const allInstances = await fetchInstanceStatuses();
+
 				// Filter the instances
-				const filteredExecuteChoiceStatus = allInstances.instances
-					.filter((i) => i.instanceName.toLowerCase().includes(focusedOption.toLowerCase()))
-					.filter((i) => i.instanceSuspended === false)
-					.filter((i) => i.instanceRunning === true);
+				const filteredServerChoiceStatus = allInstances.instances
+					.filter((i) => i.instanceInfo.instanceName.toLowerCase().includes(focusedOption.toLowerCase()))
+					.filter((i) => i.instanceInfo.instanceSuspended === false)
+					.filter((i) => i.instanceInfo.instanceRunning === true);
 
 				// Map the results
-				const filteredExecuteResultsStatus = filteredExecuteChoiceStatus.map((i) => {
+				const filteredServerResultsStatus = filteredServerChoiceStatus.map((i) => {
 					return {
-						name: `${i.instanceFriendlyName} • ${i.instanceId}`,
-						value: `${i.instanceId} | ${i.instanceFriendlyName} | ${i.instanceModule}`,
+						name: `${i.serverInfo.state === 'Running' ? '[Running]' : '[Stopped]'} ${i.instanceInfo.instanceFriendlyName} • ${i.instanceInfo.instanceId}`,
+						value: `${i.instanceInfo.instanceId} | ${i.instanceInfo.instanceFriendlyName} | ${i.instanceInfo.instanceModule}`,
 					};
 				});
 
 				// Reply with all of the instances
-				await interaction.respond(filteredExecuteResultsStatus.slice(0, 25)).catch(() => {});
+				await interaction.respond(filteredServerResultsStatus.slice(0, 25)).catch(() => {});
 
 				break;
 		}

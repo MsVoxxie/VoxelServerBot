@@ -7,7 +7,6 @@ const { getImageSource } = require('../helpers/getSourceImage');
 async function updateDatabaseInstances() {
 	const instancesArray = [];
 	let gameVersion;
-	let mcMotd;
 
 	// Fetch all instances for AMP
 	const API = await mainAPI();
