@@ -11,7 +11,7 @@ module.exports = {
 		const command = client.commands.get(interaction.commandName);
 		const focusedOption = interaction.options.getFocused();
 		const allInstances = await ampInstances.findOne({});
-
+		
 		// Switchcase for the command name
 		switch (command.data.name) {
 			case 'chatlink':
@@ -96,10 +96,10 @@ module.exports = {
 
 			case 'server':
 				// Fetch all of the instances
-				const allInstances = await fetchInstanceStatuses();
+				const allServerInstances = await fetchInstanceStatuses();
 
 				// Filter the instances
-				const filteredServerChoiceStatus = allInstances.instances
+				const filteredServerChoiceStatus = allServerInstances.instances
 					.filter((i) => i.instanceInfo.instanceName.toLowerCase().includes(focusedOption.toLowerCase()))
 					.filter((i) => i.instanceInfo.instanceSuspended === false)
 					.filter((i) => i.instanceInfo.instanceRunning === true);
