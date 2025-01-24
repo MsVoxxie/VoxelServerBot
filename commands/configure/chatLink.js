@@ -32,6 +32,298 @@ module.exports = {
 		// Check if the server exists
 		const checkServer = await chatLink.findOne({ chatLinks: { $elemMatch: { instanceId: server, channelId: channel.id } } });
 
+		// Define Arrays
+		const successfulAdditions = [];
+		const failedAdditions = [];
+		const successfulRemovals = [];
+		const failedRemovals = [];
+
+		// Define the list of jobs for the command to run
+		const jobList = [
+			{
+				eventName: 'A player sends a chat message',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: '{@User}',
+								MESSAGE: '{@Message}',
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+				],
+			},
+			{
+				eventName: 'A player joins the server for the first time',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: '{@User}',
+								MESSAGE: 'joined for the first time',
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+					{
+						taskName: 'SendConsole',
+						dictionary: {
+							Input: 'playsound minecraft:block.bell.resonate player @a 0 0 0 1 2 0.25',
+						},
+						allowDuplicates: true,
+					},
+					{
+						taskName: 'SendConsole',
+						dictionary: {
+							Input: 'tellraw @p ["",{"text":"Welcome ","color":"gold"},{"text":"to the server","color":"aqua"},", ",{"text":"{@User}","color":"green"},"!"]',
+						},
+						allowDuplicates: true,
+					},
+				],
+			},
+			{
+				eventName: 'A player joins the server',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: '{@User}',
+								MESSAGE: 'has connected',
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+					{
+						taskName: 'SendConsole',
+						dictionary: {
+							Input: 'playsound minecraft:block.conduit.activate player @a 0 0 0 1 2 0.25',
+						},
+						allowDuplicates: false,
+					},
+				],
+			},
+			{
+				eventName: 'A player leaves the server',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: '{@User}',
+								MESSAGE: 'has disconnected',
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+				],
+			},
+			{
+				eventName: 'A player is killed by an NPC',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: '{@Victim}',
+								MESSAGE: 'was {@Method} by {@Attacker}',
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+				],
+			},
+			{
+				eventName: 'A player is killed by another player',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: '{@Victim}',
+								MESSAGE: 'was {@Method} by {@Attacker}',
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+				],
+			},
+			{
+				eventName: 'The application state changes',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'IfCondition',
+						dictionary: {
+							ValueToCheck: '{@State}',
+							Operation: '3',
+							ValueToCompare: 'Pre',
+						},
+						allowDuplicates: false,
+					},
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: 'SERVER',
+								MESSAGE: '{@State}',
+								INSTANCE: '{@InstanceId}',
+								START: '{@StartTime}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+				],
+			},
+			{
+				eventName: 'A backup has started.',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: 'SERVER',
+								MESSAGE: 'A Backup has started',
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+				],
+			},
+			{
+				eventName: 'A backup finishes archiving.',
+				dontRemove: true,
+				tasksToAdd: [
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: 'SERVER',
+								MESSAGE: 'A Backup has finished archiving',
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+
+						reorderTask: 5,
+					},
+				],
+			},
+			{
+				eventName: 'The Minecraft Server watchdog forced a shutdown (server unresponsive)',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: 'SERVER',
+								MESSAGE: 'Server is unresponsive and has been terminated',
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+				],
+			},
+			{
+				eventName: 'The Minecraft Server stops unexpectedly',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: 'SERVER',
+								MESSAGE: "I've crashed",
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+				],
+			},
+			{
+				eventName: 'The Minecraft server is unable to keep up',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'IfCondition',
+						dictionary: {
+							ValueToCheck: '{@TicksSkipped}',
+							Operation: '4',
+							ValueToCompare: '300',
+						},
+						allowDuplicates: false,
+					},
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: 'SERVER',
+								MESSAGE: 'I seem to be lagging, {@MillisecondsBehind}ms or {@TicksSkipped} ticks behind',
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+				],
+			},
+		];
+
 		// Check if the channel is valid
 		if (!checkServer) {
 			// Fetch the instance data from the database
@@ -45,172 +337,37 @@ module.exports = {
 			if (!channel.permissionsFor(interaction.guild.members.me).has(PermissionFlagsBits.ManageWebhooks))
 				return interaction.followUp({ content: 'I do not have permission to manage webhooks in this channel.', flags: MessageFlags.Ephemeral });
 
-			// Chat Message Dictionary
-			const chatMessageDictionary = {
-				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: '{@Message}', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
-				ContentType: 'application/json',
-			};
+			// Add the triggers and tasks for the server
+			for await (const { eventName, tasksToAdd } of jobList) {
+				// Add event to the server
+				await addEventTrigger(server, eventName).then((e) => {
+					if (!e.success) {
+						// Skip the backup finishes archiving event as it's always present
+						if (e.eventName === 'A backup finishes archiving.') return;
+						failedAdditions.push({ eventName, desc: e.desc });
+						return;
+					}
+					successfulAdditions.push({ eventName });
+				});
 
-			// Event Dictionary
-			const userJoinDictionary = {
-				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: 'has connected', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
-				ContentType: 'application/json',
-			};
-			const userLeaveDictionary = {
-				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: 'has disconnected', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
-				ContentType: 'application/json',
-			};
+				// Add tasks to the event
+				for await (const { taskName, dictionary, allowDuplicates, reorderTask } of tasksToAdd) {
+					await addTaskToTrigger(server, eventName, taskName, dictionary, allowDuplicates).then((e) => {
+						if (!e.success) return failedAdditions.push({ eventName, taskName, desc: e.desc });
+						successfulAdditions.push({ eventName, taskName });
+					});
+					// Change the order of the task if needed
+					if (!reorderTask) continue;
+					await changeTaskOrder(server, eventName, taskName, reorderTask);
+				}
+			}
 
-			const appStateDictionary = {
-				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: '{@State}', INSTANCE: '{@InstanceId}', START: '{@StartTime}', EVENT: '{@TriggerName}' }),
-				ContentType: 'application/json',
-			};
-
-			// User first join Dictionary
-			const userFirstJoinDictionary = {
-				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: '{@User}', MESSAGE: 'joined for the first time', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
-				ContentType: 'application/json',
-			};
-
-			// Backup Dictionarys
-			const backupStartDictionary = {
-				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'A Backup has started', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
-				ContentType: 'application/json',
-			};
-
-			const backupFinishDictionary = {
-				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'A Backup has finished archiving', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
-				ContentType: 'application/json',
-			};
-
-			// Crash Dictionaries
-			const unResponsiveDictionary = {
-				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: 'Server is unresponsive and has been terminated', INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
-				ContentType: 'application/json',
-			};
-
-			const crashDictionary = {
-				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({ USER: 'SERVER', MESSAGE: "I've crashed", INSTANCE: '{@InstanceId}', EVENT: '{@TriggerName}' }),
-				ContentType: 'application/json',
-			};
-
-			// Server Lagging Dictionary
-			const serverLaggingDictionary = {
-				URI: `${process.env.SRV_API}/v1/server/link`,
-				Payload: JSON.stringify({
-					USER: 'SERVER',
-					MESSAGE: 'I seem to be lagging, {@MillisecondsBehind}ms or {@TicksSkipped} ticks behind',
-					INSTANCE: '{@InstanceId}',
-					EVENT: '{@TriggerName}',
-				}),
-				ContentType: 'application/json',
-			};
-
-			//!Add the trigger for the chat message
-			Logger.info(`Adding chat link for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			await addEventTrigger(server, 'A player sends a chat message');
-			await addTaskToTrigger(server, 'A player sends a chat message', 'MakePOSTRequest', chatMessageDictionary).then((e) => {
-				if (!e.success) return Logger.error(e.desc);
-				Logger.success(`Added chat link for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			});
-
-			//! Add the trigger for user first join
-			Logger.info(`Adding user first join trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			await addEventTrigger(server, 'A player joins the server for the first time');
-			await addTaskToTrigger(server, 'A player joins the server for the first time', 'MakePOSTRequest', userFirstJoinDictionary).then((e) => {
-				if (!e.success) return Logger.error(e.desc);
-				Logger.success(`Added user first join trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			});
-			// Add a console input to the Minecraft server to play a sound to get the attention of the players
-			await addTaskToTrigger(server, 'A player joins the server for the first time', 'SendConsole', {
-				Input: 'playsound minecraft:block.bell.resonate player @a 0 0 0 1 2 0.25',
-			});
-			// Send a message welcoming the player to the server
-			await addTaskToTrigger(
-				server,
-				'A player joins the server for the first time',
-				'SendConsole',
-				{ Input: 'tellraw @p ["",{"text":"Welcome ","color":"gold"},{"text":"to the server","color":"aqua"},", ",{"text":"{@User}","color":"green"},"!"]' },
-				true
-			);
-
-			//! Add the triggers for user join
-			Logger.info(`Adding user join and leave triggers for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			await addEventTrigger(server, 'A player joins the server');
-			await addTaskToTrigger(server, 'A player joins the server', 'SendConsole', { Input: 'playsound minecraft:block.conduit.activate player @a 0 0 0 1 2 0.25' });
-			await addTaskToTrigger(server, 'A player joins the server', 'MakePOSTRequest', userJoinDictionary).then((e) => {
-				if (!e.success) return Logger.error(e.desc);
-				Logger.success(`Added user join trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			});
-
-			//! Add the triggers for user leave
-			Logger.info(`Adding user leave trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			await addEventTrigger(server, 'A player leaves the server');
-			await addTaskToTrigger(server, 'A player leaves the server', 'SendConsole', { Input: 'playsound minecraft:block.conduit.deactivate player @a 0 0 0 1 2 0.25' });
-			await addTaskToTrigger(server, 'A player leaves the server', 'MakePOSTRequest', userLeaveDictionary).then((e) => {
-				if (!e.success) return Logger.error(e.desc);
-				Logger.success(`Added user leave trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			});
-
-			//! Add the triggers for app state
-			Logger.info(`Adding app state trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			await addEventTrigger(server, 'The application state changes');
-			await addTaskToTrigger(server, 'The application state changes', 'IfCondition', { ValueToCheck: '{@State}', Operation: '3', ValueToCompare: 'Pre' });
-			await addTaskToTrigger(server, 'The application state changes', 'MakePOSTRequest', appStateDictionary).then((e) => {
-				if (!e.success) return Logger.error(e.desc);
-				Logger.success(`Added app state trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			});
-
-			//! Add the triggers for backups
-			Logger.info(`Adding backup start trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			await addEventTrigger(server, 'A backup has started.');
-			await addTaskToTrigger(server, 'A backup has started.', 'MakePOSTRequest', backupStartDictionary).then((e) => {
-				if (!e.success) return Logger.error(e.desc);
-				Logger.success(`Added backup start trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			});
-			await addTaskToTrigger(server, 'A backup finishes archiving.', 'MakePOSTRequest', backupFinishDictionary).then((e) => {
-				if (!e.success) return Logger.error(e.desc);
-				Logger.success(`Added backup finish trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			});
-
-			//! Change the order of the backup finish task
-			Logger.info(`Changing the order of the backup finish task for ${friendlyName} in ${channel.name} in ${interaction.guild.name}`);
-			await changeTaskOrder(server, 'A backup finishes archiving.', 'MakePOSTRequest', 5).then((e) => {
-				if (!e.success) return Logger.error(e.desc);
-				Logger.success(`Changed the order of the backup finish task for ${friendlyName} in ${channel.name} in ${interaction.guild.name}`);
-			});
-
-			//! Add the triggers for crashes
-			Logger.info(`Adding crash triggers for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			await addEventTrigger(server, 'The Minecraft Server watchdog forced a shutdown (server unresponsive)');
-			await addTaskToTrigger(server, 'The Minecraft Server watchdog forced a shutdown (server unresponsive)', 'MakePOSTRequest', unResponsiveDictionary).then((e) => {
-				if (!e.success) return Logger.error(e.desc);
-				Logger.success(`Added crash trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			});
-
-			await addEventTrigger(server, 'The Minecraft Server stops unexpectedly');
-			await addTaskToTrigger(server, 'The Minecraft Server stops unexpectedly', 'MakePOSTRequest', crashDictionary).then((e) => {
-				if (!e.success) return Logger.error(e.desc);
-				Logger.success(`Added crash trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			});
-
-			//! Add the triggers for server lagging
-			Logger.info(`Adding server lagging trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			await addEventTrigger(server, 'The Minecraft server is unable to keep up');
-			await addTaskToTrigger(server, 'The Minecraft server is unable to keep up', 'IfCondition', { ValueToCheck: '{@TicksSkipped}', Operation: '4', ValueToCompare: '300' });
-			await addTaskToTrigger(server, 'The Minecraft server is unable to keep up', 'MakePOSTRequest', serverLaggingDictionary).then((e) => {
-				if (!e.success) return Logger.error(e.desc);
-				Logger.success(`Added server lagging trigger for ${friendlyName} to ${channel.name} in ${interaction.guild.name}`);
-			});
+			// Return number of successful and failed additions
+			Logger.info(`${successfulAdditions.length} triggers successfully added\n${failedAdditions.length} triggers failed to add`);
+			if (failedAdditions.length > 0) {
+				Logger.error('Failed triggers:');
+				failedAdditions.forEach((f) => Logger.error(f));
+			}
 
 			// Fetch the webhooks in the channel
 			const webhooks = await channel.fetchWebhooks();
@@ -250,7 +407,10 @@ module.exports = {
 				{ upsert: true }
 			);
 
-			await interaction.followUp({ content: `Chat link set for ${friendlyName} in <#${channel.id}>.`, flags: MessageFlags.Ephemeral });
+			await interaction.followUp({
+				content: `Chat link set for ${friendlyName} in <#${channel.id}>.\nSuccessful Additions: ${successfulAdditions.length}\nFailed Additions: ${failedAdditions.length}`,
+				flags: MessageFlags.Ephemeral,
+			});
 			Logger.success('Chat link successfully linked!');
 		} else {
 			// Check that the bot can manage webhooks
@@ -265,85 +425,30 @@ module.exports = {
 
 			// If there are no duplicates, remove the triggers and tasks
 			if (duplicateIds.length === 1) {
-				//! Remove the trigger and task for sending chat messages
-				Logger.info(`Removing chat link for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				await removeTaskFromTrigger(server, 'A player sends a chat message', 'MakePOSTRequest');
-				await removeEventTrigger(server, 'A player sends a chat message').then((e) => {
-					if (!e.success) return Logger.error(e.desc);
-					Logger.success(`Removed chat link for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				});
+				// Remove the tasks and events for the server
+				for await (const { eventName, dontRemove, tasksToAdd } of jobList) {
+					// Remove tasks from the event
+					for await (const { taskName } of tasksToAdd) {
+						await removeTaskFromTrigger(server, eventName, taskName).then((e) => {
+							if (!e.success) return failedRemovals.push({ eventName, taskName, desc: e.desc });
+							successfulRemovals.push({ eventName, taskName });
+						});
+					}
 
-				//! Remove the trigger and task for user first join
-				Logger.info(`Removing user first join trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				await removeTaskFromTrigger(server, 'A player joins the server for the first time', 'MakePOSTRequest');
-				await removeTaskFromTrigger(server, 'A player joins the server for the first time', 'SendConsole');
-				await removeTaskFromTrigger(server, 'A player joins the server for the first time', 'SendConsole');
-				await removeEventTrigger(server, 'A player joins the server for the first time').then((e) => {
-					if (!e.success) return Logger.error(e.desc);
-					Logger.success(`Removed user first join trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				});
+					// Remove the event from the server
+					if (dontRemove) continue;
+					await removeEventTrigger(server, eventName).then((e) => {
+						if (!e.success) return failedRemovals.push({ eventName, desc: e.desc });
+						successfulRemovals.push({ eventName });
+					});
+				}
 
-				//! Remove the triggers and tasks for user join
-				Logger.info(`Removing user join and leave triggers for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				await removeTaskFromTrigger(server, 'A player joins the server', 'MakePOSTRequest');
-				await removeTaskFromTrigger(server, 'A player joins the server', 'SendConsole');
-				await removeEventTrigger(server, 'A player joins the server').then((e) => {
-					if (!e.success) return Logger.error(e.desc);
-					Logger.success(`Removed user join trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				});
-
-				//! Remove the triggers and tasks for user leave
-				Logger.info(`Removing user leave trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				await removeTaskFromTrigger(server, 'A player leaves the server', 'MakePOSTRequest');
-				await removeTaskFromTrigger(server, 'A player leaves the server', 'SendConsole');
-				await removeEventTrigger(server, 'A player leaves the server').then((e) => {
-					if (!e.success) return Logger.error(e.desc);
-					Logger.success(`Removed user leave trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				});
-
-				//! Remove the triggers and tasks for app state
-				Logger.info(`Removing app state trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				await removeTaskFromTrigger(server, 'The application state changes', 'MakePOSTRequest');
-				await removeTaskFromTrigger(server, 'The application state changes', 'IfCondition');
-				await removeEventTrigger(server, 'The application state changes').then((e) => {
-					if (!e.success) return Logger.error(e.desc);
-					Logger.success(`Removed app state trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				});
-
-				//! Remove the triggers and tasks for backups
-				Logger.info(`Removing backup start trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				await removeTaskFromTrigger(server, 'A backup has started.', 'MakePOSTRequest');
-				await removeEventTrigger(server, 'A backup has started.').then((e) => {
-					if (!e.success) return Logger.error(e.desc);
-					Logger.success(`Removed backup start trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				});
-				await removeTaskFromTrigger(server, 'A backup finishes archiving.', 'MakePOSTRequest').then((e) => {
-					if (!e.success) return Logger.error(e.desc);
-					Logger.success(`Removed backup finish trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				});
-
-				//! Remove the triggers and tasks for crashes
-				Logger.info(`Removing crash triggers for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				await removeTaskFromTrigger(server, 'The Minecraft Server watchdog forced a shutdown (server unresponsive)', 'MakePOSTRequest');
-				await removeEventTrigger(server, 'The Minecraft Server watchdog forced a shutdown (server unresponsive)').then((e) => {
-					if (!e.success) return Logger.error(e.desc);
-					Logger.success(`Removed crash trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				});
-
-				await removeTaskFromTrigger(server, 'The Minecraft Server stops unexpectedly', 'MakePOSTRequest');
-				await removeEventTrigger(server, 'The Minecraft Server stops unexpectedly').then((e) => {
-					if (!e.success) return Logger.error(e.desc);
-					Logger.success(`Removed crash trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				});
-
-				//! Remove the triggers and tasks for server lagging
-				Logger.info(`Removing server lagging trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				await removeTaskFromTrigger(server, 'The Minecraft server is unable to keep up', 'MakePOSTRequest');
-				await removeTaskFromTrigger(server, 'The Minecraft server is unable to keep up', 'IfCondition');
-				await removeEventTrigger(server, 'The Minecraft server is unable to keep up').then((e) => {
-					if (!e.success) return Logger.error(e.desc);
-					Logger.success(`Removed server lagging trigger for ${friendlyName} from ${channel.name} in ${interaction.guild.name}`);
-				});
+				// Return number of successful and failed removals
+				Logger.info(`${successfulRemovals.length} triggers successfully removed\n${failedRemovals.length} triggers failed to remove`);
+				if (failedRemovals.length > 0) {
+					Logger.error('Failed triggers:');
+					failedRemovals.forEach((f) => Logger.error(f));
+				}
 			}
 
 			// Fetch the webhooks in the channel
@@ -359,7 +464,10 @@ module.exports = {
 			// Remove the chat link from the database
 			await chatLink.findOneAndUpdate({}, { $pull: { chatLinks: { instanceId: server, channelId: channel.id } } });
 
-			await interaction.followUp({ content: `Chat link removed for ${friendlyName} from <#${channel.id}>.`, flags: MessageFlags.Ephemeral });
+			await interaction.followUp({
+				content: `Chat link removed for ${friendlyName} from <#${channel.id}>\nSuccessful Removals: ${successfulRemovals.length}\nFailed Removals: ${failedRemovals.length}`,
+				flags: MessageFlags.Ephemeral,
+			});
 			Logger.success('Chat link successfully removed!');
 		}
 	},
