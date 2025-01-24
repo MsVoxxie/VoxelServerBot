@@ -25,7 +25,6 @@ module.exports = {
 				.setDescription(
 					`Instance: **${instance.instanceFriendlyName}** (${instance.instanceName})
 					Module: ***${instance.instanceModule}***
-					Running: ***${instance.instanceRunning}***
 					Created: **${client.relTimestamp(Date.now())}**`
 				);
 
