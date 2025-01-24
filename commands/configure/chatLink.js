@@ -182,6 +182,26 @@ module.exports = {
 				],
 			},
 			{
+				eventName: 'A player achieves an advancement',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: '{@User}',
+								MESSAGE: 'has made the advancement **{@Advancement}**',
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+				],
+			},
+			{
 				eventName: 'The application state changes',
 				dontRemove: false,
 				tasksToAdd: [

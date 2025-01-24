@@ -77,7 +77,7 @@ module.exports = (client) => {
 		// Emit the event
 		client.emit(formattedEvent, {
 			USER: req.body.USER,
-			MESSAGE: req.body.MESSAGE,
+			MESSAGE: req.body.MESSAGE.replace(/\s+/g, ' '),
 			INSTANCE: req.body.INSTANCE,
 			EVENT: formattedEvent,
 			START: req.body.START || null,
