@@ -28,10 +28,12 @@ module.exports = {
 			// Calculate the sleeping percentage
 			const onlinePlayers = await getOnlinePlayers(INSTANCE);
 			const maxPlayers = instanceInfo.status.users.MaxValue;
-			const sleepPercentage = calculateSleepingPercentage(onlinePlayers.players.length, maxPlayers);
+			const { sleepPercentage, requiredToSleep } = calculateSleepingPercentage(onlinePlayers.players.length, maxPlayers);
 
 			// Augment the message with the sleep percentage
-			augmentedMessage = `${MESSAGE}\n-# ${onlinePlayers.players.length}/${maxPlayers} Players, sleepPercentage set to ${sleepPercentage}%`;
+			if (onlinePlayers.players.length >= 1) {
+				augmentedMessage = `${MESSAGE}\n-# ${onlinePlayers.players.length}/${maxPlayers} Players, sleepPercentage set to ${sleepPercentage}% (${requiredToSleep})`;
+			}
 
 			// Send the message to the server
 			const API = await instanceAPI(INSTANCE);
