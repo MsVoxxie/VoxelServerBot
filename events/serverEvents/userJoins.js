@@ -1,3 +1,6 @@
+const { getInstanceStatus, getOnlinePlayers } = require('../../functions/ampAPI/instanceFunctions');
+const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { calculateSleepingPercentage } = require('../../functions/serverFuncs/minecraft');
 const { serverLink } = require('../../functions/helpers/messageDiscord');
 
 // Track users that have received a join message
@@ -25,5 +28,19 @@ module.exports = {
 			await serverLink(USER, MESSAGE, INSTANCE);
 			return;
 		}
+
+		// Dynamic sleepPercentage for minecraft servers, Experimental
+		if (!client.experimentalFeatures) return;
+		const instanceInfo = await getInstanceStatus(INSTANCE);
+		if (instanceInfo.status.module !== 'MinecraftModule') return log;
+
+		// Calculate the sleeping percentage
+		const onlinePlayers = await getOnlinePlayers(INSTANCE);
+		const maxPlayers = instanceInfo.status.users.MaxValue;
+		const sleepPercentage = calculateSleepingPercentage(onlinePlayers.players.length, maxPlayers);
+
+		// Send the message to the server
+		const API = await instanceAPI(INSTANCE);
+		await sendConsoleMessage(API, `gamerule playersSleepingPercentage ${sleepPercentage}`);
 	},
 };

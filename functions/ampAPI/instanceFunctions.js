@@ -175,6 +175,10 @@ async function getInstanceStatus(instanceId) {
 	const statusData = await API.Core.GetStatusAsync();
 	if (!statusData) return { desc: 'Failed to get status data.', success: false };
 
+	// Get module info
+	const moduleInfo = await API.Core.GetModuleInfoAsync();
+	if (!moduleInfo) return { desc: 'Failed to get module info.', success: false };
+
 	// Performance is variable and can be FPS or TPS, so we need to check for both
 	let performance = statusData.Metrics['TPS'] || statusData.Metrics['FPS'] || null;
 
@@ -207,6 +211,7 @@ async function getInstanceStatus(instanceId) {
 	// Make the status data more readable
 	const status = {
 		state: currentState[statusData.State],
+		module: moduleInfo.ModuleName,
 		cpu: statusData.Metrics['CPU Usage'],
 		memory: statusData.Metrics['Memory Usage'],
 		users: statusData.Metrics['Active Users'],
