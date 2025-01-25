@@ -18,6 +18,25 @@ module.exports = {
 	async execute(client, data) {
 		// Split the data into variables
 		const { USER, INSTANCE, MESSAGE } = data;
+		let augmentedMessage = MESSAGE;
+
+		// Dynamic sleepPercentage for minecraft servers, Experimental
+		if (client.experimentalFeatures) {
+			const instanceInfo = await getInstanceStatus(INSTANCE);
+			if (instanceInfo.status.module !== 'MinecraftModule') return;
+
+			// Calculate the sleeping percentage
+			const onlinePlayers = await getOnlinePlayers(INSTANCE);
+			const maxPlayers = instanceInfo.status.users.MaxValue;
+			const sleepPercentage = calculateSleepingPercentage(onlinePlayers.players.length, maxPlayers);
+
+			// Augment the message with the sleep percentage
+			augmentedMessage = `${MESSAGE}\n-# sleepPercentage set to ${sleepPercentage}%`;
+
+			// Send the message to the server
+			const API = await instanceAPI(INSTANCE);
+			await sendConsoleMessage(API, `gamerule playersSleepingPercentage ${sleepPercentage}`);
+		}
 
 		// Allow only the first join message to be sent for each user
 		const joinMessages = ['has connected', 'joined for the first time'];
@@ -25,22 +44,7 @@ module.exports = {
 		if (joinMessages.includes(MESSAGE) && !userJoinedSet.has(USER)) {
 			userJoinedSet.add(USER);
 			// Send off the message to Discord
-			await serverLink(USER, MESSAGE, INSTANCE);
-			return;
+			await serverLink(USER, augmentedMessage, INSTANCE);
 		}
-
-		// Dynamic sleepPercentage for minecraft servers, Experimental
-		if (!client.experimentalFeatures) return;
-		const instanceInfo = await getInstanceStatus(INSTANCE);
-		if (instanceInfo.status.module !== 'MinecraftModule') return log;
-
-		// Calculate the sleeping percentage
-		const onlinePlayers = await getOnlinePlayers(INSTANCE);
-		const maxPlayers = instanceInfo.status.users.MaxValue;
-		const sleepPercentage = calculateSleepingPercentage(onlinePlayers.players.length, maxPlayers);
-
-		// Send the message to the server
-		const API = await instanceAPI(INSTANCE);
-		await sendConsoleMessage(API, `gamerule playersSleepingPercentage ${sleepPercentage}`);
 	},
 };

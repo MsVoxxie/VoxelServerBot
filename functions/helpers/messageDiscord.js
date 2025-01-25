@@ -38,9 +38,9 @@ async function serverLink(USER = 'Placeholder', MESSAGE = 'Placeholder', INSTANC
 
 		// Message to Send
 		let message = `${MESSAGE.replace(/^<@!?(\d+)>$/, '<[MENTION REDACTED]>')}`;
-		if (USER !== 'MinecraftPro87') {
-			message = MESSAGE.replace(/#/, '## [Q] ');
-		}
+		// if (USER !== 'MinecraftPro87') { //! disable ai formatting
+		// 	message = MESSAGE.replace(/#/, '## [Q] ');
+		// }
 
 		// Create and Send
 		const webhook = new WebhookClient({ id: chatLinkData.webhookId, token: chatLinkData.webhookToken });
