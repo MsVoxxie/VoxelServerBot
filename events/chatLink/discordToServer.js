@@ -37,7 +37,10 @@ module.exports = {
 
 						// Send each part of the message
 						const API = await instanceAPI(chatLinkData.instanceId);
-						await sendConsoleMessage(API, `tellraw @a ["",{"text":"[D] ","color":"blue"},"${formattedMessage}"]`);
+						await sendConsoleMessage(
+							API,
+							`tellraw @a [{"text":""},{"text":"[D] ","color":"blue","hoverEvent":{"action":"show_text","contents":[{"text":"Discord","color":"blue"}]}},{"text":"${formattedMessage}"}]`
+						);
 
 						// Play a sound to get the attention of the players but randomize the pitch with a minimum of 0.8 and a maximum of 1.3
 						const pitch = Math.random() * (1.3 - 0.8) + 0.8;
