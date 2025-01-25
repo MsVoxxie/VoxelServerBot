@@ -31,7 +31,7 @@ module.exports = {
 			const sleepPercentage = calculateSleepingPercentage(onlinePlayers.players.length, maxPlayers);
 
 			// Augment the message with the sleep percentage
-			augmentedMessage = `${MESSAGE}\n-# sleepPercentage set to ${sleepPercentage}%`;
+			augmentedMessage = `${MESSAGE}\n-# ${onlinePlayers.players.length}/${maxPlayers} Players, sleepPercentage set to ${sleepPercentage}%`;
 
 			// Send the message to the server
 			const API = await instanceAPI(INSTANCE);
