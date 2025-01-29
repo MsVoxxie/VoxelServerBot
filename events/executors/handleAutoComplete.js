@@ -95,8 +95,11 @@ module.exports = {
 				break;
 
 			case 'server':
+				console.log('Fetching server instances');
+
 				// Fetch all of the instances
 				const allServerInstances = await fetchInstanceStatuses();
+
 				// Filter the instances
 				const filteredServerChoiceStatus = allServerInstances.instances
 					.filter((i) => i.instanceInfo.instanceName.toLowerCase().includes(focusedOption.toLowerCase()))
@@ -107,12 +110,16 @@ module.exports = {
 				const filteredServerResultsStatus = filteredServerChoiceStatus.map((i) => {
 					return {
 						name: `${i.serverInfo.state ? `[${i.serverInfo.state}]` : '[Unknown]'} ${i.instanceInfo.instanceFriendlyName} • ${i.instanceInfo.instanceId}`,
-						value: `${i.instanceInfo.instanceId} | ${i.instanceInfo.instanceFriendlyName} | ${i.instanceInfo.instanceModule}`,
+						value: `${i.instanceInfo.instanceId}|${i.instanceInfo.instanceFriendlyName}|${i.instanceInfo.instanceModule}}`,
 					};
 				});
 
+				console.log(filteredServerResultsStatus[0].value.length);
+
 				// Reply with all of the instances
-				await interaction.respond(filteredServerResultsStatus.slice(0, 25)).catch(() => {});
+				await interaction.respond(filteredServerResultsStatus.slice(0, 25)).catch((e) => {
+					console.log(e);
+				});
 
 				break;
 		}

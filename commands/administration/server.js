@@ -1,12 +1,13 @@
-const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, EmbedBuilder, codeBlock } = require('discord.js');
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { alertSoundMC } = require('../../functions/helpers/messageFuncs');
+const { trimString } = require('../../functions/helpers/stringFuncs');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('server')
 		.setDescription('Execute a method on the specified server')
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 		.addSubcommand((c) =>
 			c
 				.setName('start')
@@ -16,7 +17,7 @@ module.exports = {
 		.addSubcommand((c) =>
 			c
 				.setName('stop')
-				.setDescription('Stop the server')
+				.setDescription('Gracefully stop the server')
 				.addStringOption((o) => o.setName('server').setDescription('The server to execute the RCON command on').setRequired(true).setAutocomplete(true))
 		)
 		.addSubcommand((c) =>
@@ -28,7 +29,7 @@ module.exports = {
 		.addSubcommand((c) =>
 			c
 				.setName('kill')
-				.setDescription('Kill the server')
+				.setDescription('Forcefully stop the server (WARNING: DATA LOSS MAY OCCUR)')
 				.addStringOption((o) => o.setName('server').setDescription('The server to execute the RCON command on').setRequired(true).setAutocomplete(true))
 		)
 		.addSubcommand((c) =>
@@ -40,6 +41,13 @@ module.exports = {
 				.addStringOption((o) =>
 					o.setName('type').setDescription('The type of message to send').setRequired(true).addChoices({ name: 'Notice', value: 'notice' }, { name: 'Alert', value: 'alert' })
 				)
+		)
+		.addSubcommand((c) =>
+			c
+				.setName('rcon')
+				.setDescription('Execute an RCON command on the server')
+				.addStringOption((o) => o.setName('server').setDescription('The server to execute the RCON command on').setRequired(true).setAutocomplete(true))
+				.addStringOption((o) => o.setName('command').setDescription('The RCON command to execute').setRequired(true))
 		),
 	options: {
 		cooldown: 5,
@@ -48,12 +56,12 @@ module.exports = {
 	},
 	async execute(client, interaction, settings) {
 		// Defer the reply
-		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+		await interaction.deferReply({});
 
 		// Fetch options
 		const server = interaction.options.getString('server');
 		const command = interaction.options.getSubcommand();
-		const [instanceId, friendlyName, instanceModule] = server.split(' | ').map((i) => i.trim());
+		const [instanceId, friendlyName, instanceModule, instanceImage] = server.split('|').map((i) => i.trim());
 		const API = await instanceAPI(instanceId);
 
 		// Switch statement to determine the command to run
@@ -134,7 +142,46 @@ module.exports = {
 						await sendConsoleMessage(API, `say "[${type}] ${message}"`);
 						break;
 				}
-				await interaction.followUp({ content: `Message sent to ${friendlyName}`, flags: MessageFlags.Ephemeral });
+				await interaction.followUp({ content: `Message sent to ${friendlyName}` });
+				break;
+
+			case 'rcon':
+				const rconCmd = interaction.options.getString('command');
+
+				// GetUpdates to clear the console
+				await API.Core.GetUpdatesAsync();
+
+				// Execute the RCON command
+				await sendConsoleMessage(API, rconCmd);
+
+				// Fetch the last console message
+				const consoleResponse = await API.Core.GetUpdatesAsync();
+				const consoleOutput = consoleResponse.ConsoleEntries.sort((a, b) => a.Timestamp - b.Timestamp);
+
+				// Format the output for user readability
+				const formattedOutput = consoleOutput.map((i) => `${i.Contents}`).join('\n') || 'No Response, Likely Successful';
+
+				// Build an embed
+				const embed = new EmbedBuilder()
+					.setTitle(`RCON Command Executed on ${friendlyName}`)
+					.addFields({
+						name: '📥 Command',
+						value: codeBlock('js', rconCmd),
+						inline: true,
+					})
+					.addFields({
+						name: '📤 Result',
+						value: codeBlock('js', trimString(formattedOutput, 812)),
+					})
+					.setColor(client.colors.success)
+					.setTimestamp();
+
+				// Send the embed to the user
+				await interaction.followUp({ embeds: [embed] });
+				break;
+
+			default:
+				await interaction.followUp({ content: 'Invalid command' });
 				break;
 		}
 	},

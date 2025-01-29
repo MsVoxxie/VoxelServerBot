@@ -31,7 +31,7 @@ module.exports = {
 			const { sleepPercentage, requiredToSleep } = calculateSleepingPercentage(onlinePlayers.players.length, maxPlayers);
 
 			// Augment the message with the sleep percentage
-			if (onlinePlayers.players.length >= 1) {
+			if (onlinePlayers.players.length >= 2) {
 				augmentedMessage = `${MESSAGE}\n-# ${onlinePlayers.players.length}/${maxPlayers} Players, sleepPercentage set to ${sleepPercentage}% (${requiredToSleep})`;
 			}
 

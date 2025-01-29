@@ -151,7 +151,7 @@ module.exports = {
 							URI: `${process.env.SRV_API}/v1/server/link`,
 							Payload: JSON.stringify({
 								USER: '{@Victim}',
-								MESSAGE: 'was {@Method} by {@Attacker}',
+								MESSAGE: 'was {@Method} by **{@Attacker}**',
 								INSTANCE: '{@InstanceId}',
 								EVENT: '{@TriggerName}',
 							}),
@@ -171,7 +171,7 @@ module.exports = {
 							URI: `${process.env.SRV_API}/v1/server/link`,
 							Payload: JSON.stringify({
 								USER: '{@Victim}',
-								MESSAGE: 'was {@Method} by {@Attacker}',
+								MESSAGE: 'was {@Method} by **{@Attacker}**',
 								INSTANCE: '{@InstanceId}',
 								EVENT: '{@TriggerName}',
 							}),

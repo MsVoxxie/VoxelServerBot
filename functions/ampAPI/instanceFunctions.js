@@ -241,40 +241,38 @@ async function getOnlinePlayers(instanceId) {
 async function fetchInstanceStatuses() {
 	const instanceApi = await mainAPI();
 	const instances = await instanceApi.ADSModule.GetLocalInstancesAsync();
-	const dataArray = [];
+	const filteredInstances = instances.filter((i) => i.InstanceName !== 'ADS01');
 
-	// Async loop through the instances
-	for await (const i of instances) {
-		// If the instance is named ADS, skip it as it's the main instance
-		if (i.InstanceName === 'ADS01') continue;
-		const instanceInfo = {
-			instanceId: i.InstanceID,
-			instanceName: i.InstanceName,
-			instanceFriendlyName: i.FriendlyName,
-			instanceRunning: i.Running,
-			instanceSuspended: i.Suspended,
-			instanceModule: i.Module,
+	// Fetch all instance statuses in parallel
+	const instanceStatusPromises = filteredInstances.map((i) => getInstanceStatus(i.InstanceID));
+	const instanceStatuses = await Promise.all(instanceStatusPromises);
+
+	// Construct response
+	const dataArray = filteredInstances.map((i, index) => {
+		const serverData = instanceStatuses[index];
+		return {
+			instanceInfo: {
+				instanceId: i.InstanceID,
+				instanceName: i.InstanceName,
+				instanceFriendlyName: i.FriendlyName,
+				instanceRunning: i.Running,
+				instanceDisplaySource: i.DisplayImageSource,
+				instanceSuspended: i.Suspended,
+				instanceModule: i.Module,
+			},
+			serverInfo: serverData?.status
+				? {
+						state: serverData.status.state,
+						cpu: serverData.status.cpu,
+						memory: serverData.status.memory,
+						users: serverData.status.users,
+						uptime: serverData.status.uptime,
+						performance: serverData.status.performance,
+				  }
+				: { state: 'Offline' },
 		};
+	});
 
-		// Get the server info
-		const serverData = await getInstanceStatus(i.InstanceID);
-		const serverInfo = {
-			state: serverData?.status?.state || null,
-			cpu: serverData?.status?.cpu || null,
-			memory: serverData?.status?.memory || null,
-			users: serverData?.status?.users || null,
-			uptime: serverData?.status?.uptime || null,
-			performance: serverData?.status?.performance || null,
-		};
-
-		// Combine the data for cleaner output
-		const formattedOutput = {
-			instanceInfo,
-			serverInfo: Object.values(serverInfo).every((v) => v === null) ? { state: 'Offline' } : serverInfo,
-		};
-
-		dataArray.push(formattedOutput);
-	}
 	return { instances: dataArray, success: true };
 }
 
