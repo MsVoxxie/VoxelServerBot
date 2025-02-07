@@ -28,6 +28,12 @@ module.exports = {
 		)
 		.addSubcommand((c) =>
 			c
+				.setName('update')
+				.setDescription('Update the server')
+				.addStringOption((o) => o.setName('server').setDescription('The server to execute the RCON command on').setRequired(true).setAutocomplete(true))
+		)
+		.addSubcommand((c) =>
+			c
 				.setName('kill')
 				.setDescription('Forcefully stop the server (WARNING: DATA LOSS MAY OCCUR)')
 				.addStringOption((o) => o.setName('server').setDescription('The server to execute the RCON command on').setRequired(true).setAutocomplete(true))
@@ -70,41 +76,54 @@ module.exports = {
 				// Start the server
 				await API.Core.StartAsync()
 					.then(async () => {
-						await interaction.followUp({ content: `Server ${friendlyName} has been started` });
+						await interaction.followUp({ content: `Server ${friendlyName} has been requested to start` });
 					})
 					.catch(async (err) => {
-						await interaction.followUp({ content: `Failed to start server ${friendlyName}` });
+						await interaction.followUp({ content: `Failed to request server start.\n${friendlyName}` });
 						console.error(err);
 					});
 				break;
 			case 'stop':
 				await API.Core.StopAsync()
 					.then(async () => {
-						await interaction.followUp({ content: `Server ${friendlyName} has been stopped` });
+						await interaction.followUp({ content: `Server ${friendlyName} has been requested to stop.` });
 					})
 					.catch(async (err) => {
-						await interaction.followUp({ content: `Failed to stop server ${friendlyName}` });
+						await interaction.followUp({ content: `Failed to request server stop.\n${friendlyName}` });
 						console.error(err);
 					});
 				break;
 			case 'restart':
 				await API.Core.RestartAsync()
 					.then(async () => {
-						await interaction.followUp({ content: `Server ${friendlyName} has been restarted` });
+						await interaction.followUp({ content: `Server ${friendlyName} has been requested to restart` });
 					})
 					.catch(async (err) => {
-						await interaction.followUp({ content: `Failed to restart server ${friendlyName}` });
+						await interaction.followUp({ content: `Failed to request server restart.\n${friendlyName}` });
 						console.error(err);
 					});
 
 				break;
+
+			case 'update':
+				await API.Core.UpdateApplicationAsync()
+					.then(async () => {
+						await interaction.followUp({ content: `Server ${friendlyName} has been requested to update.` });
+					})
+					.catch(async (err) => {
+						await interaction.followUp({ content: `Failed to request server update.\n${friendlyName}` });
+						console.error(err);
+					});
+
+				break;
+
 			case 'kill':
 				await API.Core.KillAsync()
 					.then(async () => {
 						await interaction.followUp({ content: `Server ${friendlyName} has been killed` });
 					})
 					.catch(async (err) => {
-						await interaction.followUp({ content: `Failed to kill server ${friendlyName}` });
+						await interaction.followUp({ content: `Failed to kill server.\n${friendlyName}` });
 						console.error(err);
 					});
 

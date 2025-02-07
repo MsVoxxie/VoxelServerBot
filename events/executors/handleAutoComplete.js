@@ -95,8 +95,6 @@ module.exports = {
 				break;
 
 			case 'server':
-				console.log('Fetching server instances');
-
 				// Fetch all of the instances
 				const allServerInstances = await fetchInstanceStatuses();
 
@@ -114,12 +112,8 @@ module.exports = {
 					};
 				});
 
-				console.log(filteredServerResultsStatus[0].value.length);
-
 				// Reply with all of the instances
-				await interaction.respond(filteredServerResultsStatus.slice(0, 25)).catch((e) => {
-					console.log(e);
-				});
+				await interaction.respond(filteredServerResultsStatus.slice(0, 25)).catch((e) => null);
 
 				break;
 		}
