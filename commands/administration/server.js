@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, EmbedBuilder, codeBlock } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, codeBlock, InteractionContextType, ApplicationIntegrationType } = require('discord.js');
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { alertSoundMC } = require('../../functions/helpers/messageFuncs');
 const { trimString } = require('../../functions/helpers/stringFuncs');
@@ -7,6 +7,8 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('server')
 		.setDescription('Execute a method on the specified server')
+		.setContexts([InteractionContextType.Guild, InteractionContextType.PrivateChannel])
+		.setIntegrationTypes([ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall])
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 		.addSubcommand((c) =>
 			c
@@ -178,7 +180,7 @@ module.exports = {
 				const consoleOutput = consoleResponse.ConsoleEntries.sort((a, b) => a.Timestamp - b.Timestamp);
 
 				// Format the output for user readability
-				const formattedOutput = consoleOutput.map((i) => `${i.Contents}`).join('\n') || 'No Response, Likely Successful';
+				const formattedOutput = consoleOutput.map((i) => `${i.Contents}`).join('\n') || 'No console output returned';
 
 				// Build an embed
 				const embed = new EmbedBuilder()
