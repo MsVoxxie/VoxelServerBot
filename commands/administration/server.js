@@ -175,6 +175,9 @@ module.exports = {
 				// Execute the RCON command
 				await sendConsoleMessage(API, rconCmd);
 
+				// Wait half a second for the command to be processed
+				await new Promise((resolve) => setTimeout(resolve, 500));
+
 				// Fetch the last console message
 				const consoleResponse = await API.Core.GetUpdatesAsync();
 				const consoleOutput = consoleResponse.ConsoleEntries.sort((a, b) => a.Timestamp - b.Timestamp);

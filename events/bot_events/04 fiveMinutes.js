@@ -18,11 +18,15 @@ module.exports = {
 			let channelDesc;
 
 			// Fetch the instance status
-			const instanceStatus = await getInstanceStatus(instance);
-			if (!instanceStatus.success) {
+			const instData = await getInstanceStatus(instance);
+
+			if (!instData.success) {
 				channelDesc = 'Server is Offline or Restarting';
 			} else {
-				channelDesc = `Online Users: ${instanceStatus.status.users.RawValue} / ${instanceStatus.status.users.MaxValue}\nUptime: ${instanceStatus.status.uptime}`;
+				let tps = instData.status.performance
+					? `\n${instData.status.performance.Unit}: ${instData.status.performance.RawValue} / ${instData.status.performance.MaxValue}`
+					: '';
+				channelDesc = `Online Users: ${instData.status.users.RawValue} / ${instData.status.users.MaxValue}\nUptime: ${instData.status.uptime}${tps}`;
 			}
 
 			// Check if the channel description is the saem as the server status to prevent api spam
