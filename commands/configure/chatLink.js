@@ -269,7 +269,7 @@ module.exports = {
 						},
 						allowDuplicates: false,
 
-						reorderTask: 5,
+						reorderTask: -5,
 					},
 				],
 			},
