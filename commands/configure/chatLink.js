@@ -253,7 +253,7 @@ module.exports = {
 			},
 			{
 				eventName: 'A backup finishes archiving.',
-				dontRemove: true,
+				dontRemove: false,
 				tasksToAdd: [
 					{
 						taskName: 'MakePOSTRequest',
@@ -268,8 +268,6 @@ module.exports = {
 							ContentType: 'application/json',
 						},
 						allowDuplicates: false,
-
-						reorderTask: -5,
 					},
 				],
 			},
@@ -362,8 +360,6 @@ module.exports = {
 				// Add event to the server
 				await addEventTrigger(server, eventName).then((e) => {
 					if (!e.success) {
-						// Skip the backup finishes archiving event as it's always present
-						if (e.eventName === 'A backup finishes archiving.') return;
 						failedAdditions.push({ eventName, desc: e.desc });
 						return;
 					}

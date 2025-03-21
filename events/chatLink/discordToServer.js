@@ -10,6 +10,10 @@ module.exports = {
 		if (message.author.bot) return;
 		if (!message.content) return;
 
+		// funny
+		let shouldItalic = false;
+		if (message.author.id === '151636912602480640') shouldItalic = true;
+
 		// Fetch all matching chat links
 		const chatlinkFetch = await chatLink.find({ 'chatLinks.channelId': message.channel.id }).lean();
 		// const chatlinkFetch = await chatLink.find({ 'chatLinks.channelId': message.channel.id }).lean();
@@ -39,7 +43,7 @@ module.exports = {
 						const API = await instanceAPI(chatLinkData.instanceId);
 						await sendConsoleMessage(
 							API,
-							`tellraw @a [{"text":""},{"text":"[D] ","color":"blue","hoverEvent":{"action":"show_text","contents":[{"text":"Discord","color":"blue"}]}},{"text":"${formattedMessage}"}]`
+							`tellraw @a [{"text":""},{"text":"[D] ","color":"blue","hoverEvent":{"action":"show_text","contents":[{"text":"Discord","color":"blue"}]}},{"text":"${formattedMessage}","italic":${shouldItalic}}]`
 						);
 
 						// Play a sound to get the attention of the players but randomize the pitch with a minimum of 0.8 and a maximum of 1.3

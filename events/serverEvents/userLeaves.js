@@ -24,6 +24,8 @@ module.exports = {
 			// Augment the message with the sleep percentage
 			if (onlinePlayers.players.length >= 1) {
 				augmentedMessage = `${MESSAGE}\n-# ${onlinePlayers.players.length}/${maxPlayers} Players, sleepPercentage set to ${sleepPercentage}% (${requiredToSleep})`;
+			} else {
+				augmentedMessage = `${MESSAGE}\n-# Server is empty.`;
 			}
 
 			// Send the message to the server
