@@ -139,6 +139,13 @@ module.exports = {
 						},
 						allowDuplicates: false,
 					},
+					{
+						taskName: 'SendConsole',
+						dictionary: {
+							Input: 'playsound minecraft:block.conduit.deactivate player @a 0 0 0 1 2 0.25',
+						},
+						allowDuplicates: false,
+					},
 				],
 			},
 			{
