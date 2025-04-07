@@ -48,7 +48,7 @@ module.exports = {
 						const API = await instanceAPI(chatLinkData.instanceId);
 						await sendConsoleMessage(
 							API,
-							`tellraw @a ["",{"text":"[D] ","color":"blue","hoverEvent":{"action":"show_text","contents":[{"text":"Discord","color":"blue"}]}},{"text":"<"},{"text":"${authorName}","color":"${authorColor}"},{"text":">"},{"text":"${counterMessage}","italic":${shouldItalic}}]`
+							`tellraw @a ["",{"text":"[D] ","color":"blue","hoverEvent":{"action":"show_text","contents":[{"text":"${message.guild.name}","color":"blue"}]}},{"text":"<"},{"text":"${authorName}","color":"${authorColor}"},{"text":">"},{"text":"${counterMessage}","italic":${shouldItalic}}]`
 						);
 
 						// Play a sound to get the attention of the players but randomize the pitch with a minimum of 0.8 and a maximum of 1.3
