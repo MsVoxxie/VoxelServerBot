@@ -132,10 +132,12 @@ module.exports = {
 				break;
 			case 'message':
 				const message = interaction.options.getString('message');
+				const type = interaction.options.getString('type');
+				console.log(instanceModule);
+
 				switch (instanceModule) {
+					// Set the color and hover event based on the type
 					case 'Minecraft':
-						const type = interaction.options.getString('type');
-						// Set the color and hover event based on the type
 						let color, hoverText;
 						switch (type) {
 							case 'notice':

@@ -108,7 +108,7 @@ module.exports = {
 				const filteredServerResultsStatus = filteredServerChoiceStatus.map((i) => {
 					return {
 						name: `${i.serverInfo.state ? `[${i.serverInfo.state}]` : '[Unknown]'} ${i.instanceInfo.instanceFriendlyName} • ${i.instanceInfo.instanceId}`,
-						value: `${i.instanceInfo.instanceId}|${i.instanceInfo.instanceFriendlyName}|${i.instanceInfo.instanceModule}}`,
+						value: `${i.instanceInfo.instanceId}|${i.instanceInfo.instanceFriendlyName}|${i.instanceInfo.instanceModule}`,
 					};
 				});
 
