@@ -88,7 +88,7 @@ module.exports = {
 					{
 						taskName: 'SendConsole',
 						dictionary: {
-							Input: 'tellraw @p ["",{"text":"Welcome ","color":"gold"},{"text":"to the server","color":"aqua"},", ",{"text":"{@User}","color":"green"},"!"]',
+							Input: 'tellraw @a ["",{"text":"Welcome ","color":"gold"},{"text":"to the server","color":"aqua"},", ",{"text":"{@User}","color":"green"},"!"]',
 						},
 						allowDuplicates: true,
 					},
