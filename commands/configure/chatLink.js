@@ -279,6 +279,46 @@ module.exports = {
 				],
 			},
 			{
+				eventName: 'A backup finishes restoring.',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: 'SERVER',
+								MESSAGE: 'A Backup has finished restoring',
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+				],
+			},
+			{
+				eventName: 'A backup has failed.',
+				dontRemove: false,
+				tasksToAdd: [
+					{
+						taskName: 'MakePOSTRequest',
+						dictionary: {
+							URI: `${process.env.SRV_API}/v1/server/link`,
+							Payload: JSON.stringify({
+								USER: 'SERVER',
+								MESSAGE: 'A Backup has failed',
+								INSTANCE: '{@InstanceId}',
+								EVENT: '{@TriggerName}',
+							}),
+							ContentType: 'application/json',
+						},
+						allowDuplicates: false,
+					},
+				],
+			},
+			{
 				eventName: 'The Minecraft Server watchdog forced a shutdown (server unresponsive)',
 				dontRemove: false,
 				tasksToAdd: [
