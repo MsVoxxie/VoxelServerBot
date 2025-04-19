@@ -30,7 +30,7 @@ function isCacheFresh(filePath, ttl = CACHE_TTL) {
 
 // Download head PNG and save to cache
 async function downloadHead(uuid, filePath) {
-	const res = await fetch(`https://crafatar.com/renders/head/${uuid}?overlay`);
+	const res = await fetch(`https://crafatar.com/renders/head/${uuid}?size=5&overlay=true`);
 	if (!res.ok) throw new Error('Failed to fetch head image');
 	const buffer = await res.buffer();
 	fs.writeFileSync(filePath, buffer);
