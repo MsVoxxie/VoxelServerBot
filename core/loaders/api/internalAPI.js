@@ -58,6 +58,22 @@ module.exports = (client) => {
 		res.send(client.clientData);
 	});
 
+	// Host player heads
+	const path = require('path');
+	const { getPlayerHead } = require('../../../functions/serverFuncs/cacheHeads');
+
+	srv.get('/v1/client/playerhead/:username', async (req, res) => {
+		const { username } = req.params;
+
+		try {
+			const { path: imagePath, attachment } = await getPlayerHead(username);
+			res.sendFile(path.resolve(imagePath));
+		} catch (err) {
+			console.error(err);
+			res.status(404).send('Failed to get player head');
+		}
+	});
+
 	// Receive Messages
 	srv.post('/v1/server/link', async (req, res) => {
 		// Escape any incoming quotes

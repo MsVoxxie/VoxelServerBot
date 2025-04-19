@@ -32,7 +32,7 @@ async function serverLink(USER = 'Placeholder', MESSAGE = 'Placeholder', INSTANC
 				userAvatar = '';
 			} else {
 				// Get the user avatar
-				userAvatar = `https://mc-heads.net/head/${USER}`;
+				userAvatar = `https://vsb.voxxie.me/v1/client/playerhead/${USER}`;
 			}
 		}
 
