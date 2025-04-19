@@ -66,7 +66,7 @@ module.exports = (client) => {
 		const { username } = req.params;
 
 		try {
-			const { path: imagePath, attachment } = await getPlayerHead(username);
+			const imagePath = await getPlayerHead(username);
 			res.sendFile(path.resolve(imagePath));
 		} catch (err) {
 			console.error(err);

@@ -6,6 +6,7 @@ const { AttachmentBuilder } = require('discord.js');
 // Set cache location and TTL (in milliseconds)
 const CACHE_DIR = path.join(__dirname, '../../images/playerheads');
 const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
+const PLACEHOLDER_PATH = path.join(CACHE_DIR, 'placeholder.png');
 
 if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR);
 
@@ -49,6 +50,26 @@ async function getPlayerHead(username) {
 	const discordAttachment = new AttachmentBuilder(filePath, { name: `${username}.png` });
 
 	return { path: filePath, attachment: discordAttachment };
+}
+
+async function getPlayerHead(username) {
+	let uuid;
+	try {
+		uuid = await getUUID(username);
+	} catch (err) {
+		return PLACEHOLDER_PATH;
+	}
+	const filePath = path.join(CACHE_DIR, `${username}.png`);
+
+	// Get the head
+	try {
+		if (!isCacheFresh(filePath)) {
+			await downloadHead(uuid, filePath);
+		}
+		return filePath;
+	} catch (err) {
+		return PLACEHOLDER_PATH;
+	}
 }
 
 module.exports = {
