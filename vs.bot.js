@@ -16,6 +16,7 @@ const client = new Client({
 		GatewayIntentBits.GuildMembers,
 		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.GuildMessageReactions,
+		GatewayIntentBits.GuildMessageTyping,
 	],
 	allowedMentions: {
 		parse: [],
@@ -33,6 +34,7 @@ client.colors = {
 };
 
 // Define Collections
+client.typingState = new Collection();
 client.cooldowns = new Collection();
 client.commands = new Collection();
 client.events = new Collection();

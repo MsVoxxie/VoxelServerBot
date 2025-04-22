@@ -1,6 +1,7 @@
 const { Events } = require('discord.js');
 const { chatLink } = require('../../models');
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { updateTypingScoreboard } = require('../../functions/serverFuncs/minecraft');
 const { splitSentence } = require('../../functions/helpers/messageFuncs');
 
 module.exports = {
@@ -33,8 +34,21 @@ module.exports = {
 			const authorName = message.member.displayName;
 			const authorColor = message.member.displayHexColor;
 
+			// Grab the instance API
+			const API = await instanceAPI(chatLinkData.instanceId);
+
 			// Check if the instance module is Minecraft
 			if (chatLinkData.instanceModule === 'Minecraft') {
+				// Typing indicator
+				const key = `${message.channel.id}_${message.author.id}`;
+				if (client.typingState.has(key)) {
+					clearTimeout(client.typingState.get(key).timeout);
+					client.typingState.delete(key);
+				}
+
+				// Update the scoreboard with the typing users
+				await updateTypingScoreboard(message.channel, client, sendConsoleMessage, API);
+
 				try {
 					for (let i = 0; i < messageParts.length; i++) {
 						// only add the count if there are more than 1 message parts
@@ -45,7 +59,6 @@ module.exports = {
 						const counterMessage = `${counter}${messageParts[i]}`;
 
 						// Send each part of the message
-						const API = await instanceAPI(chatLinkData.instanceId);
 						await sendConsoleMessage(
 							API,
 							`tellraw @a ["",{"text":"[D] ","color":"blue","hoverEvent":{"action":"show_text","contents":[{"text":"${message.guild.name}","color":"blue"}]}},{"text":"<"},{"text":"${authorName}","color":"${authorColor}"},{"text":">"},{"text":"${counterMessage}","italic":${shouldItalic}}]`
@@ -65,7 +78,6 @@ module.exports = {
 
 					// Send each part of the message
 					for (let i = 0; i < messageParts.length; i++) {
-						const API = await instanceAPI(chatLinkData.instanceId);
 						await sendConsoleMessage(API, `say "[D] <${message.member.displayName}>${counter}${messageParts[i]}"`);
 					}
 				} catch (error) {
