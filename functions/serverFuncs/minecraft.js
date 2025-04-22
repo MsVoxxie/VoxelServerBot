@@ -23,7 +23,7 @@ async function updateTypingScoreboard(channel, client, sendConsoleMessage, API) 
 	const userCount = names.length;
 
 	// If no users are typing, set display text to an empty string
-	let displayText = userCount === 0 ? '' : userCount === 1 ? `${names[0]} is typing...` : `${userCount} users are typing...`;
+	let displayText = userCount === 0 ? '' : userCount === 1 ? `${names[0]} is typing...` : userCount >= 5 ? 'Something is broken...' : `${userCount} users are typing...`;
 
 	// If text exceeds 32 characters, show the user count instead
 	if (displayText.length > 32) {
