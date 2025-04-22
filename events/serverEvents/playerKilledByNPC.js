@@ -1,4 +1,5 @@
 const { serverLink } = require('../../functions/helpers/messageDiscord');
+const { queueTask } = require('../../functions/helpers/queueTask');
 
 module.exports = {
 	name: 'playerKilledByNPC',
@@ -8,6 +9,6 @@ module.exports = {
 		const { USER, INSTANCE, MESSAGE } = data;
 
 		// Send off the message to Discord
-		await serverLink(USER, MESSAGE, INSTANCE);
+		queueTask(INSTANCE, serverLink, USER, MESSAGE, INSTANCE);
 	},
 };

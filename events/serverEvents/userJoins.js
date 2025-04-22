@@ -2,6 +2,7 @@ const { getInstanceStatus, getOnlinePlayers } = require('../../functions/ampAPI/
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { calculateSleepingPercentage } = require('../../functions/serverFuncs/minecraft');
 const { serverLink } = require('../../functions/helpers/messageDiscord');
+const { queueTask } = require('../../functions/helpers/queueTask');
 
 // Track users that have received a join message
 const userJoinedSet = new Set();
@@ -46,7 +47,7 @@ module.exports = {
 		if (joinMessages.includes(MESSAGE) && !userJoinedSet.has(USER)) {
 			userJoinedSet.add(USER);
 			// Send off the message to Discord
-			await serverLink(USER, augmentedMessage, INSTANCE);
+			queueTask(INSTANCE, serverLink, USER, augmentedMessage, INSTANCE);
 		}
 	},
 };

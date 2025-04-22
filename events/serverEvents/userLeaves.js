@@ -2,6 +2,7 @@ const { getInstanceStatus, getOnlinePlayers } = require('../../functions/ampAPI/
 const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { calculateSleepingPercentage } = require('../../functions/serverFuncs/minecraft');
 const { serverLink } = require('../../functions/helpers/messageDiscord');
+const { queueTask } = require('../../functions/helpers/queueTask');
 
 module.exports = {
 	name: 'userLeaves',
@@ -34,6 +35,6 @@ module.exports = {
 		}
 
 		// Send off the message to Discord
-		await serverLink(USER, augmentedMessage, INSTANCE);
+		queueTask(INSTANCE, serverLink, USER, augmentedMessage, INSTANCE);
 	},
 };

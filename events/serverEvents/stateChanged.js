@@ -1,4 +1,5 @@
 const { serverLink } = require('../../functions/helpers/messageDiscord');
+const { queueTask } = require('../../functions/helpers/queueTask');
 const { getConfigNode } = require('../../functions/ampAPI/instanceFunctions');
 
 module.exports = {
@@ -17,6 +18,6 @@ module.exports = {
 		}
 
 		// Send off the message to Discord
-		await serverLink(USER, MESSAGE, INSTANCE);
+		queueTask(INSTANCE, serverLink, USER, MESSAGE, INSTANCE);
 	},
 };
