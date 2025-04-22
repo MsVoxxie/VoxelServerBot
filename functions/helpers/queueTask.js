@@ -1,11 +1,12 @@
 const logger = require('../logging/logger');
 
 const taskQueues = new Map();
-let debugEnabled = true;
-let delay = 2000;
+let debugEnabled = false;
+let delay = 100;
 
 function enableDebugLogging(enable = true) {
 	debugEnabled = enable;
+	logger.info(`Debug logging ${enable ? 'enabled' : 'disabled'}`);
 }
 
 function logDebug(message) {
