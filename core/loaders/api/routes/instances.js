@@ -13,7 +13,7 @@ router.get('/v1/servers', async (req, res) => {
 	}
 });
 
-router.get('/v1/server/servers', async (req, res) => {
+router.get('/v1/server/data/instancedata', async (req, res) => {
 	const data = await getStatusPageData();
 	res.json(data);
 });
