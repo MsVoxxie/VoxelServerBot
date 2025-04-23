@@ -12,8 +12,6 @@ module.exports = {
 	async execute(client, interaction, settings) {
 		// Flood the queue with tasks to test the queue system
 
-		for (let i = 0; i < 15; i++) {
-			queueTask('TestQueue', serverLink, 'SERVER', `Test message ${i}`, '1c86eb84-5227-492f-ad60-8a282971d518');
-		}
+		for (let i = 0; i < 15; i++) {}
 	},
 };

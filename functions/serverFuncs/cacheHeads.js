@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 const { AttachmentBuilder } = require('discord.js');
 
 // Set cache location and TTL (in milliseconds)
-const CACHE_DIR = path.join(__dirname, '../../images/playerheads');
+const CACHE_DIR = path.join(__dirname, '../../core/loaders/api/public/images/playerheads');
 const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
 const PLACEHOLDER_PATH = path.join(CACHE_DIR, 'placeholder.png');
 

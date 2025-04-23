@@ -444,7 +444,7 @@ module.exports = {
 			} else {
 				// Create the webhook
 				Logger.info(`Creating webhook for ${instance.instanceFriendlyName} in ${channel.name} in ${interaction.guild.name}`);
-				await channel.createWebhook({ name: `${friendlyName} Chat Link`, avatar: `${process.env.SRV_API}/v1/client/static/logos/SrvLogoAlt.png` }).then((wh) => {
+				await channel.createWebhook({ name: `${friendlyName} Chat Link`, avatar: `${process.env.SRV_API}/v1/static/images/logos/SrvLogoAlt.png` }).then((wh) => {
 					Logger.success(`Created webhook for ${instance.instanceFriendlyName} in ${channel.name} in ${interaction.guild.name}`);
 					webhookId = wh.id;
 					webhookToken = wh.token;

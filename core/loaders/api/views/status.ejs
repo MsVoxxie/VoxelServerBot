@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Server Status</title>
+		<link rel="stylesheet" href="/v1/static/styles.css" />
+	</head>
+	<body>
+		<div id="status-wrapper">
+			<h1>🖥️ Server Status</h1>
+			<div id="instances">
+				<% instances.forEach(function(instance) { %>
+				<div class="instance-card <%= instance.server.state.toLowerCase() %>" data-id="<%= instance.instanceId %>"></div>
+				<% }); %>
+			</div>
+		</div>
+
+		<div id="refresh-bar"></div>
+		<script src="/v1/static/scripts.js"></script>
+	</body>
+</html>

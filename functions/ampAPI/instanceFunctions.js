@@ -1,5 +1,6 @@
 const { instanceAPI, mainAPI } = require('./apiFunctions');
-const { ampInstances } = require('../../models');
+const { getImageSource } = require('../helpers/getSourceImage');
+const { SERVER_IP } = process.env;
 
 //* Add an event trigger to an instance
 async function addEventTrigger(instanceId, triggerDescription) {
@@ -276,6 +277,94 @@ async function fetchInstanceStatuses() {
 	return { instances: dataArray, success: true };
 }
 
+//* Get the status page data for all instances
+async function getStatusPageData() {
+	const instanceApi = await mainAPI();
+	if (!instanceApi) {
+		Logger.error('Failed to get AMP main API');
+		return { instances: [], success: false };
+	}
+
+	try {
+		const instances = await instanceApi.ADSModule.GetLocalInstancesAsync();
+		const filteredInstances = instances.filter(
+			(i) => i.InstanceName !== 'ADS01' && !(typeof i.WelcomeMessage === 'string' && i.WelcomeMessage.trim().toLowerCase() === 'hidden')
+		);
+
+		const instanceStatuses = await Promise.all(filteredInstances.map((i) => getInstanceStatus(i.InstanceID)));
+		const instancePlayers = await Promise.all(filteredInstances.map((i) => getOnlinePlayers(i.InstanceID)));
+
+		const dataArray = await Promise.all(
+			filteredInstances.map(async (i, index) => {
+				const serverData = instanceStatuses[index];
+				const playersData = instancePlayers[index];
+				const icon = await getImageSource(i.DisplayImageSource); // await the icon
+
+				// Pluck the server port from the instance
+				const mainPort = extractMainPort(i.DeploymentArgs);
+
+				return {
+					instanceId: i.InstanceID,
+					instanceName: i.InstanceName,
+					friendlyName: i.FriendlyName,
+					running: i.Running,
+					module: i.Module,
+					icon,
+					suspended: i.Suspended,
+					server: serverData?.status
+						? {
+								state: serverData.status.state,
+								cpu: serverData.status.cpu,
+								memory: serverData.status.memory,
+								users: serverData.status.users,
+								uptime: serverData.status.uptime,
+								performance: serverData.status.performance,
+								ip: SERVER_IP,
+								port: mainPort ? mainPort : null,
+						  }
+						: { state: 'Offline' },
+					players: playersData?.players ?? [],
+				};
+			})
+		);
+
+		// Sort the instances by their online status
+		dataArray.sort((a, b) => {
+			if (a.server.state === 'Running' && b.server.state !== 'Running') return -1;
+			if (a.server.state !== 'Running' && b.server.state === 'Running') return 1;
+			return 0;
+		});
+
+		return { instances: dataArray, success: true };
+	} catch (err) {
+		Logger.error('Error building AMP status page data');
+		Logger.error(err);
+		return { instances: [], success: false };
+	}
+	function extractMainPort(deploymentArgs) {
+		if (!deploymentArgs) return null;
+
+		const mcPort = deploymentArgs['MinecraftModule.Minecraft.PortNumber'];
+		if (mcPort) {
+			return parseInt(mcPort, 10);
+		}
+
+		const rawPorts = deploymentArgs['GenericModule.App.Ports'];
+		if (rawPorts) {
+			try {
+				const ports = JSON.parse(rawPorts);
+				const primary = ports.find((p) => p.Ref === 'ServerPort') || ports[0];
+				return primary?.Port || null;
+			} catch (err) {
+				console.error('Failed to parse ports:', err);
+				return null;
+			}
+		}
+
+		return null; // fallback
+	}
+}
+
 module.exports = {
 	addEventTrigger,
 	addTaskToTrigger,
@@ -287,4 +376,5 @@ module.exports = {
 	getInstanceStatus,
 	getOnlinePlayers,
 	fetchInstanceStatuses,
+	getStatusPageData,
 };
