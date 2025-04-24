@@ -331,8 +331,20 @@ async function getStatusPageData() {
 
 		// Sort instances by module, online status, and then by instance name
 		dataArray.sort((a, b) => {
-			if (a.module < b.module) return -1;
-			if (a.module > b.module) return 1;
+			const isRunningA = a.running ? 1 : 0;
+			const isRunningB = b.running ? 1 : 0;
+			if (isRunningA !== isRunningB) return isRunningB - isRunningA;
+
+			const modulePriority = (mod) => (mod === 'Minecraft' ? 0 : 1);
+			const priorityA = modulePriority(a.module || '');
+			const priorityB = modulePriority(b.module || '');
+			if (priorityA !== priorityB) return priorityA - priorityB;
+
+			const moduleA = a.module || '';
+			const moduleB = b.module || '';
+			if (moduleA < moduleB) return -1;
+			if (moduleA > moduleB) return 1;
+
 			return a.instanceName.localeCompare(b.instanceName);
 		});
 
