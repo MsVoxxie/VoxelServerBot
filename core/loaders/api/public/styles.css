@@ -1,9 +1,10 @@
 /* === Global Styles === */
 body {
 	font-family: sans-serif;
+	background-color: #333333;
 	background: url('/v1/static/images/backgrounds/wallpaper.png') no-repeat center center fixed;
 	background-size: cover;
-	color: #333333;
+	color: #cfcfcf;
 	margin: 0;
 	padding: 0;
 	display: flex;
