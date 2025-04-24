@@ -149,6 +149,21 @@ body {
 	transition: color 0.2s ease;
 	text-align: center;
 }
+.server-link::after {
+	content: '';
+	position: absolute;
+	bottom: -2px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 2px;
+	background: #7289da;
+	transition: width 0.3s ease;
+}
+
+.server-link:hover::after {
+	width: 100%;
+}
 
 .instance-card-content h2,
 .server-link {
