@@ -151,6 +151,20 @@ function copyToClipboard(text, button) {
 	}
 }
 
+//  Wave animation
+document.addEventListener('DOMContentLoaded', () => {
+	document.querySelectorAll('.wave').forEach((wave) => {
+		const minDur = 50;
+		const maxDur = 70;
+		const dur = (Math.random() * (maxDur - minDur) + minDur).toFixed(2);
+		const delay = -(Math.random() * dur).toFixed(2); //  -0…-dur
+		wave.style.animationDuration = `${dur}s`;
+		wave.style.animationDelay = `${delay}s`;
+		// hint the browser to keep this smooth
+		wave.style.willChange = 'transform';
+	});
+});
+
 // initial load + start ticking
 fetchInstanceData();
 setInterval(updateBar, 1000);

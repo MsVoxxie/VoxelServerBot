@@ -2,7 +2,7 @@
 body {
 	font-family: sans-serif;
 	background-color: #333333;
-	background: url('/v1/static/images/backgrounds/wallpaper.png') no-repeat center center fixed;
+	/* background: url('/v1/static/images/backgrounds/wallpaper.png') no-repeat center center fixed; */
 	background-size: cover;
 	color: #cfcfcf;
 	margin: 0;
@@ -12,6 +12,74 @@ body {
 	align-items: center;
 	min-height: 100vh;
 	flex-direction: column;
+}
+
+/* === Background Waves === */
+#wave-background {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 120vw;
+	height: 120vh;
+	overflow: visible;
+	pointer-events: none;
+	z-index: -1;
+}
+
+#wave-background svg {
+	width: 100%;
+	height: 100%;
+}
+
+.wave {
+	transform-box: fill-box;
+	transform-origin: center bottom;
+	animation: waveShift ease-in-out infinite alternate;
+	will-change: transform;
+}
+
+.wave svg {
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+/* Define the animation */
+@keyframes waveShift {
+	0% {
+		transform: translate(0px, 0px); /* Start position */
+	}
+	10% {
+		transform: translate(100px, 20px); /* Far right & small down */
+	}
+	20% {
+		transform: translate(-120px, -30px); /* Far left & small up */
+	}
+	30% {
+		transform: translate(150px, 40px); /* Far right & moderate down */
+	}
+	40% {
+		transform: translate(-140px, -40px); /* Far left & moderate up */
+	}
+	50% {
+		transform: translate(180px, 50px); /* Extreme right & larger down */
+	}
+	60% {
+		transform: translate(-160px, -50px); /* Extreme left & larger up */
+	}
+	70% {
+		transform: translate(200px, 40px); /* Far right & moderate down */
+	}
+	80% {
+		transform: translate(-180px, -30px); /* Far left & small up */
+	}
+	90% {
+		transform: translate(150px, 20px); /* Far right & small down */
+	}
+	100% {
+		transform: translate(-200px, 0px); /* Extreme left & back to original */
+	}
 }
 
 /* === Structural Layout === */
