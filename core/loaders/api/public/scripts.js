@@ -48,6 +48,9 @@ async function fetchInstanceData() {
 
 		const isRunning = inst.server.state === 'Running' || inst.server.state === 'Starting';
 
+		// Uptime
+		const serverUptime = inst.server.uptime ? `<p class="uptime">Online ${humanizeDuration(inst.server.uptime)}</p>` : '';
+
 		// Modpack url
 		const modpackURL =
 			inst.module === 'Minecraft' && inst.welcomeMessage
@@ -61,6 +64,11 @@ async function fetchInstanceData() {
 
 		// CPU percentage
 		const cpuDisplay = inst.server.cpu && inst.server.cpu.Percent != null ? `${inst.server.cpu.Percent}%` : 'N/A';
+
+		// Performance
+		const performanceDisplay = inst.server.performance
+			? `<p>${inst.server.performance.Unit}: ${inst.server.performance.RawValue}/${inst.server.performance.MaxValue}</p>`
+			: '<p>TPS: N/A</p>';
 
 		// Player and IP display
 		const playerDisplay = inst.server.users ? `${inst.server.users.RawValue}/${inst.server.users.MaxValue}` : 'N/A';
@@ -79,11 +87,13 @@ async function fetchInstanceData() {
         <div class="instance-card-content">
 		${modpackURL}
             <hr class="divider">
+			${serverUptime}
             ${
 							isRunning
 								? `
                         <p>CPU Usage: ${cpuDisplay}</p>
                         <p>Memory Usage: ${memDisplay}</p>
+						${performanceDisplay}
                         <p>Players: ${playerDisplay}</p>
                         ${ipDisplay}
                     `
@@ -138,10 +148,10 @@ function copyToClipboard(text, button) {
 		navigator.clipboard
 			.writeText(text)
 			.then(() => {
-				button.textContent = 'Copied!'; // Change the button text to 'Copied!'
+				button.textContent = 'Copied!';
 				setTimeout(() => {
-					button.textContent = 'Copy'; // Reset the button text after 2 seconds (or any other time you prefer)
-				}, 2000); // Change 2000ms (2 seconds) to whatever duration you prefer
+					button.textContent = 'Copy';
+				}, 2000);
 			})
 			.catch((err) => {
 				alert('Failed to copy: ' + err);
@@ -149,6 +159,22 @@ function copyToClipboard(text, button) {
 	} else {
 		alert('Clipboard API not supported');
 	}
+}
+
+function humanizeDuration(input) {
+	const [d, h, m, s] = input.split(':').map(Number);
+	const parts = [];
+
+	if (d) parts.push(`${d} day${d !== 1 ? 's' : ''}`);
+	if (h) parts.push(`${h} hour${h !== 1 ? 's' : ''}`);
+	if (m) parts.push(`${m} minute${m !== 1 ? 's' : ''}`);
+	if (s) parts.push(`${s} second${s !== 1 ? 's' : ''}`);
+
+	if (parts.length === 0) return 'for 0 seconds';
+	if (parts.length === 1) return `for ${parts[0]}`;
+
+	const last = parts.pop();
+	return `for ${parts.join(', ')} and ${last}`;
 }
 
 //  Wave animation
