@@ -328,11 +328,11 @@ async function getStatusPageData() {
 			})
 		);
 
-		// Sort the instances by their online status
+		// Sort instances by module, online status, and then by instance name
 		dataArray.sort((a, b) => {
-			if (a.server.state === 'Running' && b.server.state !== 'Running') return -1;
-			if (a.server.state !== 'Running' && b.server.state === 'Running') return 1;
-			return 0;
+			if (a.module < b.module) return -1;
+			if (a.module > b.module) return 1;
+			return a.instanceName.localeCompare(b.instanceName);
 		});
 
 		return { instances: dataArray, success: true };
