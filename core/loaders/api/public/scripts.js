@@ -6,30 +6,18 @@ async function fetchInstanceData() {
 	const container = document.getElementById('instances');
 	const statusWrapper = document.getElementById('status-wrapper');
 
-	// Save the initial positions of existing cards
-	const existingCards = Array.from(container.querySelectorAll('.instance-card'));
-	const firstRects = new Map(existingCards.map((card) => [card.dataset.id, card.getBoundingClientRect()]));
-
 	// Regex pattern for detecting a valid instanceId
 	const instanceIdRegex = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
-
-	// Get the last part of the URL
 	const pathParts = window.location.pathname.split('/');
 	let instanceId = null;
-
-	// Check if the last part of the URL matches the instanceId
 	const lastPart = pathParts[pathParts.length - 1];
 	if (instanceIdRegex.test(lastPart)) {
 		instanceId = lastPart;
 	}
 
-	// Define the URL to fetch data from
 	let url = '/v1/server/data/instances';
-	if (instanceId) {
-		url += `/${encodeURIComponent(instanceId)}`;
-	}
+	if (instanceId) url += `/${encodeURIComponent(instanceId)}`;
 
-	// Fetch new data
 	let data;
 	try {
 		const res = await fetch(url);
@@ -40,56 +28,43 @@ async function fetchInstanceData() {
 		return;
 	}
 
-	// Add fade-in class to the status wrapper
 	statusWrapper.classList.add('fade-in');
-
 	const newIds = data.instances.map((i) => i.instanceId);
 
 	// Remove cards that are no longer present
-	existingCards.forEach((card) => {
+	Array.from(container.querySelectorAll('.instance-card')).forEach((card) => {
 		if (!newIds.includes(card.dataset.id)) container.removeChild(card);
 	});
 
-	// Reuse existing cards or create new ones
-	const newOrder = data.instances.map((inst) => {
+	// Update or create cards
+	data.instances.forEach((inst) => {
 		let card = container.querySelector(`.instance-card[data-id="${inst.instanceId}"]`);
 		if (!card) {
 			card = document.createElement('div');
 			card.classList.add('instance-card');
 			card.dataset.id = inst.instanceId;
+			container.appendChild(card);
 		}
 
-		// Add CSS classes based on server state
+		// Update card classes
 		card.classList.toggle('starting', inst.server.state === 'Starting');
 		card.classList.toggle('running', inst.server.state === 'Running');
 		card.classList.toggle('stopped', inst.server.state === 'Stopped');
 		card.classList.toggle('offline', inst.server.state === 'Offline');
 
 		const isRunning = inst.server.state === 'Running' || inst.server.state === 'Starting';
-
-		// Uptime
 		const serverUptime = inst.server.uptime ? `<p class="uptime">Online ${humanizeDuration(inst.server.uptime)}</p>` : '';
-
-		// Modpack url
 		const modpackURL =
 			inst.module === 'Minecraft' && inst.welcomeMessage
 				? `<a class="server-link" href="${inst.welcomeMessage}" target="_blank"><h2>${inst.friendlyName}</h2></a>`
 				: `<h2>${inst.friendlyName}</h2>`;
-
-		// Memory in GB
 		const memCurrentGB = inst.server.memory ? (inst.server.memory.RawValue / 1024).toFixed(2) : null;
 		const memMaxGB = inst.server.memory ? (inst.server.memory.MaxValue / 1024).toFixed(0) : null;
 		const memDisplay = memCurrentGB && memMaxGB ? `${memCurrentGB}/${memMaxGB} GB` : 'N/A';
-
-		// CPU percentage
 		const cpuDisplay = inst.server.cpu && inst.server.cpu.Percent != null ? `${inst.server.cpu.Percent}%` : 'N/A';
-
-		// Performance
 		const performanceDisplay = inst.server.performance
 			? `<p>${inst.server.performance.Unit}: ${inst.server.performance.RawValue}/${inst.server.performance.MaxValue}</p>`
 			: '<p>TPS: N/A</p>';
-
-		// Player and IP display
 		const playerDisplay = inst.server.users ? `${inst.server.users.RawValue}/${inst.server.users.MaxValue}` : 'N/A';
 		const ipDisplay = isRunning
 			? `
@@ -100,19 +75,38 @@ async function fetchInstanceData() {
       `
 			: '';
 
-		// Ugly mess
-		card.innerHTML = `
-        <div class="instance-card-overlay" style="background-image:url('${inst.icon}')"></div>
-        <div class="instance-card-content">
-		${modpackURL}
+		// Only update the content inside the card, not the card itself
+		let overlay = card.querySelector('.instance-card-overlay');
+		let content = card.querySelector('.instance-card-content');
+		if (!overlay) {
+			overlay = document.createElement('div');
+			overlay.className = 'instance-card-overlay';
+			card.appendChild(overlay);
+		}
+		overlay.style.backgroundImage = `url('${inst.icon}')`;
+
+		if (!content) {
+			content = document.createElement('div');
+			content.className = 'instance-card-content';
+			content.dataset.instanceid = inst.instanceId;
+			card.appendChild(content);
+		}
+
+		// Click event for the card
+		card.onclick = () => {
+			window.location.href = `/v1/servers/${inst.instanceId}`;
+		};
+
+		content.innerHTML = `
+            ${modpackURL}
             <hr class="divider">
-			${serverUptime}
+            ${serverUptime}
             ${
 							isRunning
 								? `
                         <p>CPU Usage: ${cpuDisplay}</p>
                         <p>Memory Usage: ${memDisplay}</p>
-						${performanceDisplay}
+                        ${performanceDisplay}
                         <p>Players: ${playerDisplay}</p>
                         ${ipDisplay}
                     `
@@ -120,28 +114,7 @@ async function fetchInstanceData() {
                         <p class="offline-label">Server ${inst.server.state}</p>
                     `
 						}
-        </div>
-    `;
-		return card;
-	});
-
-	// Animate the transition
-	newOrder.forEach((card) => container.appendChild(card));
-	newOrder.forEach((card) => {
-		const first = firstRects.get(card.dataset.id);
-		const last = card.getBoundingClientRect();
-		if (first) {
-			const dx = first.left - last.left;
-			const dy = first.top - last.top;
-			if (dx || dy) {
-				card.style.transform = `translate(${dx}px,${dy}px)`;
-				card.style.transition = 'transform 0s';
-				requestAnimationFrame(() => {
-					card.style.transition = 'transform 300ms ease';
-					card.style.transform = '';
-				});
-			}
-		}
+        `;
 	});
 }
 

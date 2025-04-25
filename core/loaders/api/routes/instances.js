@@ -9,12 +9,14 @@ router.get('/v1/servers/:instanceId?', async (req, res) => {
 		if (req.params.instanceId) {
 			const instance = data.instances.find((i) => i.instanceId === req.params.instanceId);
 			if (instance) {
-				res.render('status', { instances: [instance] });
+				const meta = buildMeta(instance);
+				res.render('status', { instances: [instance], meta });
 			} else {
 				res.status(404).send('Instance not found');
 			}
 		} else {
-			res.render('status', { instances: data.instances });
+			const meta = buildMeta();
+			res.render('status', { instances: data.instances, meta });
 		}
 	} catch (err) {
 		console.error(err);
@@ -26,20 +28,36 @@ router.get('/v1/servers/:instanceId?', async (req, res) => {
 router.get('/v1/server/data/instances/:instanceId?', async (req, res) => {
 	const { instanceId } = req.params;
 	const data = await getStatusPageData();
-
-	// Ensure instances is always an array, even when querying a single instance
 	if (instanceId) {
 		const instance = data.instances.find((i) => i.instanceId === instanceId);
 		if (instance) {
-			// Return the full data object with instances as an array (even for single instance)
 			res.json({ ...data, instances: [instance] });
 		} else {
 			res.status(404).send('Instance not found');
 		}
 	} else {
-		// No instanceId provided, return the full data object with instances array
-		res.json(data); // Return the full data object, including all instances
+		res.json(data);
 	}
 });
+
+// Meta builder
+function buildMeta(instance) {
+	// Build description
+	const state = instance?.server ? instance.server.state : '';
+	const cpuUsage = instance?.server.cpu ? `CPU Usage: ${instance.server.cpu.Percent}%` : '';
+	const memoryUsage = instance?.server.memory ? `Memory Usage: ${instance.server.memory.RawValue}/${instance.server.memory.MaxValue}GB` : '';
+	const performance = instance?.server.performance ? `${instance.server.performance.Unit}: ${instance.server.performance.RawValue}` : '';
+	const userCount = instance?.server.users ? `Users: ${instance.server.users.RawValue}/${instance.server.users.MaxValue}` : '';
+
+	const builtDescription = instance
+		? `${instance.friendlyName} - ${state}\n${cpuUsage}\n${memoryUsage}\n${performance}\n${userCount}`
+		: 'W.I.P Page to view the status of my servers.';
+
+	return {
+		title: instance ? `VoxelServers - ${instance.friendlyName}` : 'VoxelServers - Server Statuses',
+		description: builtDescription || 'W.I.P Page to view the status of my servers.',
+		image: (instance && instance.icon) || '/v1/static/images/logos/SrvLogoAlt.png',
+	};
+}
 
 module.exports = router;
