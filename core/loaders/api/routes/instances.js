@@ -1,3 +1,4 @@
+const { time } = require('discord.js');
 const { getStatusPageData } = require('../../../../functions/ampAPI/instanceFunctions');
 const express = require('express');
 const router = express.Router();
@@ -57,6 +58,7 @@ function buildMeta(instance) {
 		title: instance ? `VoxelServers - ${instance.friendlyName}` : 'VoxelServers - Server Statuses',
 		description: builtDescription || 'W.I.P Page to view the status of my servers.',
 		image: (instance && instance.icon) || '/v1/static/images/logos/SrvLogoAlt.png',
+		timestamp: Date.now(),
 	};
 }
 
