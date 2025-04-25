@@ -10,10 +10,29 @@ async function fetchInstanceData() {
 	const existingCards = Array.from(container.querySelectorAll('.instance-card'));
 	const firstRects = new Map(existingCards.map((card) => [card.dataset.id, card.getBoundingClientRect()]));
 
+	// Regex pattern for detecting a valid instanceId
+	const instanceIdRegex = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+
+	// Get the last part of the URL
+	const pathParts = window.location.pathname.split('/');
+	let instanceId = null;
+
+	// Check if the last part of the URL matches the instanceId
+	const lastPart = pathParts[pathParts.length - 1];
+	if (instanceIdRegex.test(lastPart)) {
+		instanceId = lastPart;
+	}
+
+	// Define the URL to fetch data from
+	let url = '/v1/server/data/instances';
+	if (instanceId) {
+		url += `/${encodeURIComponent(instanceId)}`;
+	}
+
 	// Fetch new data
 	let data;
 	try {
-		const res = await fetch('/v1/server/data/instancedata');
+		const res = await fetch(url);
 		if (!res.ok) throw new Error(`HTTP ${res.status}`);
 		data = await res.json();
 	} catch (err) {

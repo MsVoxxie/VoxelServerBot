@@ -5,7 +5,6 @@
 		<title>VoxelServers - Server Status</title>
 		<link rel="icon" type="image/png" href="/v1/static/images/logos/VS_Fox.ico" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="description" content="VoxelServers - Server Status Page" />
 		<meta property="og:title" content="VoxelServers - Server Status" />
 		<meta property="og:image" content="/v1/static/images/logos/SrvLogoAlt.png" />
 		<meta property="og:description" content="W.I.P Page to view the status of my servers." />
@@ -54,7 +53,7 @@
 			</svg>
 		</div>
 		<div id="status-wrapper">
-			<h1>🖥️ VoxelServers Instances</h1>
+			<h1>VoxelServers</h1>
 			<div id="instances">
 				<% instances.forEach(function(instance) { %>
 				<div class="instance-card <%= instance.server.state.toLowerCase() %>" data-id="<%= instance.instanceId %>"></div>
