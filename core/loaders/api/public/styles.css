@@ -36,7 +36,7 @@ body {
 	transform-box: fill-box;
 	transform-origin: center bottom;
 	animation: waveShift ease-in-out infinite alternate;
-	will-change: transform;
+	/* will-change: transform; */
 }
 
 .wave svg {
