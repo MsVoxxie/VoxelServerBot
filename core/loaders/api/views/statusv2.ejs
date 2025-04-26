@@ -2,14 +2,14 @@
 <head>
 	<meta charset="UTF-8" />
 	<title>VoxelServers</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta property="og:title" content="<%= meta.title %>" />
-    <meta property="og:description" content="<%= meta.description %>" />
-    <meta property="og:image" content="<%= meta.image %>" />
-    <meta property="og:type" content="article" />
-    <meta property="article:published_time" content="<%= meta.timestamp %>" />
-    <meta name="theme-color" content="#7097c3" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta property="og:title" content="<%= meta.title %>" />
+	<meta property="og:description" content="<%= meta.description %>" />
+	<meta property="og:image" content="<%= meta.image %>" />
+	<meta property="og:type" content="article" />
+	<meta property="article:published_time" content="<%= meta.timestamp %>" />
+	<meta name="theme-color" content="#7097c3" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<script src="https://cdn.tailwindcss.com"></script>
 	<link rel="stylesheet" href="/v1/static/stylesheets/stylesv2.css" />
 	<link rel="icon" type="image/png" href="/v1/static/images/logos/VS_Fox.ico" />
@@ -152,25 +152,22 @@
 		</svg>
 	</div>
 
-    <!-- Main content -->
-    <div class="page-wrapper min-h-screen flex flex-col justify-center items-center py-6 px-8">
-        <!-- Refresh Progress Bar -->
-        <div id="refresh-bar" class="fixed bottom-0 left-0 h-1 bg-gradient-to-r from-blue-400 to-indigo-500 transition-all duration-1000 ease-out" style="width: 0%"></div>
-      
-        <!-- Community Badge -->
-        <a class="text-center text-white font-bold text-3xl mb-6 transition hover:shadow-2xl hover:-translate-y-1" href="/v1/servers">VoxelServers</a>
-      
-        <!-- Grid for Instances -->
-        <div class="grid gap-6 max-w-screen-xl w-full 
-          <%= instances.length === 1 ? 'grid-cols-1 justify-center' : 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' %>">
-          <% instances.forEach(function(instance) { %>
-          <div
-            class="instance-card relative rounded-2xl overflow-hidden shadow-lg transition hover:shadow-2xl hover:-translate-y-1 flex flex-col justify-between w-full 
-            <%= instance.server.state === 'Offline' ? 'max-h-32' : 'h-full' %>
-            <%= instances.length === 1 ? 'max-w-[500px]' : '' %>"
-            style="<%= instances.length === 1 ? 'margin: 0 auto;' : '' %>"
-            data-id="<%= instance.instanceId %>"
-          >
+	<!-- Main content -->
+	<div class="page-wrapper min-h-screen flex flex-col justify-center items-center py-6 px-8">
+		<!-- Refresh Progress Bar -->
+		<div id="refresh-bar" class="fixed bottom-0 left-0 h-1 bg-gradient-to-r from-blue-400 to-indigo-500 transition-all duration-1000 ease-out" style="width: 0%"></div>
+
+		<!-- Community Badge -->
+		<a class="text-center text-white font-bold text-3xl mb-6 transition hover:shadow-2xl hover:-translate-y-1" href="/v1/servers">VoxelServers</a>
+
+		<!-- Grid for Instances -->
+		<div class="grid gap-6 max-w-screen-xl w-full <%= instances.length === 1 ? 'grid-cols-1 justify-center' : 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' %>">
+			<% instances.forEach(function(instance) { %>
+			<div
+				class="instance-card relative rounded-2xl overflow-hidden shadow-lg transition hover:shadow-2xl hover:-translate-y-1 flex flex-col justify-between w-full <%= instance.server.state === 'Offline' ? 'max-h-32' : 'h-full' %> <%= instances.length === 1 ? 'max-w-[500px]' : '' %>"
+				style="<%= instances.length === 1 ? 'margin: 0 auto;' : '' %>"
+				data-id="<%= instance.instanceId %>"
+			>
 				<!-- Blurred background + overlay -->
 				<div class="absolute inset-0">
 					<img src="<%= instance.icon %>" alt="" class="w-full h-full object-cover filter blur-md opacity-80" />
@@ -265,7 +262,12 @@
 					<div class="text-sm text-gray-300 mb-1">Connect</div>
 					<div class="bg-gray-800 font-mono text-white text-sm p-2 rounded-lg flex items-center justify-center space-x-2">
 						<code><%= instance.server.ip %>:<%= instance.server.port %></code>
-						<button class="text-blue-400 hover:text-blue-200" onclick="copyToClipboard('<%= instance.server.ip %>:<%= instance.server.port %>', this)">Copy</button>
+						<button
+							class="text-blue-400 hover:text-blue-200"
+							onclick="event.stopPropagation(); copyToClipboard('<%= instance.server.ip %>:<%= instance.server.port %>', this)"
+						>
+							Copy
+						</button>
 					</div>
 					<% } else { %>
 					<div class="text-sm text-gray-300">Status</div>
@@ -277,5 +279,5 @@
 			<% }); %>
 		</div>
 		<script src="/v1/static/scripts/scriptsv2.js"></script>
-	</body>
-</html>
+	</div>
+</body>

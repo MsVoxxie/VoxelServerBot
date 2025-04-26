@@ -121,7 +121,12 @@ function updateCards(instances) {
 					<div class="text-sm text-gray-300 mb-1">Connect</div>
 					<div class="bg-gray-800 font-mono text-white text-sm p-2 rounded-lg flex items-center justify-center space-x-2 opacity-70 transition hover:opacity-100">
 						<code>${inst.server.ip}:${inst.server.port}</code>
-						<button class="text-blue-400 hover:text-blue-200" onclick="copyToClipboard('${inst.server.ip}:${inst.server.port}', this)">Copy</button>
+						<button
+							class="text-blue-400 hover:text-blue-200"
+							onclick="event.stopPropagation(); copyToClipboard('<%= instance.server.ip %>:<%= instance.server.port %>', this)"
+						>
+							Copy
+						</button>
 					</div>
 				`;
 			} else {
