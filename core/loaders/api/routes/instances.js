@@ -1,4 +1,3 @@
-const { time } = require('discord.js');
 const { getStatusPageData } = require('../../../../functions/ampAPI/instanceFunctions');
 const express = require('express');
 const router = express.Router();
@@ -11,13 +10,13 @@ router.get('/v1/servers/:instanceId?', async (req, res) => {
 			const instance = data.instances.find((i) => i.instanceId === req.params.instanceId);
 			if (instance) {
 				const meta = buildMeta(instance);
-				res.render('status', { instances: [instance], meta });
+				res.render('statusv2', { instances: [instance], meta });
 			} else {
 				res.status(404).send('Instance not found');
 			}
 		} else {
 			const meta = buildMeta();
-			res.render('status', { instances: data.instances, meta });
+			res.render('statusv2', { instances: data.instances, meta });
 		}
 	} catch (err) {
 		console.error(err);
