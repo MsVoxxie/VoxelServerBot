@@ -3,6 +3,41 @@
 	transition: width 0.5s ease;
 }
 
+/* === Head Pops! === */
+@keyframes pop-in {
+	0% {
+		transform: scale(0.5);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.3);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+@keyframes pop-out {
+	0% {
+		transform: scale(1);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(0.5);
+		opacity: 0;
+	}
+}
+
+.pop-in {
+	animation: pop-in 0.4s ease forwards;
+}
+
+.pop-out {
+	animation: pop-out 0.4s ease forwards;
+}
+
 /* === Loader === */
 .page-wrapper {
 	opacity: 0;
@@ -17,6 +52,7 @@
 	background: dodgerblue;
 	width: 0%;
 	transition: width 1s linear;
+	z-index: 9999;
 }
 
 /* === Background Waves === */

@@ -164,7 +164,7 @@
 		<div class="grid gap-6 max-w-screen-xl w-full <%= instances.length === 1 ? 'grid-cols-1 justify-center' : 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' %>">
 			<% instances.forEach(function(instance) { %>
 			<div
-				class="instance-card relative rounded-2xl overflow-hidden shadow-lg transition hover:shadow-2xl hover:-translate-y-1 flex flex-col justify-between w-full <%= instance.server.state === 'Offline' ? 'max-h-32' : 'h-full' %> <%= instances.length === 1 ? 'max-w-[500px]' : '' %>"
+				class="instance-card relative rounded-2xl overflow-hidden shadow-lg transition hover:shadow-2xl hover:-translate-y-1 flex flex-col justify-between w-full <%= instance.server.state === 'Offline' ? 'max-h-35' : 'h-full' %> <%= instances.length === 1 ? 'max-w-[500px]' : '' %>"
 				style="<%= instances.length === 1 ? 'margin: 0 auto;' : '' %>"
 				data-id="<%= instance.instanceId %>"
 			>
@@ -182,19 +182,22 @@
 				<!-- Card content -->
 				<div class="relative z-10 p-4 space-y-4 flex-grow">
 					<!-- Title -->
-					<div class="text-white font-bold text-xl text-center flex justify-center items-center">
+					<div class="text-white font-bold text-xl text-center flex justify-center items-center mb-0 leading-none space-x-2">
 						<span><%= instance.friendlyName || instance.instanceName %></span>
 						<% if (instance.module === 'Minecraft' && instance.welcomeMessage) { %>
 						<a
 							href="<%= instance.welcomeMessage %>"
 							onclick="event.stopPropagation()"
 							target="_blank"
-							class="bg-blue-500 text-white text-xs px-2 py-0.3 rounded-md ml-2 hover:bg-blue-400 transition align-middle"
+							class="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-md hover:bg-blue-400 transition flex items-center h-5"
 						>
 							Modpack
 						</a>
 						<% } %>
 					</div>
+
+					<!-- Module Name -->
+					<div class="text-s text-gray-400 text-center -mt-1 leading-none"><%= instance.moduleName || instance.module %></div>
 
 					<!-- CPU -->
 					<% if (instance.server.cpu) { %>
@@ -241,8 +244,17 @@
 					</div>
 					<% } %>
 
-					<!-- Players -->
-					<% if (instance.server.users) { %>
+					<!-- Players (heads for Minecraft, bar for everything else) -->
+					<% if (instance.module === 'Minecraft' && instance.server.state === 'Running' && instance.players) { %>
+					<div>
+						<div class="text-sm text-gray-300">Players</div>
+						<div class="players-container flex items-center flex-wrap gap-1 mt-1">
+							<% const players = instance.players || []; const maxPlayers = instance.server.users?.MaxValue ?? players.length; for (let i = 0; i < maxPlayers; i++) %>
+						</div>
+						<div class="text-xs text-gray-400 mt-1 text-center"><%= players.length %> / <%= maxPlayers %> players</div>
+					</div>
+					<% } else if (instance.server.users && instance.server.state === 'Running') { %>
+					<!-- For non-Minecraft servers, show the player bar if the server is running -->
 					<div>
 						<div class="text-sm text-gray-300">Players</div>
 						<div class="flex justify-between text-white">
@@ -250,7 +262,7 @@
 							<span class="users-max text-gray-400 text-sm">/ <%= instance.server.users.MaxValue %></span>
 						</div>
 						<div class="w-full bg-gray-700 rounded-full h-2 mt-1 users-bar">
-							<div class="bar-inner bg-purple-500 h-2 rounded-full" style="width: <%= instance.server.users.Percent %>%"></div>
+							<div class="bg-purple-500 h-2 rounded-full" style="width: <%= instance.server.users.Percent %>%"></div>
 						</div>
 					</div>
 					<% } %>

@@ -1,3 +1,4 @@
+let currentPlayerLists = {}; // Store current player lists
 const bar = document.getElementById('refresh-bar');
 let time = 0;
 const interval = 10;
@@ -89,8 +90,55 @@ function updateCards(instances) {
 			if (memBarInner) memBarInner.style.width = inst.server.memory.Percent + '%';
 		}
 
-		// Update Players
-		if (inst.server.users) {
+		// Players Section Update (only for Minecraft instances)
+		if (inst.module === 'Minecraft' && inst.server.state === 'Running' && inst.players) {
+			const playersContainer = card.querySelector('.players-container');
+			const currentPlayers = inst.players.map((player) => player.name).join(',');
+
+			// Check if the player list has changed
+			if (currentPlayerLists[inst.instanceId] !== currentPlayers) {
+				currentPlayerLists[inst.instanceId] = currentPlayers; // Update the stored player list
+
+				// Remove current player heads
+				const existingPlayerImgs = playersContainer.querySelectorAll('img');
+				existingPlayerImgs.forEach((img) => {
+					img.classList.add('pop-out');
+					setTimeout(() => {
+						img.remove();
+					}, 300); // Ensure removal happens after animation
+				});
+
+				// Remove any existing empty slots
+				const existingEmptySlots = playersContainer.querySelectorAll('.w-6.bg-gray-600');
+				existingEmptySlots.forEach((slot) => {
+					slot.remove();
+				});
+
+				// Add new player heads
+				inst.players.forEach((user) => {
+					const playerImg = document.createElement('img');
+					playerImg.src = `/v1/client/playerheads/${user.name}`;
+					playerImg.alt = user.name;
+					playerImg.title = user.name;
+					playerImg.classList.add('w-6', 'h-6', 'rounded-full', 'bg-gray-700', 'object-cover', 'pop-in');
+					playersContainer.appendChild(playerImg);
+				});
+
+				// Add empty slots if there are less than max players
+				const maxPlayers = inst.server.users?.MaxValue || inst.players.length;
+				const currentPlayerCount = inst.players.length;
+
+				// Add empty slots to represent empty player spots
+				for (let i = currentPlayerCount; i < maxPlayers; i++) {
+					const emptySlot = document.createElement('div');
+					emptySlot.classList.add('w-6', 'h-6', 'rounded-full', 'bg-gray-600', 'bg-opacity-30', 'pop-in');
+					playersContainer.appendChild(emptySlot);
+				}
+			}
+		}
+
+		// For Non-Minecraft instances, just show the user bar if the server is running
+		if (inst.server.users && inst.server.state === 'Running') {
 			const usersCount = card.querySelector('.users-count');
 			const usersMax = card.querySelector('.users-max');
 			const usersBarInner = card.querySelector('.users-bar > div');
@@ -123,7 +171,7 @@ function updateCards(instances) {
 						<code>${inst.server.ip}:${inst.server.port}</code>
 						<button
 							class="text-blue-400 hover:text-blue-200"
-							onclick="event.stopPropagation(); copyToClipboard('<%= instance.server.ip %>:<%= instance.server.port %>', this)"
+							onclick="event.stopPropagation(); copyToClipboard('${inst.server.ip}:${inst.server.port}', this)"
 						>
 							Copy
 						</button>

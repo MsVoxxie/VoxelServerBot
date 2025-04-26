@@ -260,6 +260,7 @@ async function fetchInstanceStatuses() {
 				instanceDisplaySource: i.DisplayImageSource,
 				instanceSuspended: i.Suspended,
 				instanceModule: i.Module,
+				instanceModuleName: i.ModuleDisplayName,
 			},
 			serverInfo: serverData?.status
 				? {
@@ -287,6 +288,7 @@ async function getStatusPageData() {
 
 	try {
 		const instances = await instanceApi.ADSModule.GetLocalInstancesAsync();
+
 		const filteredInstances = instances.filter(
 			(i) => i.InstanceName !== 'ADS01' && !(typeof i.WelcomeMessage === 'string' && i.WelcomeMessage.trim().toLowerCase() === 'hidden')
 		);
@@ -310,6 +312,8 @@ async function getStatusPageData() {
 					welcomeMessage: i.WelcomeMessage,
 					running: i.Running,
 					module: i.Module,
+					moduleName: i.ModuleDisplayName,
+
 					icon,
 					suspended: i.Suspended,
 					server: serverData?.status
