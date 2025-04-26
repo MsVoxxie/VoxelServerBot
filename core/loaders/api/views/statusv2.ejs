@@ -190,6 +190,7 @@
 						<% if (instance.module === 'Minecraft' && instance.welcomeMessage) { %>
 						<a
 							href="<%= instance.welcomeMessage %>"
+							onclick="event.stopPropagation()"
 							target="_blank"
 							class="bg-blue-500 text-white text-xs px-2 py-0.3 rounded-md ml-2 hover:bg-blue-400 transition align-middle"
 						>
