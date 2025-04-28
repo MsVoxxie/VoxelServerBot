@@ -125,8 +125,9 @@ function updateCards(instances) {
 			const perfContainer = document.createElement('div');
 			perfContainer.classList.add('text-sm', 'text-gray-300', 'mt-2');
 			perfContainer.innerHTML = `
+				<div class="text-sm text-gray-300">Performance</div>
 				<div class="flex justify-between text-white">
-					<span class="perf-value">N/A</span>
+					<span class="perf-value">Loading...</span>
 					<span class="perf-max text-gray-400 text-sm">of 0 TPS</span>
 				</div>
 			`;
