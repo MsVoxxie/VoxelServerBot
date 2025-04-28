@@ -49,9 +49,16 @@ async function reloadStatus() {
 
 // Walk each card and update its fields
 function updateCards(instances) {
+	const presentInstanceIds = new Set(instances.map((inst) => inst.instanceId));
+
 	instances.forEach((inst) => {
-		const card = document.querySelector(`.instance-card[data-id="${inst.instanceId}"]`);
-		if (!card) return;
+		let card = document.querySelector(`.instance-card[data-id="${inst.instanceId}"]`);
+
+		// If the card doesn't exist, create and append it
+		if (!card) {
+			card = initializeCard(inst);
+			document.querySelector('.grid').appendChild(card);
+		}
 
 		// Update border color
 		const border = card.querySelector('.status-border');
@@ -71,118 +78,163 @@ function updateCards(instances) {
 		}
 
 		// Update CPU
+		const cpuPercent = card.querySelector('.cpu-percent');
+		const cpuMax = card.querySelector('.cpu-max');
+		const cpuBarInner = card.querySelector('.cpu-bar > div');
 		if (inst.server.cpu) {
-			const cpuPercent = card.querySelector('.cpu-percent');
-			const cpuMax = card.querySelector('.cpu-max');
-			const cpuBarInner = card.querySelector('.cpu-bar > div');
 			if (cpuPercent) cpuPercent.textContent = inst.server.cpu.Percent + '%';
 			if (cpuMax) cpuMax.textContent = 'of ' + inst.server.cpu.MaxValue + '%';
 			if (cpuBarInner) cpuBarInner.style.width = inst.server.cpu.Percent + '%';
+		} else {
+			if (cpuPercent) cpuPercent.textContent = 'N/A';
+			if (cpuMax) cpuMax.textContent = 'of 0%';
+			if (cpuBarInner) cpuBarInner.style.width = '0%';
 		}
 
 		// Update Memory
+		const memUsed = card.querySelector('.mem-used');
+		const memMax = card.querySelector('.mem-max');
+		const memBarInner = card.querySelector('.mem-bar > div');
 		if (inst.server.memory) {
-			const memUsed = card.querySelector('.mem-used');
-			const memMax = card.querySelector('.mem-max');
-			const memBarInner = card.querySelector('.mem-bar > div');
 			if (memUsed) memUsed.textContent = (inst.server.memory.RawValue / 1024).toFixed(1) + ' GB';
 			if (memMax) memMax.textContent = 'of ' + (inst.server.memory.MaxValue / 1024).toFixed(1) + ' GB';
 			if (memBarInner) memBarInner.style.width = inst.server.memory.Percent + '%';
-		}
-
-		// Players Section Update (only for Minecraft instances)
-		if (inst.module === 'Minecraft' && inst.server.state === 'Running' && inst.players) {
-			const playersContainer = card.querySelector('.players-container');
-			const currentPlayers = inst.players.map((player) => player.name).join(',');
-
-			// Check if the player list has changed
-			if (currentPlayerLists[inst.instanceId] !== currentPlayers) {
-				currentPlayerLists[inst.instanceId] = currentPlayers; // Update the stored player list
-
-				// Remove current player heads
-				const existingPlayerImgs = playersContainer.querySelectorAll('img');
-				existingPlayerImgs.forEach((img) => {
-					img.classList.add('pop-out');
-					setTimeout(() => {
-						img.remove();
-					}, 300); // Ensure removal happens after animation
-				});
-
-				// Remove any existing empty slots
-				const existingEmptySlots = playersContainer.querySelectorAll('.w-6.bg-gray-600');
-				existingEmptySlots.forEach((slot) => {
-					slot.remove();
-				});
-
-				// Add new player heads
-				inst.players.forEach((user) => {
-					const playerImg = document.createElement('img');
-					playerImg.src = `/v1/client/playerheads/${user.name}`;
-					playerImg.alt = user.name;
-					playerImg.title = user.name;
-					playerImg.classList.add('w-6', 'h-6', 'rounded-full', 'bg-gray-700', 'object-cover', 'pop-in');
-					playersContainer.appendChild(playerImg);
-				});
-
-				// Add empty slots if there are less than max players
-				const maxPlayers = inst.server.users?.MaxValue || inst.players.length;
-				const currentPlayerCount = inst.players.length;
-
-				// Add empty slots to represent empty player spots
-				for (let i = currentPlayerCount; i < maxPlayers; i++) {
-					const emptySlot = document.createElement('div');
-					emptySlot.classList.add('w-6', 'h-6', 'rounded-full', 'bg-gray-600', 'bg-opacity-30', 'pop-in');
-					playersContainer.appendChild(emptySlot);
-				}
-			}
-		}
-
-		// For Non-Minecraft instances, just show the user bar if the server is running
-		if (inst.server.users && inst.server.state === 'Running') {
-			const usersCount = card.querySelector('.users-count');
-			const usersMax = card.querySelector('.users-max');
-			const usersBarInner = card.querySelector('.users-bar > div');
-			if (usersCount) usersCount.textContent = inst.server.users.RawValue;
-			if (usersMax) usersMax.textContent = '/ ' + inst.server.users.MaxValue;
-			if (usersBarInner) usersBarInner.style.width = inst.server.users.Percent + '%';
+		} else {
+			if (memUsed) memUsed.textContent = 'N/A';
+			if (memMax) memMax.textContent = 'of 0 GB';
+			if (memBarInner) memBarInner.style.width = '0%';
 		}
 
 		// Update Performance
+		const perfValue = card.querySelector('.perf-value');
+		const perfMax = card.querySelector('.perf-max');
+		let perfBarInner = card.querySelector('.perf-bar > .bar-inner');
+
+		// Only create the performance bar if performance values exist
+		if (inst.server.performance && !perfBarInner) {
+			const perfBar = document.createElement('div');
+			perfBar.classList.add('w-full', 'bg-gray-700', 'rounded-full', 'h-2', 'mt-1', 'perf-bar');
+
+			perfBarInner = document.createElement('div');
+			perfBarInner.classList.add('bar-inner', 'bg-yellow-500', 'h-2', 'rounded-full');
+			perfBarInner.style.width = '0%';
+
+			perfBar.appendChild(perfBarInner);
+
+			// Create the performance container
+			const perfContainer = document.createElement('div');
+			perfContainer.classList.add('text-sm', 'text-gray-300', 'mt-2');
+			perfContainer.innerHTML = `
+				<div class="flex justify-between text-white">
+					<span class="perf-value">N/A</span>
+					<span class="perf-max text-gray-400 text-sm">of 0 TPS</span>
+				</div>
+			`;
+			perfContainer.appendChild(perfBar);
+
+			// Append the performance container under memory and above players
+			const memoryContainer = card.querySelector('.mem-bar');
+			if (memoryContainer) {
+				memoryContainer.parentNode.insertBefore(perfContainer, memoryContainer.nextSibling);
+			} else {
+				console.warn('Memory container not found for card:', card);
+			}
+		}
+
+		// Update the performance bar values
 		if (inst.server.performance) {
-			const perfValue = card.querySelector('.perf-value');
-			const perfMax = card.querySelector('.perf-max');
-			const perfBarInner = card.querySelector('.perf-bar > div');
 			if (perfValue) perfValue.textContent = inst.server.performance.RawValue;
 			if (perfMax) perfMax.textContent = 'of ' + inst.server.performance.MaxValue + ' ' + (inst.server.performance.Unit || 'TPS');
 			if (perfBarInner) {
 				const pbar = (inst.server.performance.RawValue / inst.server.performance.MaxValue) * 100;
 				perfBarInner.style.width = pbar + '%';
 			}
+		} else {
+			if (perfValue) perfValue.textContent = 'N/A';
+			if (perfMax) perfMax.textContent = 'of 0 TPS';
+			if (perfBarInner) perfBarInner.style.width = '0%';
+		}
+
+		// Update Players (for Minecraft)
+		const playersContainer = card.querySelector('.players-container');
+		const playersCount = card.querySelector('.players-count');
+		if (playersContainer) {
+			if (inst.module === 'Minecraft') {
+				const players = inst.players || []; // Default to an empty array if no players
+				const currentPlayers = players.map((player) => player.name).join(',');
+
+				// Only update player heads if the list changed
+				if (currentPlayerLists[inst.instanceId] !== currentPlayers || inst.server.state !== 'Running') {
+					currentPlayerLists[inst.instanceId] = currentPlayers;
+
+					// Remove all children (player heads and empty slots)
+					playersContainer.innerHTML = '';
+
+					// Add new player heads or placeholder slots
+					const maxPlayers = inst.server.state === 'Running' ? inst.server.users?.MaxValue || players.length : 8;
+					for (let i = 0; i < maxPlayers; i++) {
+						if (i < players.length && inst.server.state === 'Running') {
+							// Show actual player heads
+							const playerImg = document.createElement('img');
+							playerImg.src = `/v1/client/playerheads/${players[i].name}`;
+							playerImg.alt = players[i].name;
+							playerImg.title = players[i].name;
+							playerImg.classList.add('w-6', 'h-6', 'rounded-full', 'bg-gray-700', 'object-cover', 'pop-in');
+							playersContainer.appendChild(playerImg);
+						} else {
+							// Show placeholder slots
+							const emptySlot = document.createElement('div');
+							emptySlot.classList.add('w-6', 'h-6', 'rounded-full', 'bg-gray-600', 'bg-opacity-30', 'pop-in');
+							playersContainer.appendChild(emptySlot);
+						}
+					}
+					// Update player count
+					if (playersCount) {
+						playersCount.textContent = `${players.length} / ${maxPlayers} players`;
+					}
+				}
+			} else {
+				// Not Minecraft or no players: clear the container
+				playersContainer.innerHTML = '';
+				currentPlayerLists[inst.instanceId] = '';
+			}
+		}
+
+		// Always update the user bar (orbs) for all servers
+		const usersCount = card.querySelector('.users-count');
+		const usersMax = card.querySelector('.users-max');
+		const usersBarInner = card.querySelector('.users-bar > div');
+		if (inst.server.users) {
+			if (usersCount) usersCount.textContent = inst.server.users.RawValue;
+			if (usersMax) usersMax.textContent = '/ ' + inst.server.users.MaxValue;
+			if (usersBarInner) usersBarInner.style.width = inst.server.users.Percent + '%';
+		} else {
+			if (usersCount) usersCount.textContent = '0';
+			if (usersMax) usersMax.textContent = '/ 0';
+			if (usersBarInner) usersBarInner.style.width = '0%';
 		}
 
 		// Update Connect/Status block
 		const connectBlock = card.querySelector('.connect-status');
 		if (connectBlock) {
 			if (inst.server.state === 'Running') {
-				// Show connect info
 				connectBlock.innerHTML = `
-					<div class="text-sm text-gray-300 mb-1">Connect</div>
-					<div class="bg-gray-800 font-mono text-white text-sm p-2 rounded-lg flex items-center justify-center space-x-2 opacity-70 transition hover:opacity-100">
-						<code>${inst.server.ip}:${inst.server.port}</code>
-						<button
-							class="text-blue-400 hover:text-blue-200"
-							onclick="event.stopPropagation(); copyToClipboard('${inst.server.ip}:${inst.server.port}', this)"
-						>
-							Copy
-						</button>
-					</div>
-				`;
+                    <div class="text-sm text-gray-300 mb-1">Connect</div>
+                    <div class="bg-gray-800 font-mono text-white text-sm p-2 rounded-lg flex items-center justify-center space-x-2 opacity-70 transition hover:opacity-100">
+                        <code>${inst.server.ip}:${inst.server.port}</code>
+                        <button
+                            class="text-blue-400 hover:text-blue-200"
+                            onclick="event.stopPropagation(); copyToClipboard('${inst.server.ip}:${inst.server.port}', this)"
+                        >
+                            Copy
+                        </button>
+                    </div>
+                `;
 			} else {
-				// Show status
 				connectBlock.innerHTML = `
-					<div class="text-sm text-gray-300">Status</div>
-					<div class="text-red-400 font-bold">${inst.server.state}</div>
-				`;
+                    <div class="text-sm text-gray-300">Status</div>
+                    <div class="text-red-400 font-bold">${inst.server.state}</div>
+                `;
 			}
 		}
 
@@ -190,6 +242,14 @@ function updateCards(instances) {
 		card.onclick = () => {
 			window.location.href = `/v1/servers/${inst.instanceId}`;
 		};
+	});
+
+	// Remove cards that are no longer present
+	document.querySelectorAll('.instance-card').forEach((card) => {
+		const id = card.getAttribute('data-id');
+		if (!presentInstanceIds.has(id)) {
+			card.remove();
+		}
 	});
 }
 

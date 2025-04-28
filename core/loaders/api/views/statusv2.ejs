@@ -211,6 +211,17 @@
 							<div class="bar-inner bg-red-500 h-2 rounded-full" style="width: <%= instance.server.cpu.Percent %>%"></div>
 						</div>
 					</div>
+					<% } else { %>
+					<div>
+						<div class="text-sm text-gray-300">CPU Usage</div>
+						<div class="flex justify-between text-white">
+							<span class="cpu-percent">N/A</span>
+							<span class="cpu-max text-gray-400 text-sm">of N/A</span>
+						</div>
+						<div class="w-full bg-gray-700 rounded-full h-2 mt-1 cpu-bar">
+							<div class="bar-inner bg-red-500 h-2 rounded-full" style="width: 0%"></div>
+						</div>
+					</div>
 					<% } %>
 
 					<!-- Memory -->
@@ -223,6 +234,17 @@
 						</div>
 						<div class="w-full bg-gray-700 rounded-full h-2 mt-1 mem-bar">
 							<div class="bar-inner bg-blue-500 h-2 rounded-full" style="width: <%= instance.server.memory.Percent %>%"></div>
+						</div>
+					</div>
+					<% } else { %>
+					<div>
+						<div class="text-sm text-gray-300">Memory</div>
+						<div class="flex justify-between text-white">
+							<span class="mem-used">N/A</span>
+							<span class="mem-max text-gray-400 text-sm">of N/A</span>
+						</div>
+						<div class="w-full bg-gray-700 rounded-full h-2 mt-1 mem-bar">
+							<div class="bar-inner bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
 						</div>
 					</div>
 					<% } %>
@@ -242,27 +264,55 @@
 							></div>
 						</div>
 					</div>
+					<% } else if (instance.server.state === 'Offline' && instance.server.performance) { %>
+					<div class="text-sm text-gray-300">Performance</div>
+					<div class="flex justify-between text-white">
+						<span class="perf-value">N/A</span>
+						<span class="perf-max text-gray-400 text-sm">of 0 TPS</span>
+					</div>
+					<div class="w-full bg-gray-700 rounded-full h-2 mt-1 perf-bar">
+						<div class="bar-inner bg-yellow-500 h-2 rounded-full" style="width: 0%"></div>
+					</div>
 					<% } %>
 
 					<!-- Players (heads for Minecraft, bar for everything else) -->
-					<% if (instance.module === 'Minecraft' && instance.server.state === 'Running' && instance.players) { %>
+					<% if (instance.module === 'Minecraft') { %>
 					<div>
 						<div class="text-sm text-gray-300">Players</div>
-						<div class="players-container flex items-center flex-wrap gap-1 mt-1">
-							<% const players = instance.players || []; const maxPlayers = instance.server.users?.MaxValue ?? players.length; for (let i = 0; i < maxPlayers; i++) %>
+						<div class="players-container grid grid-cols-10 gap-2 justify-center mt-1">
+							<% const players = instance.players || []; const maxPlayers = instance.server.state === 'Running' ? (instance.server.users?.MaxValue ?? players.length) : 8; for
+							(let i = 0; i < maxPlayers; i++) { %> <% if (i < players.length && instance.server.state === 'Running') { %>
+							<!-- Show actual player heads -->
+							<img
+								src="/v1/client/playerheads/<%= players[i].name %>"
+								alt="<%= players[i].name %>"
+								title="<%= players[i].name %>"
+								class="w-6 h-6 rounded-full bg-gray-700 object-cover"
+							/>
+							<% } else { %>
+							<!-- Show placeholder slots -->
+							<div class="w-6 h-6 rounded-full bg-gray-600 bg-opacity-30"></div>
+							<% } %> <% } %>
 						</div>
-						<div class="text-xs text-gray-400 mt-1 text-center"><%= players.length %> / <%= maxPlayers %> players</div>
+						<div class="players-count text-xs text-gray-400 mt-1 text-center">
+							<% if (instance.server.state === 'Running') { %> <%= players.length %> / <%= maxPlayers %> players <% } else { %> Offline <% } %>
+						</div>
 					</div>
-					<% } else if (instance.server.users && instance.server.state === 'Running') { %>
-					<!-- For non-Minecraft servers, show the player bar if the server is running -->
+					<% } else { %>
+					<!-- For non-Minecraft servers -->
 					<div>
 						<div class="text-sm text-gray-300">Players</div>
 						<div class="flex justify-between text-white">
+							<% if (instance.server.state === 'Running') { %>
 							<span class="users-count"><%= instance.server.users.RawValue %></span>
 							<span class="users-max text-gray-400 text-sm">/ <%= instance.server.users.MaxValue %></span>
+							<% } else { %>
+							<span class="users-count">0</span>
+							<span class="users-max text-gray-400 text-sm">/ 0</span>
+							<% } %>
 						</div>
 						<div class="w-full bg-gray-700 rounded-full h-2 mt-1 users-bar">
-							<div class="bg-purple-500 h-2 rounded-full" style="width: <%= instance.server.users.Percent %>%"></div>
+							<div class="bg-purple-500 h-2 rounded-full" style="width: <%= instance.server.state === 'Running' ? instance.server.users.Percent : 0 %>%"></div>
 						</div>
 					</div>
 					<% } %>
