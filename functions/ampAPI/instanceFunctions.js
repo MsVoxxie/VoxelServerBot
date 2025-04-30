@@ -1,5 +1,6 @@
 const { instanceAPI, mainAPI } = require('./apiFunctions');
 const { getImageSource } = require('../helpers/getSourceImage');
+const Logger = require('../logging/logger');
 const { SERVER_IP } = process.env;
 
 //* Add an event trigger to an instance
@@ -300,7 +301,7 @@ async function getStatusPageData() {
 			filteredInstances.map(async (i, index) => {
 				const serverData = instanceStatuses[index];
 				const playersData = instancePlayers[index];
-				const icon = await getImageSource(i.DisplayImageSource); // await the icon
+				const icon = await getImageSource(i.DisplayImageSource) || null; // await the icon
 
 				// Pluck the server port from the instance
 				const mainPort = extractMainPort(i.DeploymentArgs);

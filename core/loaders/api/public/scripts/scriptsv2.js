@@ -172,7 +172,7 @@ function updateCards(instances) {
 					playersContainer.innerHTML = '';
 
 					// Add new player heads or placeholder slots
-					const maxPlayers = inst.server.state === 'Running' ? inst.server.users?.MaxValue || players.length : 8;
+					const maxPlayers = inst.server.state === 'Running' ? inst.server.users?.MaxValue || players.length : 10;
 					for (let i = 0; i < maxPlayers; i++) {
 						if (i < players.length && inst.server.state === 'Running') {
 							// Show actual player heads

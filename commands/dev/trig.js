@@ -10,8 +10,8 @@ module.exports = {
 		disabled: false,
 	},
 	async execute(client, interaction, settings) {
-		// Flood the queue with tasks to test the queue system
-
-		for (let i = 0; i < 15; i++) {}
+		const inst = await mainAPI();
+		const Status = await inst.Core.GetStatusAsync();
+		console.log(Status);
 	},
 };
