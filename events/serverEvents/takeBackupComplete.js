@@ -11,7 +11,7 @@ module.exports = {
 		// Modify the message to include the time taken
 		const startTime = client.backupTimers.get(INSTANCE).startTime;
 		const duration = client.getDuration(startTime, Date.now()).join(', ');
-		MESSAGE = `${MESSAGE}\n Took ${duration}`;
+		MESSAGE = `${MESSAGE}\nTook ${duration}`;
 
 		// Send off the message to Discord
 		queueTask(INSTANCE, serverLink, USER, MESSAGE, INSTANCE);
