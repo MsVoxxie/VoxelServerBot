@@ -6,9 +6,19 @@ module.exports = {
 	runType: 'infinity',
 	async execute(client, data) {
 		// Split the data into variables
-		const { USER, INSTANCE, MESSAGE } = data;
+		let { USER, INSTANCE, MESSAGE } = data;
+
+		// Modify the message to include the time taken
+		const startTime = client.backupTimers.get(INSTANCE).startTime;
+		const duration = client.getDuration(startTime, Date.now()).join(', ');
+		MESSAGE = `${MESSAGE}\n Took ${duration}`;
 
 		// Send off the message to Discord
 		queueTask(INSTANCE, serverLink, USER, MESSAGE, INSTANCE);
+
+		// Remove the instanceid from the backupTimers collection
+		if (client.backupTimers.has(INSTANCE)) {
+			client.backupTimers.delete(INSTANCE);
+		}
 	},
 };

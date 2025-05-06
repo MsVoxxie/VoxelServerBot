@@ -10,5 +10,10 @@ module.exports = {
 
 		// Send off the message to Discord
 		queueTask(INSTANCE, serverLink, USER, MESSAGE, INSTANCE);
+
+		// Add the instanceid and startTime to the backupTimers collection
+		if (!client.backupTimers.has(INSTANCE)) {
+			client.backupTimers.set(INSTANCE, { startTime: Date.now() });
+		}
 	},
 };

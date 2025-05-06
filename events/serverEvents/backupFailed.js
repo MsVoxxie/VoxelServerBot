@@ -10,5 +10,10 @@ module.exports = {
 
 		// Send off the message to Discord
 		queueTask(INSTANCE, serverLink, USER, MESSAGE, INSTANCE);
+
+		// Remove the instanceid from the backupTimers collection
+		if (client.backupTimers.has(INSTANCE)) {
+			client.backupTimers.delete(INSTANCE);
+		}
 	},
 };
