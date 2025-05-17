@@ -49,9 +49,9 @@ async function reloadStatus() {
 
 // Walk each card and update its fields
 function updateCards(instances) {
-	const presentInstanceIds = new Set(instances.map((inst) => inst.instanceId));
+	const presentInstanceIds = new Set(instances.filter((inst) => !inst.suspended).map((inst) => inst.instanceId));
 
-	instances.forEach((inst) => {
+	instances.filter(inst => !inst.suspended).forEach((inst) => {
 		let card = document.querySelector(`.instance-card[data-id="${inst.instanceId}"]`);
 
 		// If the card doesn't exist, create and append it
