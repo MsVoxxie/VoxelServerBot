@@ -180,9 +180,10 @@
 				></div>
 
 				<!-- Card content -->
-				<div class="relative z-10 p-4 space-y-4 flex-grow">
+				<div class="relative z-10 p-4 space-y-2 flex-grow">
+					<!-- Changed space-y-4 to space-y-2 -->
 					<!-- Title -->
-					<div class="text-white font-bold text-xl text-center flex justify-center items-center mb-0 leading-none space-x-2">
+					<div class="text-white font-bold text-xl text-center flex justify-center items-center leading-tight space-x-2">
 						<span><%= instance.friendlyName || instance.instanceName %></span>
 						<% if (instance.module === 'Minecraft' && instance.welcomeMessage) { %>
 						<a
@@ -196,8 +197,14 @@
 						<% } %>
 					</div>
 
+					<!-- Description -->
+					<div class="text-sm text-gray-400 text-center leading-tight"><%= instance.description || '' %></div>
+
+					<!-- Break -->
+					<hr class="my-4 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
+
 					<!-- Module Name -->
-					<div class="text-s text-gray-400 text-center -mt-1 leading-none"><%= instance.moduleName || instance.module %></div>
+					<div class="text-sm text-gray-400 text-center leading-tight"><%= instance.moduleName || instance.module %></div>
 
 					<!-- CPU -->
 					<% if (instance.server.cpu) { %>

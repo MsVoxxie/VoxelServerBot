@@ -311,6 +311,7 @@ async function getStatusPageData() {
 					instanceName: i.InstanceName,
 					friendlyName: i.FriendlyName,
 					welcomeMessage: i.WelcomeMessage,
+					description: i.Description,
 					running: i.Running,
 					module: i.Module,
 					moduleName: i.ModuleDisplayName,
