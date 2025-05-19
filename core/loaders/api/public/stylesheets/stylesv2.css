@@ -98,3 +98,19 @@
 		opacity: 1;
 	}
 }
+
+/* === State Bounce === */
+.state-bounce {
+	animation: bounce 0.5s ease-in-out forwards;
+}
+@keyframes bounce {
+	0% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+	100% {
+		transform: translateY(0);
+	}
+}
