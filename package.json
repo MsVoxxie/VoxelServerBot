@@ -12,7 +12,7 @@
     "moment": "^2.29.4",
     "moment-duration-format": "^2.3.2",
     "moment-timezone": "^0.5.47",
-    "mongoose": "^8.10.0",
+    "mongoose": "^8.15.0",
     "node-cron": "^3.0.3",
     "openai": "^4.59.0",
     "path": "^0.12.7"
