@@ -14,7 +14,7 @@
     "moment-timezone": "^0.5.47",
     "mongoose": "^8.10.0",
     "node-cron": "^3.0.3",
-    "openai": "^4.59.0",
+    "openai": "^4.100.0",
     "path": "^0.12.7"
   }
 }
