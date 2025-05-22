@@ -204,7 +204,9 @@
 					<hr class="my-4 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400" />
 
 					<!-- Module Name -->
-					<div class="text-sm text-gray-400 text-center leading-tight"><%= instance.moduleName || instance.module %></div>
+					<div class="text-sm text-gray-400 text-center leading-tight">
+						<%= instance.moduleName || instance.module %><%= `${instance.pack_version ? ` | Modpack ${instance.pack_version}` : ''}` || '' %>
+					</div>
 
 					<!-- CPU -->
 					<% if (instance.server.cpu) { %>

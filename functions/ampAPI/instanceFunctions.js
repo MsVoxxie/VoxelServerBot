@@ -301,7 +301,16 @@ async function getStatusPageData() {
 			filteredInstances.map(async (i, index) => {
 				const serverData = instanceStatuses[index];
 				const playersData = instancePlayers[index];
-				const icon = await getImageSource(i.DisplayImageSource) || null; // await the icon
+				const icon = (await getImageSource(i.DisplayImageSource)) || null; // await the icon
+
+				// If the instance module is Minecraft, get the motd and extract the pack version
+				let pack_version = null;
+				if (i.Module === 'Minecraft') {
+					const motdData = await getConfigNode(i.InstanceID, 'MinecraftModule.Minecraft.ServerMOTD');
+					if (motdData) {
+						pack_version = motdData.currentValue;
+					}
+				}
 
 				// Pluck the server port from the instance
 				const mainPort = extractMainPort(i.DeploymentArgs);
@@ -315,7 +324,7 @@ async function getStatusPageData() {
 					running: i.Running,
 					module: i.Module,
 					moduleName: i.ModuleDisplayName,
-
+					pack_version,
 					icon,
 					suspended: i.Suspended,
 					server: serverData?.status

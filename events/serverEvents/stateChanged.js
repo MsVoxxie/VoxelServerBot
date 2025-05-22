@@ -14,7 +14,7 @@ module.exports = {
 		if (USER === 'SERVER' && MESSAGE === 'Ready') {
 			const currentMOTD = await getConfigNode(INSTANCE, 'MinecraftModule.Minecraft.ServerMOTD');
 			const serverStart = client.serverStartTime(START);
-			MESSAGE = `${currentMOTD.currentValue} is now Online\nTook ${serverStart}`;
+			MESSAGE = `${USER} | ${currentMOTD.currentValue} is now Online\nTook ${serverStart}`;
 		}
 
 		// Send off the message to Discord
