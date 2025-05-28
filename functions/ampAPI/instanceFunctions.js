@@ -150,6 +150,7 @@ async function getConfigNode(instanceId, configNode) {
 	const API = await instanceAPI(instanceId);
 
 	// Fetch the config node
+	if (!API) return { desc: 'Invalid instanceId.', success: false };
 	const configData = await API.Core.GetConfigAsync(configNode);
 
 	return { node: configData.Node, currentValue: configData.CurrentValue };
@@ -306,7 +307,7 @@ async function getStatusPageData() {
 				// If the instance module is Minecraft, get the motd and extract the pack version
 				let pack_version = null;
 				if (i.Module === 'Minecraft') {
-					const motdData = await getConfigNode(i.InstanceID, 'MinecraftModule.Minecraft.ServerMOTD');
+					const motdData = (await getConfigNode(i.InstanceID, 'MinecraftModule.Minecraft.ServerMOTD')) || null;
 					if (motdData) {
 						pack_version = motdData.currentValue;
 					}
