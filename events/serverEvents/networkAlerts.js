@@ -65,13 +65,7 @@ module.exports = {
 								break;
 						}
 
-						console.log(serverMessage);
-
 						// Send the message to the server
-						// await sendConsoleMessage(
-						// 	API,
-						// 	`tellraw @a [{"text":""},{"text":"[${hoverText}] ","color":"${color}","hoverEvent":{"action":"show_text","contents":[{"text":"Server","color":"${color}"}]}},{"text":"${serverMessage}"}]`
-						// );
 						queueTask(
 							INSTANCE,
 							sendConsoleMessage,
@@ -82,8 +76,9 @@ module.exports = {
 						queueTask(INSTANCE, alertSoundMC, API, alertType);
 						break;
 					default:
-					// For other modules we can just use say
-					// await sendConsoleMessage(API, `say "${serverMessage}"`);
+						// For other modules we can just use say
+						queueTask(INSTANCE, sendConsoleMessage, API, `say "${serverMessage}"`);
+						break;
 				}
 			} catch (error) {
 				console.error(`Error sending network notice to ${INSTANCE}:`, error);
