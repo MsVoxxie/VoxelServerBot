@@ -14,25 +14,25 @@ module.exports = {
 	name: 'receivedChat',
 	runType: 'disabled',
 	async execute(client, data) {
-		let message = data.MESSAGE;
+		let { USER, MESSAGE } = data;
 
 		// If the USER is SERVER and the MESSAGE is Ready, Let's get the time it took to start the server
-		if (data.USER === 'SERVER' && data.MESSAGE === 'Ready') {
+		if (USER === 'SERVER' && MESSAGE === 'Ready') {
 			const currentMOTD = await getConfigNode(data.INSTANCE, 'MinecraftModule.Minecraft.ServerMOTD');
 			const serverStart = client.serverStartTime(data.START);
-			message = `${currentMOTD.currentValue} is now Online\nTook ${serverStart}`;
+			MESSAGE = `${currentMOTD.currentValue} is now Online\nTook ${serverStart}`;
 		}
 
 		// Allow only the first join message to be sent for each user //! This Sucks
-		if (data.MESSAGE === 'has connected' || data.MESSAGE === 'joined for the first time') {
-			if (userJoinedSet.has(data.USER)) {
+		if (MESSAGE === 'has connected' || MESSAGE === 'joined for the first time') {
+			if (userJoinedSet.has(USER)) {
 				return;
 			} else {
-				userJoinedSet.add(data.USER);
+				userJoinedSet.add(USER);
 			}
 		}
 
 		// Send webhook
-		await serverLink(data.USER, message, data.INSTANCE);
+		await serverLink(USER, MESSAGE, data.INSTANCE);
 	},
 };

@@ -1,4 +1,8 @@
+// Scheduling
 const cron = require('node-cron');
+
+// System info
+const si = require('systeminformation');
 
 // Configuration File
 const dotenv = require('dotenv');
@@ -48,6 +52,7 @@ require('./functions/database/util')(client);
 // Run Loaders
 require('./core/loaders/api/internalAPI')(client);
 require('./core/loaders/commandLoader')(client);
+require('./core/loaders/networkLoader')(client);
 require('./core/loaders/eventLoader')(client);
 
 // Every 1 minute
