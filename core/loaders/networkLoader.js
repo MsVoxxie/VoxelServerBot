@@ -13,10 +13,12 @@ module.exports = (client) => {
 	// Debounce counters & state
 	let highPingCount = 0;
 	let stablePingCount = 0;
+	let failedPingCount = 0;
 	let notified = false;
 
 	const HIGH_PING_LIMIT = 3; // sad ping limit
 	const STABLE_PING_LIMIT = 5; // happy ping limit
+	const FAILED_PING_LIMIT = 5; // failed ping limit
 
 	async function emitNetworkAlert(alertType, alertMessage, alertDetails) {
 		if (client.debug) {
@@ -47,12 +49,17 @@ module.exports = (client) => {
 		const netIdle = netRxMbps < LOW_NET_Mbps && netTxMbps < LOW_NET_Mbps;
 
 		if (!pingAlive) {
-			emitNetworkAlert('Network Failure', 'Network Failure Detected', `No response from ${PING_HOST}`);
-			// Reset counters on failure
-			highPingCount = 0;
-			stablePingCount = 0;
-			notified = false;
+			if (failedPingCount < FAILED_PING_LIMIT) failedPingCount++;
+			if (failedPingCount >= FAILED_PING_LIMIT) {
+				// Reset counters on failure
+				highPingCount = 0;
+				stablePingCount = 0;
+				notified = false;
+				emitNetworkAlert('Network Failure', 'Network Failure Detected', `No response from ${PING_HOST}`);
+			}
 			return;
+		} else {
+			failedPingCount = 0; // Reset failed ping count on success
 		}
 
 		const isHighPing = pingMs > HIGH_PING_MS;
