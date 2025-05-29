@@ -14,7 +14,8 @@ module.exports = (client) => {
 	let highPingCount = 0;
 	let stablePingCount = 0;
 	let failedPingCount = 0;
-	let notified = false;
+	let notificationSent = false;
+	let networkFailed = false;
 
 	const HIGH_PING_LIMIT = 3; // sad ping limit
 	const STABLE_PING_LIMIT = 5; // happy ping limit
@@ -50,16 +51,21 @@ module.exports = (client) => {
 
 		if (!pingAlive) {
 			if (failedPingCount < FAILED_PING_LIMIT) failedPingCount++;
-			if (failedPingCount >= FAILED_PING_LIMIT) {
+			if (failedPingCount >= FAILED_PING_LIMIT && !networkFailed) {
 				// Reset counters on failure
 				highPingCount = 0;
 				stablePingCount = 0;
-				notified = false;
-				emitNetworkAlert('Network Failure', 'Network Failure Detected', `No response from ${PING_HOST}`);
+				notificationSent = false;
+				emitNetworkAlert('Network Failure', 'Network Failure Detected', {
+					server: `↓ ${netRxMbps.toFixed(2)} Mbps ↑ ${netTxMbps.toFixed(2)} Mbps`,
+					external: `⇄ Failed`,
+				});
+				networkFailed = true;
 			}
 			return;
 		} else {
-			failedPingCount = 0; // Reset failed ping count on success
+			networkFailed = false;
+			failedPingCount = 0;
 		}
 
 		const isHighPing = pingMs > HIGH_PING_MS;
@@ -70,7 +76,7 @@ module.exports = (client) => {
 			if (client.debug) {
 				console.warn(`[DEBUG] High ping detected: ${pingMs} ms (${highPingCount}/${HIGH_PING_LIMIT})`);
 			}
-			if (highPingCount >= HIGH_PING_LIMIT && !notified) {
+			if (highPingCount >= HIGH_PING_LIMIT && !notificationSent) {
 				if (netIdle) {
 					emitNetworkAlert('External Congestion', 'Network Congested', {
 						server: `↓ ${netRxMbps.toFixed(2)} Mbps ↑ ${netTxMbps.toFixed(2)} Mbps`,
@@ -82,17 +88,17 @@ module.exports = (client) => {
 						external: `⇄ ${pingMs} ms`,
 					});
 				}
-				notified = true;
+				notificationSent = true;
 			}
 		} else {
 			if (stablePingCount < STABLE_PING_LIMIT) stablePingCount++;
 			if (highPingCount > 0) highPingCount--;
-			if (notified && stablePingCount >= STABLE_PING_LIMIT) {
+			if (notificationSent && stablePingCount >= STABLE_PING_LIMIT) {
 				emitNetworkAlert('Network Stable', `Network has recovered`, {
 					server: `↓ ${netRxMbps.toFixed(2)} Mbps ↑ ${netTxMbps.toFixed(2)} Mbps`,
 					external: `⇄ ${pingMs} ms`,
 				});
-				notified = false;
+				notificationSent = false;
 			}
 			if (client.debug) {
 				console.log(
