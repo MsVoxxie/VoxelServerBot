@@ -11,95 +11,86 @@ module.exports = {
 	async execute(client, data) {
 		const { type, message, details } = data;
 		const { server, external } = details;
-		let discordMessage, serverMessage;
 
-		// Determine the server message based on the type of network notice
-		switch (type) {
-			case 'External Congestion':
-				serverMessage = `${message} | Ping ${external}`;
-				discordMessage = `${message}\n${codeBlock('ml', `Ping ${external}`)}`;
-				break;
-			case 'Server Congestion':
-				serverMessage = `${message} | Server ${server}`;
-				discordMessage = `${message}\n${codeBlock('ml', `Server ${server}`)}`;
-				break;
-			case 'Network Failure':
-				serverMessage = `${message} | Unable to reach external services`;
-				discordMessage = `${message}\n${codeBlock('ml', `Unable to reach external services`)}`;
-				break;
-			case 'Network Stable':
-				serverMessage = `${message} | Ping ${external}`;
-				discordMessage = `${message}\n${codeBlock('ml', `Ping ${external}`)}`;
-				break;
-		}
+		const { discordMessage, serverMessage } = getMessagesForType(type, message, server, external);
 
-		// Fetch all matching chat links
-		const chatlinkFetch = await chatLink.find({}).lean();
-		if (!chatlinkFetch.length) return;
+		const chatLinksData = await chatLink.find({}).lean();
+		if (!chatLinksData.length) return;
 
-		// Get all valid chat links
-		for (const chatLinkD of chatlinkFetch[0].chatLinks) {
-			const chatLinkData = chatLinkD;
-			const INSTANCE = chatLinkData.instanceId;
-			const MODULE = chatLinkData.instanceModule;
+		const chatLinks = chatLinksData[0].chatLinks;
 
-			// Discord Messages
+		for (const { instanceId, instanceModule } of chatLinks) {
 			try {
-				// Send off the message to Discord
-				queueTask(INSTANCE, serverLink, 'SERVER', discordMessage, INSTANCE);
-			} catch (error) {
-				console.error(`Error sending network notice to ${INSTANCE}:`, error);
-			}
+				// Send to Discord
+				queueTask(instanceId, serverLink, 'SERVER', discordMessage, instanceId);
 
-			// Server Messages
-			try {
-				const API = await instanceAPI(INSTANCE);
+				// Get AMP API
+				const API = await instanceAPI(instanceId);
 
-				// Determine the color and hover text based on the type of network notice
-				switch (MODULE) {
-					case 'Minecraft':
-						let color, hoverText, alertType;
-						switch (type) {
-							case 'External Congestion':
-								color = 'red';
-								alertType = 'alert';
-								hoverText = 'Alert';
-								break;
-							case 'Server Congestion':
-								color = 'orange';
-								alertType = 'alert';
-								hoverText = 'Alert';
-								break;
-							case 'Network Failure':
-								color = 'dark_red';
-								alertType = 'alert';
-								hoverText = 'Alert';
-								break;
-							case 'Network Stable':
-								color = 'green';
-								hoverText = 'Notice';
-								alertType = 'notice';
-								break;
-						}
+				if (instanceModule === 'Minecraft') {
+					const { color, hoverText, alertType } = getMCAlertStyle(type);
 
-						// Send the message to the server
-						queueTask(
-							INSTANCE,
-							sendConsoleMessage,
-							API,
-							`tellraw @a [{"text":""},{"text":"[${hoverText}] ","color":"${color}","hoverEvent":{"action":"show_text","contents":[{"text":"Server","color":"${color}"}]}},{"text":"${serverMessage}"}]`
-						);
-						// Play an alert sound
-						queueTask(INSTANCE, alertSoundMC, API, alertType);
-						break;
-					default:
-						// For other modules we can just use say
-						queueTask(INSTANCE, sendConsoleMessage, API, `say "${serverMessage}"`);
-						break;
+					const tellraw = `tellraw @a [{"text":""},{"text":"[${hoverText}] ","color":"${color}","hoverEvent":{"action":"show_text","contents":[{"text":"Server","color":"${color}"}]}},{"text":"${serverMessage}"}]`;
+
+					queueTask(instanceId, sendConsoleMessage, API, tellraw);
+					queueTask(instanceId, alertSoundMC, API, alertType);
+				} else {
+					// Fallback for non-Minecraft modules
+					queueTask(instanceId, sendConsoleMessage, API, `say "${serverMessage}"`);
 				}
-			} catch (error) {
-				console.error(`Error sending network notice to ${INSTANCE}:`, error);
+			} catch (err) {
+				console.error(`Error sending network notice to ${instanceId}:`, err);
 			}
 		}
 	},
 };
+
+function getMessagesForType(type, message, server, external) {
+	switch (type) {
+		case 'External Congestion':
+			return {
+				serverMessage: `${message} | Ping ${external}`,
+				discordMessage: `${message}\n${codeBlock('ml', `Ping ${external}`)}`,
+			};
+		case 'Server Congestion':
+			return {
+				serverMessage: `${message} | Server ${server}`,
+				discordMessage: `${message}\n${codeBlock('ml', `Server ${server}`)}`,
+			};
+		case 'Network Failure':
+			return {
+				serverMessage: `${message} | Unable to reach external services`,
+				discordMessage: `${message}\n${codeBlock('ml', 'Unable to reach external services')}`,
+			};
+		case 'Network Stable':
+			return {
+				serverMessage: `${message} | Ping ${external}`,
+				discordMessage: `${message}\n${codeBlock('ml', `Ping ${external}`)}`,
+			};
+		default:
+			return {
+				serverMessage: message,
+				discordMessage: codeBlock('ml', message),
+			};
+	}
+}
+
+function getMCAlertStyle(type) {
+	switch (type) {
+		case 'External Congestion':
+		case 'Server Congestion':
+		case 'Network Failure':
+			return {
+				color: type === 'Network Failure' ? 'dark_red' : type === 'Server Congestion' ? 'orange' : 'red',
+				hoverText: 'Alert',
+				alertType: 'alert',
+			};
+		case 'Network Stable':
+		default:
+			return {
+				color: 'green',
+				hoverText: 'Notice',
+				alertType: 'notice',
+			};
+	}
+}
