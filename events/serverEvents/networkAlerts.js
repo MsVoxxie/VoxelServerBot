@@ -3,6 +3,7 @@ const { alertSoundMC } = require('../../functions/helpers/messageFuncs');
 const { serverLink } = require('../../functions/helpers/messageDiscord');
 const { queueTask } = require('../../functions/helpers/queueTask');
 const { chatLink } = require('../../models');
+const { codeBlock } = require('discord.js');
 
 module.exports = {
 	name: 'networkNotice',
@@ -10,6 +11,27 @@ module.exports = {
 	async execute(client, data) {
 		const { type, message, details } = data;
 		const { server, external } = details;
+		let discordMessage, serverMessage;
+
+		// Determine the server message based on the type of network notice
+		switch (type) {
+			case 'External Congestion':
+				serverMessage = `${message} | Ping ${external}`;
+				discordMessage = `${message}\n${codeBlock('ml', `Ping ${external}`)}`;
+				break;
+			case 'Server Congestion':
+				serverMessage = `${message} | Server ${server}`;
+				discordMessage = `${message}\n${codeBlock('ml', `Server ${server}`)}`;
+				break;
+			case 'Network Failure':
+				serverMessage = `${message} | Unable to reach external services`;
+				discordMessage = `${message}\n${codeBlock('ml', `Unable to reach external services`)}`;
+				break;
+			case 'Network Stable':
+				serverMessage = `${message} | Ping ${external}`;
+				discordMessage = `${message}\n${codeBlock('ml', `Ping ${external}`)}`;
+				break;
+		}
 
 		// Fetch all matching chat links
 		const chatlinkFetch = await chatLink.find({}).lean();
@@ -23,9 +45,6 @@ module.exports = {
 
 			// Discord Messages
 			try {
-				// Define the message to send
-				let discordMessage = `${message} \n\`\`\`Ping ${external} ${server}\`\`\``;
-
 				// Send off the message to Discord
 				queueTask(INSTANCE, serverLink, 'SERVER', discordMessage, INSTANCE);
 			} catch (error) {
@@ -35,7 +54,6 @@ module.exports = {
 			// Server Messages
 			try {
 				const API = await instanceAPI(INSTANCE);
-				let serverMessage = `${message} | Ping ${external} ${server}`;
 
 				// Determine the color and hover text based on the type of network notice
 				switch (MODULE) {
@@ -56,7 +74,6 @@ module.exports = {
 								color = 'dark_red';
 								alertType = 'alert';
 								hoverText = 'Alert';
-								serverMessage = `Network Failed to respond.`;
 								break;
 							case 'Network Stable':
 								color = 'green';

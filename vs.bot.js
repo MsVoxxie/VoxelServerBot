@@ -1,9 +1,6 @@
 // Scheduling
 const cron = require('node-cron');
 
-// System info
-const si = require('systeminformation');
-
 // Configuration File
 const dotenv = require('dotenv');
 dotenv.config();

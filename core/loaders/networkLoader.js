@@ -6,7 +6,7 @@ module.exports = (client) => {
 	const INTERFACE = 'eth0';
 
 	// Thresholds
-	const HIGH_PING_MS = 120;
+	const HIGH_PING_MS = 80; // Unusually high for my network
 	const LOW_NET_Mbps = 2;
 	const CHECK_INTERVAL_MS = 5000;
 
