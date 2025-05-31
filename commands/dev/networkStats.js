@@ -5,6 +5,7 @@ module.exports = {
 		.setName('networkstats')
 		.setDescription('Get network statistics')
 		.setIntegrationTypes([ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall])
+		.setContexts([InteractionContextType.Guild, InteractionContextType.PrivateChannel])
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 		.addBooleanOption((option) => option.setName('ephemeral').setDescription('Reply with an ephemeral message').setRequired(false)),
 	options: {
