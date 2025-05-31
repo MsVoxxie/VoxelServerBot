@@ -7,8 +7,8 @@ module.exports = (client) => {
 
 	const CHECK_INTERVAL_MS = 5000;
 	const LOW_NET_Mbps = 2;
-	const ABSOLUTE_HIGH_MS = 60;
-	const RELATIVE_THRESHOLD = 10;
+	const ABSOLUTE_HIGH_MS = 100;
+	const RELATIVE_THRESHOLD = 20;
 
 	const HIGH_PING_LIMIT = 3;
 	const STABLE_PING_LIMIT = 5;
@@ -92,6 +92,14 @@ module.exports = (client) => {
 		if (client.debug) {
 			console.log(`[DEBUG] Ping ${pingMs} ms | Median ${medianPing.toFixed(1)} ms | Short Avg ${shortAvg.toFixed(1)} ms | Spike: ${isSpike ? 'YES' : 'NO'}`);
 		}
+
+		client.network.externalPing = pingMs.toFixed(1);
+		client.network.externalAvg = shortAvg.toFixed(1);
+		client.network.externalMedian = medianPing.toFixed(1);
+		client.network.externalHistory = pingHistory.slice(-MAX_HISTORY);
+		client.network.networkAlive = pingAlive;
+		client.network.internalUp = netRxMbps.toFixed(2);
+		client.network.internalDown = netTxMbps.toFixed(2);
 	}
 
 	function handlePingFailure(details) {
