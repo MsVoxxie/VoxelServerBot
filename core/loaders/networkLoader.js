@@ -8,7 +8,7 @@ module.exports = (client) => {
 	const CHECK_INTERVAL_MS = 5000;
 	const LOW_NET_Mbps = 2;
 	const ABSOLUTE_HIGH_MS = 100;
-	const RELATIVE_THRESHOLD = 20;
+	const RELATIVE_THRESHOLD = 45;
 
 	const HIGH_PING_LIMIT = 3;
 	const STABLE_PING_LIMIT = 5;
@@ -84,6 +84,7 @@ module.exports = (client) => {
 		const isSpike = pingMs > shortAvg + 15;
 
 		if (isHighPing) {
+			client.network.lastSpike = pingMs;
 			handleHighPing(pingMs, netIdle, details);
 		} else {
 			handleStablePing(pingMs, details);

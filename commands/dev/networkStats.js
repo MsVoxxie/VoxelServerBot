@@ -24,9 +24,9 @@ module.exports = {
 				{ name: 'External Ping', value: `⇄ ${network.externalPing} ms`, inline: true },
 				{ name: 'External Avg', value: `↻ ${network.externalAvg} ms`, inline: true },
 				{ name: 'External Median', value: `⬌ ${network.externalMedian} ms`, inline: true },
-				{ name: 'Network Alive', value: network.networkAlive ? '✅ Yes' : '❌ No', inline: true },
 				{ name: 'Internal Down', value: `↓ ${network.internalDown} Mbps`, inline: true },
 				{ name: 'Internal Up', value: `↑ ${network.internalUp} Mbps`, inline: true },
+				{ name: 'Last Spike', value: network.lastSpike ? `↟ ${network.lastSpike} ms` : '✓ No Spikes', inline: true },
 			]);
 
 		// Send the response

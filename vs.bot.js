@@ -30,7 +30,7 @@ client.network = {
 	externalPing: 0,
 	externalAvg: 0,
 	externalMedian: 0,
-	externalHistory: [],
+	lastSpike: null,
 	internalUp: 0,
 	internalDown: 0,
 };
