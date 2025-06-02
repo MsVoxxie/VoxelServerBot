@@ -116,6 +116,7 @@ module.exports = (client) => {
 	}
 
 	function resetPingFailureState() {
+		client.network.lastSpike = '× Disconnected';
 		networkFailed = false;
 		failedPingCount = 0;
 	}
