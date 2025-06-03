@@ -8,6 +8,7 @@ module.exports = (client) => {
 	const CHECK_INTERVAL_MS = 5000;
 	const LOW_NET_Mbps = 2;
 	const ABSOLUTE_HIGH_MS = 75;
+	const STABLE_PING_MS = 60;
 	const RELATIVE_THRESHOLD = 45;
 
 	const HIGH_PING_LIMIT = 3;
@@ -81,13 +82,17 @@ module.exports = (client) => {
 		const shortAvg = getShortTermAverage();
 		// const isHighPing = pingMs > medianPing + RELATIVE_THRESHOLD || pingMs > ABSOLUTE_HIGH_MS;
 		const isHighPing = pingMs > ABSOLUTE_HIGH_MS; // median method was unreliable in some cases, looking into it.
+		const isStablePing = pingMs < STABLE_PING_MS;
 		const isSpike = pingMs > shortAvg + 15;
 
 		if (isHighPing) {
 			client.network.lastSpike = pingMs;
 			handleHighPing(pingMs, netIdle, details);
-		} else {
+		} else if (isStablePing) {
+			client.network.lastSpike = '✓ Stable';
 			handleStablePing(pingMs, details);
+		} else {
+			client.network.lastSpike = pingMs;
 		}
 
 		if (client.debug) {
