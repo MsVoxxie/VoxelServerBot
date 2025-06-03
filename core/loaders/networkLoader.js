@@ -7,15 +7,15 @@ module.exports = (client) => {
 
 	const CHECK_INTERVAL_MS = 5000;
 	const LOW_NET_Mbps = 2;
-	const ABSOLUTE_HIGH_MS = 100;
+	const ABSOLUTE_HIGH_MS = 75;
 	const RELATIVE_THRESHOLD = 45;
 
 	const HIGH_PING_LIMIT = 3;
 	const STABLE_PING_LIMIT = 5;
 	const FAILED_PING_LIMIT = 5;
 
-	const MAX_HISTORY = 12; // Maximum number of ping records to keep
-	const SHORT_TERM = 3; // Last 15 seconds
+	const MAX_HISTORY = 24; // Maximum number of ping records to keep
+	const SHORT_TERM = 6; // Last 30 seconds
 
 	let highPingCount = 0;
 	let stablePingCount = 0;
@@ -79,8 +79,8 @@ module.exports = (client) => {
 
 		const medianPing = getMedianPing();
 		const shortAvg = getShortTermAverage();
-		// const isHighPing = pingMs > Math.max(medianPing + RELATIVE_THRESHOLD, ABSOLUTE_HIGH_MS);
-		const isHighPing = pingMs > medianPing + RELATIVE_THRESHOLD || pingMs > ABSOLUTE_HIGH_MS;
+		// const isHighPing = pingMs > medianPing + RELATIVE_THRESHOLD || pingMs > ABSOLUTE_HIGH_MS;
+		const isHighPing = pingMs > ABSOLUTE_HIGH_MS; // median method was unreliable in some cases, looking into it.
 		const isSpike = pingMs > shortAvg + 15;
 
 		if (isHighPing) {
