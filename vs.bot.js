@@ -31,6 +31,7 @@ client.network = {
 	externalAvg: 0,
 	externalMedian: 0,
 	lastSpike: null,
+	lastSpikeTime: null,
 	internalUp: 0,
 	internalDown: 0,
 };

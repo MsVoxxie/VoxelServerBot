@@ -2,6 +2,9 @@ module.exports = (client) => {
 	const si = require('systeminformation');
 	const ping = require('ping');
 
+	// Cooldown period for network alerts
+	const COOLDOWN_MS = 60 * 5 * 1000; // 5 minutes
+
 	const PING_HOST = '1.1.1.1'; // Cloudflare
 	const INTERFACE = 'eth0';
 
@@ -9,7 +12,7 @@ module.exports = (client) => {
 	const LOW_NET_Mbps = 2;
 	const ABSOLUTE_HIGH_MS = 75;
 	const STABLE_PING_MS = 60;
-	const RELATIVE_THRESHOLD = 45;
+	const RELATIVE_THRESHOLD = 45; // Unused until i better method
 
 	const HIGH_PING_LIMIT = 3;
 	const STABLE_PING_LIMIT = 5;
@@ -86,7 +89,11 @@ module.exports = (client) => {
 		const isSpike = pingMs > shortAvg + 15;
 
 		if (isHighPing) {
+			if (Date.now() - (client.network.lastSpikeTime || 0) < COOLDOWN_MS) return;
+
 			client.network.lastSpike = pingMs;
+			client.network.lastSpikeTime = Date.now();
+
 			handleHighPing(pingMs, netIdle, details);
 		} else if (isStablePing) {
 			client.network.lastSpike = '✓ Stable';
