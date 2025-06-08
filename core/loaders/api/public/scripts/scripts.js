@@ -1,10 +1,32 @@
+let currentPlayerLists = {}; // Store current player lists
 const bar = document.getElementById('refresh-bar');
 let time = 0;
-const interval = 10;
+const interval = 2;
 
-async function fetchInstanceData() {
-	const container = document.getElementById('instances');
-	const statusWrapper = document.getElementById('status-wrapper');
+// save last state
+let lastState = {};
+
+// Update the status bar every second
+function updateBar() {
+	if (time >= interval) {
+		bar.style.width = '100%';
+		setTimeout(() => {
+			time = 0;
+			bar.style.transition = 'none';
+			bar.style.width = '0%';
+			void bar.offsetWidth;
+			bar.style.transition = 'width 1s linear';
+			reloadStatus();
+		}, 50);
+	} else {
+		time++;
+		bar.style.width = `${(time / interval) * 100}%`;
+	}
+}
+
+// Fetch fresh JSON from back-end
+async function reloadStatus() {
+	const pageWrapper = document.getElementsByClassName('page-wrapper')[0];
 
 	// Regex pattern for detecting a valid instanceId
 	const instanceIdRegex = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
@@ -17,122 +39,233 @@ async function fetchInstanceData() {
 
 	let url = '/v1/server/data/instances';
 	if (instanceId) url += `/${encodeURIComponent(instanceId)}`;
-
-	let data;
 	try {
 		const res = await fetch(url);
-		if (!res.ok) throw new Error(`HTTP ${res.status}`);
-		data = await res.json();
+		if (!res.ok) throw new Error(res.statusText);
+		const json = await res.json();
+		updateCards(json.instances);
+		pageWrapper.classList.add('fade-in');
 	} catch (err) {
-		console.error('Error fetching instance data:', err);
-		return;
+		console.error('could not reload status:', err);
 	}
-
-	statusWrapper.classList.add('fade-in');
-	const newIds = data.instances.map((i) => i.instanceId);
-
-	// Remove cards that are no longer present
-	Array.from(container.querySelectorAll('.instance-card')).forEach((card) => {
-		if (!newIds.includes(card.dataset.id)) container.removeChild(card);
-	});
-
-	// Update or create cards
-	data.instances.forEach((inst) => {
-		let card = container.querySelector(`.instance-card[data-id="${inst.instanceId}"]`);
-		if (!card) {
-			card = document.createElement('div');
-			card.classList.add('instance-card');
-			card.dataset.id = inst.instanceId;
-			container.appendChild(card);
-		}
-
-		// Update card classes
-		card.classList.toggle('starting', inst.server.state === 'Starting');
-		card.classList.toggle('running', inst.server.state === 'Running');
-		card.classList.toggle('stopped', inst.server.state === 'Stopped');
-		card.classList.toggle('offline', inst.server.state === 'Offline');
-
-		const isRunning = inst.server.state === 'Running' || inst.server.state === 'Starting';
-		const serverUptime = inst.server.uptime ? `<p class="uptime">Online ${humanizeDuration(inst.server.uptime)}</p>` : '';
-		const modpackURL =
-			inst.module === 'Minecraft' && inst.welcomeMessage
-				? `<a class="server-link" href="${inst.welcomeMessage}" target="_blank"><h2>${inst.friendlyName}</h2></a>`
-				: `<h2>${inst.friendlyName}</h2>`;
-		const memCurrentGB = inst.server.memory ? (inst.server.memory.RawValue / 1024).toFixed(2) : null;
-		const memMaxGB = inst.server.memory ? (inst.server.memory.MaxValue / 1024).toFixed(0) : null;
-		const memDisplay = memCurrentGB && memMaxGB ? `${memCurrentGB}/${memMaxGB} GB` : 'N/A';
-		const cpuDisplay = inst.server.cpu && inst.server.cpu.Percent != null ? `${inst.server.cpu.Percent}%` : 'N/A';
-		const performanceDisplay = inst.server.performance
-			? `<p>${inst.server.performance.Unit}: ${inst.server.performance.RawValue}/${inst.server.performance.MaxValue}</p>`
-			: '<p>TPS: N/A</p>';
-		const playerDisplay = inst.server.users ? `${inst.server.users.RawValue}/${inst.server.users.MaxValue}` : 'N/A';
-		const ipDisplay = isRunning
-			? `
-        <div class="ip-display">
-          <span class="ip-text">${inst.server.ip}:${inst.server.port}</span>
-          <button class="copy-btn" onclick="copyToClipboard('${inst.server.ip}:${inst.server.port}', this)">Copy</button>
-        </div>
-      `
-			: '';
-
-		// Only update the content inside the card, not the card itself
-		let overlay = card.querySelector('.instance-card-overlay');
-		let content = card.querySelector('.instance-card-content');
-		if (!overlay) {
-			overlay = document.createElement('div');
-			overlay.className = 'instance-card-overlay';
-			card.appendChild(overlay);
-		}
-		overlay.style.backgroundImage = `url('${inst.icon}')`;
-
-		if (!content) {
-			content = document.createElement('div');
-			content.className = 'instance-card-content';
-			content.dataset.instanceid = inst.instanceId;
-			card.appendChild(content);
-		}
-
-		// Click event for the card
-		card.onclick = () => {
-			window.location.href = `/v1/servers/${inst.instanceId}`;
-		};
-
-		content.innerHTML = `
-            ${modpackURL}
-            <hr class="divider">
-            ${serverUptime}
-            ${
-							isRunning
-								? `
-                        <p>CPU Usage: ${cpuDisplay}</p>
-                        <p>Memory Usage: ${memDisplay}</p>
-                        ${performanceDisplay}
-                        <p>Players: ${playerDisplay}</p>
-                        ${ipDisplay}
-                    `
-								: `
-                        <p class="offline-label">Server ${inst.server.state}</p>
-                    `
-						}
-        `;
-	});
 }
 
-function updateBar() {
-	if (time >= interval) {
-		bar.style.width = '100%';
-		setTimeout(() => {
-			time = 0;
-			bar.style.transition = 'none';
-			bar.style.width = '0%';
-			void bar.offsetWidth;
-			bar.style.transition = 'width 1s linear';
-			fetchInstanceData();
-		}, 50);
-	} else {
-		time++;
-		bar.style.width = `${(time / interval) * 100}%`;
-	}
+// Walk each card and update its fields
+function updateCards(instances) {
+	const presentInstanceIds = new Set(instances.filter((inst) => !inst.suspended).map((inst) => inst.instanceId));
+
+	instances
+		.filter((inst) => !inst.suspended)
+		.forEach((inst) => {
+			let card = document.querySelector(`.instance-card[data-id="${inst.instanceId}"]`);
+
+			// If the card doesn't exist, create and append it
+			if (!card) {
+				card = initializeCard(inst);
+				document.querySelector('.grid').appendChild(card);
+			}
+
+			// Update border color
+			const border = card.querySelector('.status-border');
+			if (border) {
+				const state = inst.server.state;
+				border.className =
+					'absolute inset-0 border-2 rounded-2xl pointer-events-none status-border ' +
+					(state === 'Running'
+						? 'border-green-500'
+						: state === 'Stopping'
+						? 'border-orange-500'
+						: state === 'Stopped'
+						? 'border-red-500'
+						: state === 'Starting'
+						? 'border-yellow-500'
+						: 'border-gray-500');
+
+				// Give the card a bounce effect if it's changed state
+				if (lastState[inst.instanceId] !== state) {
+					card.classList.add('state-bounce');
+					setTimeout(() => {
+						card.classList.remove('state-bounce');
+					}, 1000);
+				}
+				lastState[inst.instanceId] = state;
+			}
+
+			// Update CPU
+			const cpuPercent = card.querySelector('.cpu-percent');
+			const cpuMax = card.querySelector('.cpu-max');
+			const cpuBarInner = card.querySelector('.cpu-bar > div');
+			if (inst.server.cpu) {
+				if (cpuPercent) cpuPercent.textContent = inst.server.cpu.Percent + '%';
+				if (cpuMax) cpuMax.textContent = 'of ' + inst.server.cpu.MaxValue + '%';
+				if (cpuBarInner) cpuBarInner.style.width = inst.server.cpu.Percent + '%';
+			} else {
+				if (cpuPercent) cpuPercent.textContent = 'N/A';
+				if (cpuMax) cpuMax.textContent = 'of 0%';
+				if (cpuBarInner) cpuBarInner.style.width = '0%';
+			}
+
+			// Update Memory
+			const memUsed = card.querySelector('.mem-used');
+			const memMax = card.querySelector('.mem-max');
+			const memBarInner = card.querySelector('.mem-bar > div');
+			if (inst.server.memory) {
+				if (memUsed) memUsed.textContent = (inst.server.memory.RawValue / 1024).toFixed(1) + ' GB';
+				if (memMax) memMax.textContent = 'of ' + (inst.server.memory.MaxValue / 1024).toFixed(1) + ' GB';
+				if (memBarInner) memBarInner.style.width = inst.server.memory.Percent + '%';
+			} else {
+				if (memUsed) memUsed.textContent = 'N/A';
+				if (memMax) memMax.textContent = 'of 0 GB';
+				if (memBarInner) memBarInner.style.width = '0%';
+			}
+
+			// Update Performance
+			const perfValue = card.querySelector('.perf-value');
+			const perfMax = card.querySelector('.perf-max');
+			let perfBarInner = card.querySelector('.perf-bar > .bar-inner');
+
+			// Only create the performance bar if performance values exist
+			if (inst.server.performance && !perfBarInner) {
+				const perfBar = document.createElement('div');
+				perfBar.classList.add('w-full', 'bg-gray-700', 'rounded-full', 'h-2', 'mt-1', 'perf-bar');
+
+				perfBarInner = document.createElement('div');
+				perfBarInner.classList.add('bar-inner', 'bg-yellow-500', 'h-2', 'rounded-full');
+				perfBarInner.style.width = '0%';
+
+				perfBar.appendChild(perfBarInner);
+
+				// Create the performance container
+				const perfContainer = document.createElement('div');
+				perfContainer.classList.add('text-sm', 'text-gray-300', 'mt-2');
+				perfContainer.innerHTML = `
+				<div class="text-sm text-gray-300">Performance</div>
+				<div class="flex justify-between text-white">
+					<span class="perf-value">Loading...</span>
+					<span class="perf-max text-gray-400 text-sm">of 0 TPS</span>
+				</div>
+			`;
+				perfContainer.appendChild(perfBar);
+
+				// Append the performance container under memory and above players
+				const memoryContainer = card.querySelector('.mem-bar');
+				if (memoryContainer) {
+					memoryContainer.parentNode.insertBefore(perfContainer, memoryContainer.nextSibling);
+				} else {
+					console.warn('Memory container not found for card:', card);
+				}
+			}
+
+			// Update the performance bar values
+			if (inst.server.performance) {
+				if (perfValue) perfValue.textContent = inst.server.performance.RawValue;
+				if (perfMax) perfMax.textContent = 'of ' + inst.server.performance.MaxValue + ' ' + (inst.server.performance.Unit || 'TPS');
+				if (perfBarInner) {
+					const pbar = (inst.server.performance.RawValue / inst.server.performance.MaxValue) * 100;
+					perfBarInner.style.width = pbar + '%';
+				}
+			} else {
+				if (perfValue) perfValue.textContent = 'N/A';
+				if (perfMax) perfMax.textContent = 'of 0 TPS';
+				if (perfBarInner) perfBarInner.style.width = '0%';
+			}
+
+			// Update Players (for Minecraft)
+			const playersContainer = card.querySelector('.players-container');
+			const playersCount = card.querySelector('.players-count');
+			if (playersContainer) {
+				if (inst.module === 'Minecraft') {
+					const players = inst.players || []; // Default to an empty array if no players
+					const currentPlayers = players.map((player) => player.name).join(',');
+
+					// Only update player heads if the list changed
+					if (currentPlayerLists[inst.instanceId] !== currentPlayers || inst.server.state !== 'Running') {
+						currentPlayerLists[inst.instanceId] = currentPlayers;
+
+						// Remove all children (player heads and empty slots)
+						playersContainer.innerHTML = '';
+
+						// Add new player heads or placeholder slots
+						const maxPlayers = inst.server.state === 'Running' ? inst.server.users?.MaxValue || players.length : 10;
+						for (let i = 0; i < maxPlayers; i++) {
+							if (i < players.length && inst.server.state === 'Running') {
+								// Show actual player heads
+								const playerImg = document.createElement('img');
+								playerImg.src = `/v1/client/playerheads/${players[i].name}`;
+								playerImg.alt = players[i].name;
+								playerImg.title = players[i].name;
+								playerImg.classList.add('w-6', 'h-6', 'rounded-full', 'bg-gray-700', 'object-cover', 'pop-in');
+								playersContainer.appendChild(playerImg);
+							} else {
+								// Show placeholder slots
+								const emptySlot = document.createElement('div');
+								emptySlot.classList.add('w-6', 'h-6', 'rounded-full', 'bg-gray-600', 'bg-opacity-30', 'pop-in');
+								playersContainer.appendChild(emptySlot);
+							}
+						}
+						// Update player count
+						if (playersCount) {
+							playersCount.textContent = `${players.length} / ${maxPlayers} players`;
+						}
+					}
+				} else {
+					// Not Minecraft or no players: clear the container
+					playersContainer.innerHTML = '';
+					currentPlayerLists[inst.instanceId] = '';
+				}
+			}
+
+			// Always update the user bar (orbs) for all servers
+			const usersCount = card.querySelector('.users-count');
+			const usersMax = card.querySelector('.users-max');
+			const usersBarInner = card.querySelector('.users-bar > div');
+			if (inst.server.users) {
+				if (usersCount) usersCount.textContent = inst.server.users.RawValue;
+				if (usersMax) usersMax.textContent = '/ ' + inst.server.users.MaxValue;
+				if (usersBarInner) usersBarInner.style.width = inst.server.users.Percent + '%';
+			} else {
+				if (usersCount) usersCount.textContent = '0';
+				if (usersMax) usersMax.textContent = '/ 0';
+				if (usersBarInner) usersBarInner.style.width = '0%';
+			}
+
+			// Update Connect/Status block
+			const connectBlock = card.querySelector('.connect-status');
+			if (connectBlock) {
+				if (inst.server.state === 'Running') {
+					connectBlock.innerHTML = `
+                    <div class="text-sm text-gray-300 mb-1">Connect</div>
+                    <div class="bg-gray-800 font-mono text-white text-sm p-2 rounded-lg flex items-center justify-center space-x-2 opacity-70 transition hover:opacity-100">
+                        <code>${inst.server.ip}:${inst.server.port}</code>
+                        <button
+                            class="text-blue-400 hover:text-blue-200"
+                            onclick="event.stopPropagation(); copyToClipboard('${inst.server.ip}:${inst.server.port}', this)"
+                        >
+                            Copy
+                        </button>
+                    </div>
+                `;
+				} else {
+					connectBlock.innerHTML = `
+                    <div class="text-sm text-gray-300">Status</div>
+                    <div class="text-red-400 font-bold">${inst.server.state}</div>
+                `;
+				}
+			}
+
+			// Make card clickable
+			card.onclick = () => {
+				window.location.href = `/v1/servers/${inst.instanceId}`;
+			};
+		});
+
+	// Remove cards that are no longer present
+	document.querySelectorAll('.instance-card').forEach((card) => {
+		const id = card.getAttribute('data-id');
+		if (!presentInstanceIds.has(id)) {
+			card.remove();
+		}
+	});
 }
 
 function copyToClipboard(text, button) {
@@ -153,36 +286,46 @@ function copyToClipboard(text, button) {
 	}
 }
 
-function humanizeDuration(input) {
-	const [d, h, m, s] = input.split(':').map(Number);
-	const parts = [];
-
-	if (d) parts.push(`${d} day${d !== 1 ? 's' : ''}`);
-	if (h) parts.push(`${h} hour${h !== 1 ? 's' : ''}`);
-	if (m) parts.push(`${m} minute${m !== 1 ? 's' : ''}`);
-	if (s) parts.push(`${s} second${s !== 1 ? 's' : ''}`);
-
-	if (parts.length === 0) return 'for 0 seconds';
-	if (parts.length === 1) return `for ${parts[0]}`;
-
-	const last = parts.pop();
-	return `for ${parts.join(', ')} and ${last}`;
-}
-
-//  Wave animation
+// run once on load
 document.addEventListener('DOMContentLoaded', () => {
-	document.querySelectorAll('.wave').forEach((wave) => {
-		const minDur = 50;
-		const maxDur = 70;
-		const dur = (Math.random() * (maxDur - minDur) + minDur).toFixed(2);
-		const delay = -(Math.random() * dur).toFixed(2); //  -0…-dur
-		wave.style.animationDuration = `${dur}s`;
-		wave.style.animationDelay = `${delay}s`;
-		// hint the browser to keep this smooth
-		wave.style.willChange = 'transform';
+	reloadStatus();
+	setInterval(updateBar, 1000);
+
+	const waveIntensity = 1.5; // Lower for smoother waves
+
+	document.querySelectorAll('.wave').forEach((wave, idx) => {
+		const originalD = wave.getAttribute('d');
+
+		function perturbPath(d, amount = 20, phase = 0) {
+			const actualAmount = amount * waveIntensity;
+			let i = 0;
+			return d.replace(/,(-?\d+(\.\d+)?)/g, (match, y) => {
+				const base = parseFloat(y);
+				// Use a sine wave for smooth offset
+				const delta = Math.sin(phase + i * 0.7 + idx) * actualAmount;
+				i++;
+				return ',' + (base + delta).toFixed(2);
+			});
+		}
+
+		let phase = 0;
+		function animateWave() {
+			phase += 0.5 + Math.random() * 0.5;
+			const newD = perturbPath(originalD, 18 + Math.random() * 8, phase);
+			const shift = (Math.random() - 0.5) * 24;
+
+			anime({
+				targets: wave,
+				d: [{ value: newD }, { value: originalD }],
+				translateX: [{ value: shift }, { value: 0 }],
+				duration: 6000 + Math.random() * 5000,
+				easing: 'easeInOutSine',
+				direction: 'alternate',
+				loop: false,
+				complete: animateWave,
+			});
+		}
+
+		animateWave();
 	});
 });
-
-// initial load + start ticking
-fetchInstanceData();
-setInterval(updateBar, 1000);

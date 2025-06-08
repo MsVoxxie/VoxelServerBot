@@ -10,13 +10,13 @@ router.get('/v1/servers/:instanceId?', async (req, res) => {
 			const instance = data.instances.find((i) => i.instanceId === req.params.instanceId);
 			if (instance) {
 				const meta = buildMeta(instance);
-				res.render('statusv2', { instances: [instance], meta });
+				res.render('status', { instances: [instance], meta });
 			} else {
 				res.status(404).send('Instance not found');
 			}
 		} else {
 			const meta = buildMeta();
-			res.render('statusv2', { instances: data.instances, meta });
+			res.render('status', { instances: data.instances, meta });
 		}
 	} catch (err) {
 		console.error(err);
@@ -45,7 +45,9 @@ function buildMeta(instance) {
 	// Build description
 	const state = instance?.server ? instance.server.state : '';
 	const cpuUsage = instance?.server.cpu ? `CPU Usage: ${instance.server.cpu.Percent}%` : '';
-	const memoryUsage = instance?.server.memory ? `Memory Usage: ${(instance.server.memory.RawValue / 1024).toFixed(2)}/${(instance.server.memory.MaxValue / 1024).toFixed(0)}GB` : '';
+	const memoryUsage = instance?.server.memory
+		? `Memory Usage: ${(instance.server.memory.RawValue / 1024).toFixed(2)}/${(instance.server.memory.MaxValue / 1024).toFixed(0)}GB`
+		: '';
 	const performance = instance?.server.performance ? `${instance.server.performance.Unit}: ${instance.server.performance.RawValue}` : '';
 	const userCount = instance?.server.users ? `Users: ${instance.server.users.RawValue}/${instance.server.users.MaxValue}` : '';
 
