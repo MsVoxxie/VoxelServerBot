@@ -20,10 +20,16 @@ const success = function (message) {
 	console.log(colors.green('[SUCCESS]'), message);
 };
 
+// [CAPI] console out
+const capi = function (message) {
+	console.log(colors.rainbow('[CAPI]'), message);
+};
+
 // Module exports
 module.exports = {
 	info: info,
 	warn: warn,
 	error: error,
 	success: success,
+	capi: capi,
 };

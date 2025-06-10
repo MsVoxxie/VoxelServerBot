@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "@cubecoders/ampapi": "^1.0.1",
+    "@tailwindcss/cli": "^4.1.8",
     "ascii-table": "^0.0.9",
+    "canvas-confetti": "^1.9.3",
     "colors": "^1.4.0",
     "cors": "^2.8.5",
     "discord.js": "^14.13.0",
@@ -17,6 +19,8 @@
     "openai": "^4.59.0",
     "path": "^0.12.7",
     "ping": "^0.4.4",
-    "systeminformation": "^5.27.1"
+    "systeminformation": "^5.27.1",
+    "tailwindcss": "^4.1.8",
+    "ws": "^8.18.2"
   }
 }

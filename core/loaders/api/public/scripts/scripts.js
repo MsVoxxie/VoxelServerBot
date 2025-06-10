@@ -81,13 +81,6 @@ function updateCards(instances) {
 						? 'border-yellow-500'
 						: 'border-gray-500');
 
-				// Give the card a bounce effect if it's changed state
-				if (lastState[inst.instanceId] !== state) {
-					card.classList.add('state-bounce');
-					setTimeout(() => {
-						card.classList.remove('state-bounce');
-					}, 1000);
-				}
 				lastState[inst.instanceId] = state;
 			}
 

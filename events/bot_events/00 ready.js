@@ -3,6 +3,7 @@ const { Events } = require('discord.js');
 const { botData } = require('../../models');
 const Logger = require('../../functions/logging/logger');
 const { updateDatabaseInstances } = require('../../functions/ampAPI/updateDatabase');
+const { subscribeToApi } = require('../../functions/websockets/websocket');
 
 module.exports = {
 	name: Events.ClientReady,
@@ -22,5 +23,13 @@ module.exports = {
 		const { instanceCount, allInstances } = await updateDatabaseInstances();
 		client.totalInstances = instanceCount;
 		client.oldInstances = allInstances;
+
+		// subscribeToApi(client, `ws://${process.env.WEBSOCKET_IP}:${process.env.WEBSOCKET_PORT}`, {
+		// 	event: 'REGISTER',
+		// 	bot: {
+		// 		id: client.user.id,
+		// 		name: client.user.username,
+		// 	},
+		// });
 	},
 };

@@ -35,6 +35,7 @@ client.network = {
 	internalUp: 0,
 	internalDown: 0,
 };
+
 client.experimentalFeatures = true;
 client.debug = false;
 client.colors = {
