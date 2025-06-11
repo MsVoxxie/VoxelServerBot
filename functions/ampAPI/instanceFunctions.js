@@ -328,18 +328,7 @@ async function getStatusPageData() {
 					pack_version,
 					icon,
 					suspended: i.Suspended,
-					server: serverData?.status
-						? {
-								state: serverData.status.state,
-								cpu: serverData.status.cpu,
-								memory: serverData.status.memory,
-								users: serverData.status.users,
-								uptime: serverData.status.uptime,
-								performance: serverData.status.performance,
-								ip: SERVER_IP,
-								port: mainPort ? mainPort : null,
-						  }
-						: { state: 'Offline' },
+					server: safeServer(serverData, mainPort, SERVER_IP),
 					players: playersData?.players ?? [],
 				};
 			})
@@ -392,6 +381,46 @@ async function getStatusPageData() {
 
 		return null; // fallback
 	}
+}
+
+function safeMetric(metric, defaults = {}) {
+    return {
+        RawValue: metric?.RawValue ?? 0,
+        MaxValue: metric?.MaxValue ?? 100,
+        Percent: metric?.Percent ?? 0,
+        Units: metric?.Units ?? '',
+        Color: metric?.Color ?? '#888',
+        Color2: metric?.Color2 ?? '#888',
+        Color3: metric?.Color3 ?? '#FFF',
+        ShortName: metric?.ShortName ?? '',
+    };
+}
+
+function safePerformance(perf, defaults = {}) {
+    return {
+        RawValue: perf?.RawValue ?? 0,
+        MaxValue: perf?.MaxValue ?? 20,
+        Percent: perf?.Percent ?? 0,
+        Units: perf?.Units ?? 'TPS',
+        Color: perf?.Color ?? '#888',
+        Color2: perf?.Color2 ?? '#888',
+        Color3: perf?.Color3 ?? '#FFF',
+        ShortName: perf?.ShortName ?? '',
+        Unit: perf?.Unit ?? 'TPS',
+    };
+}
+
+function safeServer(serverData, mainPort, SERVER_IP) {
+    return {
+        state: serverData?.status?.state ?? 'Offline',
+        cpu: safeMetric(serverData?.status?.cpu),
+        memory: safeMetric(serverData?.status?.memory),
+        users: safeMetric(serverData?.status?.users),
+        uptime: serverData?.status?.uptime ?? '0:00:00:00',
+        performance: safePerformance(serverData?.status?.performance),
+        ip: SERVER_IP ?? '',
+        port: mainPort ?? null,
+    };
 }
 
 module.exports = {
