@@ -384,43 +384,43 @@ async function getStatusPageData() {
 }
 
 function safeMetric(metric, defaults = {}) {
-    return {
-        RawValue: metric?.RawValue ?? 0,
-        MaxValue: metric?.MaxValue ?? 100,
-        Percent: metric?.Percent ?? 0,
-        Units: metric?.Units ?? '',
-        Color: metric?.Color ?? '#888',
-        Color2: metric?.Color2 ?? '#888',
-        Color3: metric?.Color3 ?? '#FFF',
-        ShortName: metric?.ShortName ?? '',
-    };
+	return {
+		RawValue: metric?.RawValue ?? defaults.RawValue ?? 0,
+		MaxValue: metric?.MaxValue ?? defaults.MaxValue ?? 100,
+		Percent: metric?.Percent ?? defaults.Percent ?? 0,
+		Units: metric?.Units ?? defaults.Units ?? '',
+		Color: metric?.Color ?? defaults.Color ?? '#888',
+		Color2: metric?.Color2 ?? defaults.Color2 ?? '#888',
+		Color3: metric?.Color3 ?? defaults.Color3 ?? '#FFF',
+		ShortName: metric?.ShortName ?? defaults.ShortName ?? '',
+	};
 }
 
 function safePerformance(perf, defaults = {}) {
-    return {
-        RawValue: perf?.RawValue ?? 0,
-        MaxValue: perf?.MaxValue ?? 20,
-        Percent: perf?.Percent ?? 0,
-        Units: perf?.Units ?? 'TPS',
-        Color: perf?.Color ?? '#888',
-        Color2: perf?.Color2 ?? '#888',
-        Color3: perf?.Color3 ?? '#FFF',
-        ShortName: perf?.ShortName ?? '',
-        Unit: perf?.Unit ?? 'TPS',
-    };
+	return {
+		RawValue: perf?.RawValue ?? 0,
+		MaxValue: perf?.MaxValue ?? 20,
+		Percent: perf?.Percent ?? 0,
+		Units: perf?.Units ?? 'TPS',
+		Color: perf?.Color ?? '#888',
+		Color2: perf?.Color2 ?? '#888',
+		Color3: perf?.Color3 ?? '#FFF',
+		ShortName: perf?.ShortName ?? '',
+		Unit: perf?.Unit ?? 'TPS',
+	};
 }
 
 function safeServer(serverData, mainPort, SERVER_IP) {
-    return {
-        state: serverData?.status?.state ?? 'Offline',
-        cpu: safeMetric(serverData?.status?.cpu),
-        memory: safeMetric(serverData?.status?.memory),
-        users: safeMetric(serverData?.status?.users),
-        uptime: serverData?.status?.uptime ?? '0:00:00:00',
-        performance: safePerformance(serverData?.status?.performance),
-        ip: SERVER_IP ?? '',
-        port: mainPort ?? null,
-    };
+	return {
+		state: serverData?.status?.state ?? 'Offline',
+		cpu: safeMetric(serverData?.status?.cpu),
+		memory: safeMetric(serverData?.status?.memory),
+		users: safeMetric(serverData?.status?.users, { RawValue: 0, MaxValue: 10, Percent: 0 }),
+		uptime: serverData?.status?.uptime ?? '0:00:00:00',
+		performance: safePerformance(serverData?.status?.performance),
+		ip: SERVER_IP ?? '',
+		port: mainPort ?? null,
+	};
 }
 
 module.exports = {
