@@ -12,7 +12,11 @@ module.exports = (client) => {
 	srv.set('view engine', 'ejs'); // 👈 EJS
 	srv.set('views', join(__dirname, '../api/views'));
 
-	srv.use(cors());
+	const corsOptions = {
+		origin: /^https:\/\/vs\.voxxie\.me$/,
+	};
+
+	srv.use(cors(corsOptions));
 	srv.use(express.json());
 	srv.use('/v1/static', express.static(join(__dirname, '../api/public')));
 
