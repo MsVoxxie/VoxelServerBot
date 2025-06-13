@@ -13,7 +13,8 @@ module.exports = (client) => {
 	srv.set('views', join(__dirname, '../api/views'));
 
 	const corsOptions = {
-		origin: /^https:\/\/vs\.voxxie\.me$/,
+		// origin: /^https:\/\/vs\.voxxie\.me$/,
+		origin: '*',
 	};
 
 	srv.use(cors(corsOptions));
