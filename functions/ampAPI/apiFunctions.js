@@ -16,7 +16,7 @@ async function mainAPI() {
 		// Logger.success('AMP API Initialized');
 		return API;
 	} catch (err) {
-		// console.error(err);
+		return null;
 	}
 }
 
@@ -36,7 +36,7 @@ async function instanceAPI(instanceID) {
 		if (!API) throw new Error('Invalid API or the instance is offline.');
 		return API;
 	} catch (err) {
-		// console.error(err);
+		return null;
 	}
 }
 
@@ -91,7 +91,6 @@ async function fetchTriggerTaskId(serverId, triggerDescription, taskName) {
 
 // Send a console message to a specific instance
 async function sendConsoleMessage(API, Message) {
-	if (!API) throw new Error('No Valid API Instance Provided.');
 	await API.Core.SendConsoleMessageAsync(Message);
 }
 

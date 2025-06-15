@@ -284,7 +284,6 @@ async function fetchInstanceStatuses() {
 async function getStatusPageData() {
 	const instanceApi = await mainAPI();
 	if (!instanceApi) {
-		Logger.error('Failed to get AMP main API');
 		return { instances: [], success: false };
 	}
 
@@ -295,6 +294,11 @@ async function getStatusPageData() {
 			(i) => i.InstanceName !== 'ADS01' && !(typeof i.WelcomeMessage === 'string' && i.WelcomeMessage.trim().toLowerCase() === 'hidden')
 		);
 
+		if (filteredInstances.length === 0) {
+			Logger.warn('No valid instances found');
+			return { instances: [], success: true };
+		}
+
 		const instanceStatuses = await Promise.all(filteredInstances.map((i) => getInstanceStatus(i.InstanceID)));
 		const instancePlayers = await Promise.all(filteredInstances.map((i) => getOnlinePlayers(i.InstanceID)));
 
@@ -303,6 +307,14 @@ async function getStatusPageData() {
 				const serverData = instanceStatuses[index];
 				const playersData = instancePlayers[index];
 				const icon = (await getImageSource(i.DisplayImageSource)) || null; // await the icon
+
+				// If the Description contains a date, extract it as a releaseDate and remove it from the description
+				let releaseDate = null;
+				const dateMatch = i.Description ? i.Description.match(/<t:(\d+)>/) : null;
+				if (dateMatch) {
+					releaseDate = new Date(parseInt(dateMatch[1], 10) * 1000).toISOString();
+					i.Description = i.Description.replace(dateMatch[0], '').trim();
+				}
 
 				// If the instance module is Minecraft, get the motd and extract the pack version
 				let pack_version = null;
@@ -322,6 +334,7 @@ async function getStatusPageData() {
 					friendlyName: i.FriendlyName,
 					welcomeMessage: i.WelcomeMessage,
 					description: i.Description,
+					releaseDate,
 					running: i.Running,
 					module: i.Module,
 					moduleName: i.ModuleDisplayName,
