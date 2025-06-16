@@ -1,7 +1,9 @@
-const { instanceAPI, mainAPI } = require('./apiFunctions');
+const { instanceAPI, mainAPI, sendConsoleMessage } = require('./apiFunctions');
 const { getImageSource } = require('../helpers/getSourceImage');
 const Logger = require('../logging/logger');
 const { SERVER_IP } = process.env;
+let last7DaysMsg;
+const sevenDaysCache = {};
 
 //* Add an event trigger to an instance
 async function addEventTrigger(instanceId, triggerDescription) {
@@ -306,7 +308,7 @@ async function getStatusPageData() {
 			filteredInstances.map(async (i, index) => {
 				const serverData = instanceStatuses[index];
 				const playersData = instancePlayers[index];
-				const icon = (await getImageSource(i.DisplayImageSource)) || null; // await the icon
+				const icon = (await getImageSource(i.DisplayImageSource)) || null;
 
 				// If the Description contains a date, extract it as a releaseDate and remove it from the description
 				let releaseDate = null;
@@ -325,6 +327,52 @@ async function getStatusPageData() {
 					}
 				}
 
+				let currentTime = null;
+				let bloodMoonFrequency = null;
+
+				// If the instance module is Seven Days To Die, get the currentDay and bloodMoonFrequency
+				if (i.ModuleDisplayName === 'Seven Days To Die') {
+					const cache = sevenDaysCache[i.InstanceID] || {};
+					const now = Date.now();
+
+					if (!cache.timestamp || now - cache.timestamp > 5 * 60 * 1000) {
+						try {
+							const sevenAPI = await instanceAPI(i.InstanceID);
+							Logger.info(`7D2D: ${i.FriendlyName} - Fetching current day...`);
+							await sendConsoleMessage(sevenAPI, 'gettime');
+							await sevenAPI.Core.GetUpdatesAsync();
+							await new Promise((resolve) => setTimeout(resolve, 500));
+							const consoleResponse = await sevenAPI.Core.GetUpdatesAsync();
+							const consoleOutput = consoleResponse.ConsoleEntries;
+
+							const dayEntry = consoleOutput.find((ent) => typeof ent.Contents === 'string' && /^Day \d+, \d{2}:\d{2}/.test(ent.Contents));
+							if (dayEntry) {
+								const match = dayEntry.Contents.match(/^Day (\d+), (\d{2}:\d{2})/);
+								if (match) {
+									currentTime = { day: match[1], time: match[2] };
+								}
+							}
+
+							const configNode = await getConfigNode(i.InstanceID, 'Meta.GenericModule.BloodMoonFrequency');
+							if (configNode && configNode.currentValue) {
+								bloodMoonFrequency = Number(configNode.currentValue) || 7;
+							}
+
+							sevenDaysCache[i.InstanceID] = {
+								timestamp: now,
+								currentTime,
+								bloodMoonFrequency,
+							};
+						} catch (err) {
+							Logger.error(`Failed to fetch 7D2D data for ${i.FriendlyName}: ${err.message}`);
+						}
+					}
+
+					// Use cached values (either just updated or from previous fetch)
+					currentTime = sevenDaysCache[i.InstanceID]?.currentTime ?? null;
+					bloodMoonFrequency = sevenDaysCache[i.InstanceID]?.bloodMoonFrequency ?? 7;
+				}
+
 				// Pluck the server port from the instance
 				const mainPort = extractMainPort(i.DeploymentArgs);
 
@@ -341,7 +389,7 @@ async function getStatusPageData() {
 					pack_version,
 					icon,
 					suspended: i.Suspended,
-					server: safeServer(serverData, mainPort, SERVER_IP),
+					server: safeServer(serverData, mainPort, SERVER_IP, bloodMoonFrequency, currentTime),
 					players: playersData?.players ?? [],
 				};
 			})
@@ -429,7 +477,7 @@ function safePerformance(perf, defaults = {}) {
 	};
 }
 
-function safeServer(serverData, mainPort, SERVER_IP) {
+function safeServer(serverData, mainPort, SERVER_IP, bloodMoonFrequency, currentTime) {
 	return {
 		state: serverData?.status?.state ?? 'Offline',
 		cpu: safeMetric(serverData?.status?.cpu),
@@ -437,6 +485,8 @@ function safeServer(serverData, mainPort, SERVER_IP) {
 		users: safeMetric(serverData?.status?.users, { RawValue: 0, MaxValue: 10, Percent: 0 }),
 		uptime: serverData?.status?.uptime ?? '0:00:00:00',
 		performance: safePerformance(serverData?.status?.performance),
+		bloodMoonFrequency,
+		currentTime,
 		ip: SERVER_IP ?? '',
 		port: mainPort ?? null,
 	};

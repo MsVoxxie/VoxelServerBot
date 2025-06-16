@@ -91,6 +91,8 @@ async function fetchTriggerTaskId(serverId, triggerDescription, taskName) {
 
 // Send a console message to a specific instance
 async function sendConsoleMessage(API, Message) {
+	if (!API) throw new Error('No API instance provided');
+	if (!Message) throw new Error('No message provided');
 	await API.Core.SendConsoleMessageAsync(Message);
 }
 
