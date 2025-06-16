@@ -348,10 +348,16 @@ async function getStatusPageData() {
 		);
 
 		// Sort instances by module, online status, and then by instance name
+		// Online status is in the order of Running Starting Updating Prestart Stopping Stopped Failed Offline
+		const statusOrder = ['Running', 'Starting', 'Updating', 'PreStart', 'Stopping', 'Stopped', 'Failed', 'Offline'];
+
 		dataArray.sort((a, b) => {
-			const isRunningA = a.running ? 1 : 0;
-			const isRunningB = b.running ? 1 : 0;
-			if (isRunningA !== isRunningB) return isRunningB - isRunningA;
+			const stateA = a.server?.state || 'Offline';
+			const stateB = b.server?.state || 'Offline';
+			const stateIndexA = statusOrder.indexOf(stateA);
+			const stateIndexB = statusOrder.indexOf(stateB);
+
+			if (stateIndexA !== stateIndexB) return stateIndexA - stateIndexB;
 
 			const modulePriority = (mod) => (mod === 'Minecraft' ? 0 : 1);
 			const priorityA = modulePriority(a.module || '');
