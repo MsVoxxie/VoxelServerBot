@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@cubecoders/ampapi": "^1.0.1",
-    "@tailwindcss/cli": "^4.1.8",
+    "@tailwindcss/cli": "^4.1.10",
     "ascii-table": "^0.0.9",
     "canvas-confetti": "^1.9.3",
     "colors": "^1.4.0",
