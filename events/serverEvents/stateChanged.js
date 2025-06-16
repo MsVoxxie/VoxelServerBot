@@ -14,7 +14,8 @@ module.exports = {
 		if (USER === 'SERVER' && MESSAGE === 'Ready') {
 			const currentMOTD = await getConfigNode(INSTANCE, 'MinecraftModule.Minecraft.ServerMOTD');
 			const serverStart = client.serverStartTime(START);
-			MESSAGE = `Ready | ${currentMOTD.currentValue}\nTook ${serverStart}`;
+			const timeMsg = `Took ${serverStart}`;
+			MESSAGE = `Ready | ${currentMOTD ? `${currentMOTD.currentValue} ` : '\n'}${timeMsg}`;
 		}
 
 		// Send off the message to Discord
