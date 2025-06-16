@@ -328,9 +328,8 @@ async function getStatusPageData() {
 				}
 
 				let currentTime = null;
-				let bloodMoonFrequency = null;
 
-				// If the instance module is Seven Days To Die, get the currentDay and bloodMoonFrequency
+				// If the instance module is Seven Days To Die, get the currentTime
 				if (i.ModuleDisplayName === 'Seven Days To Die') {
 					const cache = sevenDaysCache[i.InstanceID] || {};
 					const now = Date.now();
@@ -353,15 +352,9 @@ async function getStatusPageData() {
 								}
 							}
 
-							const configNode = await getConfigNode(i.InstanceID, 'Meta.GenericModule.BloodMoonFrequency');
-							if (configNode && configNode.currentValue) {
-								bloodMoonFrequency = Number(configNode.currentValue) || 7;
-							}
-
 							sevenDaysCache[i.InstanceID] = {
 								timestamp: now,
 								currentTime,
-								bloodMoonFrequency,
 							};
 						} catch (err) {
 							Logger.error(`Failed to fetch 7D2D data for ${i.FriendlyName}: ${err.message}`);
@@ -370,7 +363,6 @@ async function getStatusPageData() {
 
 					// Use cached values (either just updated or from previous fetch)
 					currentTime = sevenDaysCache[i.InstanceID]?.currentTime ?? null;
-					bloodMoonFrequency = sevenDaysCache[i.InstanceID]?.bloodMoonFrequency ?? 7;
 				}
 
 				// Pluck the server port from the instance
@@ -389,7 +381,7 @@ async function getStatusPageData() {
 					pack_version,
 					icon,
 					suspended: i.Suspended,
-					server: safeServer(serverData, mainPort, SERVER_IP, bloodMoonFrequency, currentTime),
+					server: safeServer(serverData, mainPort, SERVER_IP, currentTime),
 					players: playersData?.players ?? [],
 				};
 			})
@@ -477,7 +469,7 @@ function safePerformance(perf, defaults = {}) {
 	};
 }
 
-function safeServer(serverData, mainPort, SERVER_IP, bloodMoonFrequency, currentTime) {
+function safeServer(serverData, mainPort, SERVER_IP, currentTime) {
 	return {
 		state: serverData?.status?.state ?? 'Offline',
 		cpu: safeMetric(serverData?.status?.cpu),
@@ -485,7 +477,6 @@ function safeServer(serverData, mainPort, SERVER_IP, bloodMoonFrequency, current
 		users: safeMetric(serverData?.status?.users, { RawValue: 0, MaxValue: 10, Percent: 0 }),
 		uptime: serverData?.status?.uptime ?? '0:00:00:00',
 		performance: safePerformance(serverData?.status?.performance),
-		bloodMoonFrequency,
 		currentTime,
 		ip: SERVER_IP ?? '',
 		port: mainPort ?? null,
