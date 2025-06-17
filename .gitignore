@@ -1,3 +1,4 @@
 .env
 node_modules
 core/loaders/api/public/images/playerheads
+core/loaders/api/public/images/steamavatars

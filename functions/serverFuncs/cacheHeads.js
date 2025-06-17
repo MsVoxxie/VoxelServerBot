@@ -4,11 +4,15 @@ const fetch = require('node-fetch');
 const { AttachmentBuilder } = require('discord.js');
 
 // Set cache location and TTL (in milliseconds)
-const CACHE_DIR = path.join(__dirname, '../../core/loaders/api/public/images/playerheads');
+const MC_CACHE_DIR = path.join(__dirname, '../../core/loaders/api/public/images/playerheads');
+const STEAM_CACHE_DIR = path.join(__dirname, '../../core/loaders/api/public/images/steamavatars');
 const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
-const PLACEHOLDER_PATH = path.join(CACHE_DIR, 'placeholder.png');
+const MC_PLACEHOLDER_PATH = path.join(MC_CACHE_DIR, 'placeholder.png');
+const STEAM_PLACEHOLDER_PATH = path.join(STEAM_CACHE_DIR, 'placeholder.png');
+const STEAM_API_KEY = process.env.STEAM_API_KEY;
 
-if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR);
+if (!fs.existsSync(MC_CACHE_DIR)) fs.mkdirSync(MC_CACHE_DIR);
+if (!fs.existsSync(STEAM_CACHE_DIR)) fs.mkdirSync(STEAM_CACHE_DIR);
 
 // Get UUID from username
 async function getUUID(username) {
@@ -37,10 +41,25 @@ async function downloadHead(uuid, filePath) {
 	return buffer;
 }
 
+// Download Steam avatar and save to cache
+async function downloadSteamAvatar(steam64, filePath) {
+	const apiUrl = `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${STEAM_API_KEY}&steamids=${steam64}`;
+	const res = await fetch(apiUrl);
+	if (!res.ok) throw new Error('Failed to fetch Steam profile');
+	const data = await res.json();
+	const player = data.response.players[0];
+	if (!player || !player.avatarfull) throw new Error('No avatar found for this SteamID');
+	const avatarRes = await fetch(player.avatarfull);
+	if (!avatarRes.ok) throw new Error('Failed to fetch avatar image');
+	const buffer = await avatarRes.buffer();
+	fs.writeFileSync(filePath, buffer);
+	return buffer;
+}
+
 // Main function: Get head from cache or fetch it
 async function getPlayerHead(username) {
 	const uuid = await getUUID(username);
-	const filePath = path.join(CACHE_DIR, `${username}.png`);
+	const filePath = path.join(MC_CACHE_DIR, `${username}.png`);
 
 	if (!isCacheFresh(filePath)) {
 		await downloadHead(uuid, filePath); // Save to disk
@@ -57,9 +76,9 @@ async function getPlayerHead(username) {
 	try {
 		uuid = await getUUID(username);
 	} catch (err) {
-		return PLACEHOLDER_PATH;
+		return MC_PLACEHOLDER_PATH;
 	}
-	const filePath = path.join(CACHE_DIR, `${username}.png`);
+	const filePath = path.join(MC_CACHE_DIR, `${username}.png`);
 
 	// Get the head
 	try {
@@ -68,11 +87,26 @@ async function getPlayerHead(username) {
 		}
 		return filePath;
 	} catch (err) {
-		return PLACEHOLDER_PATH;
+		return MC_PLACEHOLDER_PATH;
 	}
+}
+
+// Main function: Get Steam avatar from cache or fetch it
+async function getSteamAvatar(steam64, apiKey) {
+	const filePath = path.join(STEAM_CACHE_DIR, `${steam64}.png`);
+	if (!isCacheFresh(filePath)) {
+		try {
+			await downloadSteamAvatar(steam64, filePath, apiKey);
+		} catch (err) {
+			return STEAM_PLACEHOLDER_PATH;
+		}
+	}
+	return filePath;
 }
 
 module.exports = {
 	getPlayerHead,
-	CACHE_DIR,
+	getSteamAvatar,
+	MC_CACHE_DIR,
+	STEAM_CACHE_DIR,
 };
