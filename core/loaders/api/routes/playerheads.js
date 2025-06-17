@@ -14,7 +14,7 @@ router.get('/v1/client/playerheads/:username', async (req, res) => {
 	}
 });
 
-router.get('/v1/client/steamhead/:steam64', async (req, res) => {
+router.get('/v1/client/steamheads/:steam64', async (req, res) => {
 	const { steam64 } = req.params;
 	try {
 		const imagePath = await getSteamAvatar(steam64);
