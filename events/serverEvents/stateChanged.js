@@ -17,7 +17,7 @@ module.exports = {
 
 			const serverStart = client.serverStartTime(START);
 			const timeMsg = `Took ${serverStart}`;
-			MESSAGE = `Ready | ${currentMOTD.currentValue ? `${currentMOTD.currentValue} ` : '\n'}${timeMsg}`;
+			MESSAGE = `Ready | ${currentMOTD.currentValue ? `${currentMOTD.currentValue}\n` : ''}${timeMsg}`;
 		}
 
 		// Send off the message to Discord
