@@ -1,4 +1,4 @@
-const { getInstanceAPI, mainAPI, sendConsoleMessage } = require('./apiFunctions');
+const { getInstanceAPI, getMainAPI, sendConsoleMessage } = require('./apiFunctions');
 const { getImageSource } = require('../helpers/getSourceImage');
 const Logger = require('../logging/logger');
 const { SERVER_IP } = process.env;
@@ -244,7 +244,7 @@ async function getOnlinePlayers(instanceId) {
 
 //* Get the status of every instance and it's server
 async function fetchInstanceStatuses() {
-	const instanceApi = await mainAPI();
+	const instanceApi = await getMainAPI();
 	const instances = await instanceApi.ADSModule.GetLocalInstancesAsync();
 	const filteredInstances = instances.filter((i) => i.InstanceName !== 'ADS01');
 
@@ -284,7 +284,7 @@ async function fetchInstanceStatuses() {
 
 //* Get the status page data for all instances
 async function getStatusPageData() {
-	const instanceApi = await mainAPI();
+	const instanceApi = await getMainAPI();
 	if (!instanceApi) {
 		return { instances: [], success: false };
 	}
@@ -293,7 +293,7 @@ async function getStatusPageData() {
 		const instances = await instanceApi.ADSModule.GetLocalInstancesAsync();
 
 		const filteredInstances = instances.filter(
-			(i) => i.InstanceName !== 'ADS01' && !(typeof i.WelcomeMessage === 'string' && i.WelcomeMessage.trim().toLowerCase() === 'hidden')
+			(i) => i.InstanceName !== 'ADS01' && !(typeof i.WelcomeMessage === 'string' && i.WelcomeMessage.trim().toLowerCase() === 'hidden') && i.Running === true
 		);
 
 		if (filteredInstances.length === 0) {
