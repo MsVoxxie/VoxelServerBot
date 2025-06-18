@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const { mainAPI, instanceAPI } = require('../../functions/ampAPI/apiFunctions');
+const { mainAPI, getInstanceAPI } = require('../../functions/ampAPI/apiFunctions');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('apply_defaults')
@@ -34,7 +34,7 @@ module.exports = {
 			console.log(`Applying settings to ${instance.name} - (${instance.id})...`);
 
 			try {
-				const instAPI = await instanceAPI(instance.id);
+				const instAPI = await getInstanceAPI(instance.id);
 				await instAPI.Core.SetConfigsAsync(sortedDefaults);
 			} catch (error) {
 				console.log(`❌ Failed to apply settings to ${instance.name} - (${instance.id})...`);

@@ -1,5 +1,5 @@
 const { getInstanceStatus, getOnlinePlayers } = require('../../functions/ampAPI/instanceFunctions');
-const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { getInstanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { calculateSleepingPercentage } = require('../../functions/serverFuncs/minecraft');
 const { serverLink } = require('../../functions/helpers/messageDiscord');
 const { queueTask } = require('../../functions/helpers/queueTask');
@@ -36,9 +36,7 @@ module.exports = {
 				augmentedMessage = `${MESSAGE}\n-# ${onlinePlayers.players.length}/${maxPlayers} Players, sleepPercentage set to ${sleepPercentage}% (${requiredToSleep})`;
 			}
 
-			// Send the message to the server
-			const API = await instanceAPI(INSTANCE);
-			await sendConsoleMessage(API, `gamerule playersSleepingPercentage ${sleepPercentage}`);
+			await sendConsoleMessage(INSTANCE, `gamerule playersSleepingPercentage ${sleepPercentage}`);
 		}
 
 		// Allow only the first join message to be sent for each user

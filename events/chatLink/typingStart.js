@@ -1,6 +1,6 @@
 const { Events } = require('discord.js');
 const { chatLink } = require('../../models');
-const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { getInstanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { updateTypingScoreboard } = require('../../functions/serverFuncs/minecraft');
 
 module.exports = {
@@ -19,9 +19,6 @@ module.exports = {
 			if (chatLinkData.channelId !== typing.channel.id) continue;
 			if (chatLinkData.instanceModule !== 'Minecraft') continue;
 
-			// Get the instance API
-			const API = await instanceAPI(chatLinkData.instanceId);
-
 			// Create a key for the typing state
 			const key = `${typing.channel.id}_${typing.user.id}`;
 
@@ -33,7 +30,7 @@ module.exports = {
 			// Set a new timeout to remove after 10 seconds of inactivity
 			const timeout = setTimeout(async () => {
 				client.typingState.delete(key);
-				await updateTypingScoreboard(typing.channel, client, sendConsoleMessage, API).catch(console.error);
+				await updateTypingScoreboard(typing.channel, client, sendConsoleMessage, chatLinkData.instanceId).catch(console.error);
 			}, 30 * 1000);
 
 			// Store or refresh the entry
@@ -44,7 +41,7 @@ module.exports = {
 			});
 
 			// Update the scoreboard with the typing users
-			await updateTypingScoreboard(typing.channel, client, sendConsoleMessage, API);
+			await updateTypingScoreboard(typing.channel, client, sendConsoleMessage, chatLinkData.instanceId);
 		}
 	},
 };

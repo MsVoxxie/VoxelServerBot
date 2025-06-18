@@ -1,4 +1,4 @@
-const { instanceAPI, mainAPI, sendConsoleMessage } = require('./apiFunctions');
+const { getInstanceAPI, mainAPI, sendConsoleMessage } = require('./apiFunctions');
 const { getImageSource } = require('../helpers/getSourceImage');
 const Logger = require('../logging/logger');
 const { SERVER_IP } = process.env;
@@ -8,7 +8,7 @@ const sevenDaysCache = {};
 //* Add an event trigger to an instance
 async function addEventTrigger(instanceId, triggerDescription) {
 	// Get the instances API
-	const API = await instanceAPI(instanceId);
+	const API = await getInstanceAPI(instanceId);
 
 	// Get all schedule data
 	const scheduleData = await API.Core.GetScheduleDataAsync();
@@ -31,7 +31,7 @@ async function addEventTrigger(instanceId, triggerDescription) {
 //* Add a task to an event trigger
 async function addTaskToTrigger(instanceId, triggerDescription, taskName, taskData, allowDuplicates = false) {
 	// Get the instances API
-	const API = await instanceAPI(instanceId);
+	const API = await getInstanceAPI(instanceId);
 
 	// Get all schedule data
 	const scheduleData = await API.Core.GetScheduleDataAsync();
@@ -64,7 +64,7 @@ async function addTaskToTrigger(instanceId, triggerDescription, taskName, taskDa
 //* Change the order of tasks in an event trigger
 async function changeTaskOrder(instanceId, triggerDescription, taskName, newOrder) {
 	// Get the instances API
-	const API = await instanceAPI(instanceId);
+	const API = await getInstanceAPI(instanceId);
 
 	// Get all schedule data
 	const scheduleData = await API.Core.GetScheduleDataAsync();
@@ -96,7 +96,7 @@ async function changeTaskOrder(instanceId, triggerDescription, taskName, newOrde
 //! Remove an event trigger from an instance
 async function removeEventTrigger(instanceId, triggerDescription) {
 	// Get the instances API
-	const API = await instanceAPI(instanceId);
+	const API = await getInstanceAPI(instanceId);
 
 	// Get all schedule data
 	const scheduleData = await API.Core.GetScheduleDataAsync();
@@ -117,7 +117,7 @@ async function removeEventTrigger(instanceId, triggerDescription) {
 //! Remove a task from an event trigger
 async function removeTaskFromTrigger(instanceId, triggerDescription, taskName) {
 	// Get the instances API
-	const API = await instanceAPI(instanceId);
+	const API = await getInstanceAPI(instanceId);
 
 	// Get all schedule data
 	const scheduleData = await API.Core.GetScheduleDataAsync();
@@ -149,7 +149,7 @@ async function removeTaskFromTrigger(instanceId, triggerDescription, taskName) {
 //* Get a config node by its name
 async function getConfigNode(instanceId, configNode) {
 	// Get the instances API
-	const API = await instanceAPI(instanceId);
+	const API = await getInstanceAPI(instanceId);
 
 	// Fetch the config node
 	if (!API) return { desc: 'Invalid instanceId.', success: false };
@@ -161,7 +161,7 @@ async function getConfigNode(instanceId, configNode) {
 //* Set a config node by its name
 async function setConfigNode(instanceId, configNode, configValue) {
 	// Get the instances API
-	const API = await instanceAPI(instanceId);
+	const API = await getInstanceAPI(instanceId);
 	if (!API) return { desc: 'Invalid instanceId.', success: false };
 
 	// Set the config node
@@ -173,7 +173,7 @@ async function setConfigNode(instanceId, configNode, configValue) {
 //* Get the current status of an instance
 async function getInstanceStatus(instanceId) {
 	// Get the instances API
-	const API = await instanceAPI(instanceId);
+	const API = await getInstanceAPI(instanceId);
 	if (!API) return { desc: 'Invalid instanceId.', success: false };
 
 	// Get the status of the instance
@@ -230,7 +230,7 @@ async function getInstanceStatus(instanceId) {
 //* Get the currently online players of an instance
 async function getOnlinePlayers(instanceId) {
 	// Get the instances API
-	const API = await instanceAPI(instanceId);
+	const API = await getInstanceAPI(instanceId);
 	if (!API) return { desc: 'Invalid instanceId.', success: false };
 
 	// Get the online players
@@ -336,9 +336,8 @@ async function getStatusPageData() {
 
 					if (!cache.timestamp || now - cache.timestamp > 5 * 60 * 1000) {
 						try {
-							const sevenAPI = await instanceAPI(i.InstanceID);
-							Logger.info(`7D2D: ${i.FriendlyName} - Fetching current day...`);
-							await sendConsoleMessage(sevenAPI, 'gettime');
+							const sevenAPI = await getInstanceAPI(i.InstanceID);
+							await sendConsoleMessage(i.InstanceID, 'gettime');
 							await sevenAPI.Core.GetUpdatesAsync();
 							await new Promise((resolve) => setTimeout(resolve, 500));
 							const consoleResponse = await sevenAPI.Core.GetUpdatesAsync();
@@ -357,7 +356,7 @@ async function getStatusPageData() {
 								currentTime,
 							};
 						} catch (err) {
-							Logger.error(`Failed to fetch 7D2D data for ${i.FriendlyName}: ${err.message}`);
+							null;
 						}
 					}
 

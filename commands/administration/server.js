@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, codeBlock, InteractionContextType, ApplicationIntegrationType } = require('discord.js');
-const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { getInstanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { alertSoundMC } = require('../../functions/helpers/messageFuncs');
 const { trimString } = require('../../functions/helpers/stringFuncs');
 
@@ -70,7 +70,7 @@ module.exports = {
 		const server = interaction.options.getString('server');
 		const command = interaction.options.getSubcommand();
 		const [instanceId, friendlyName, instanceModule, instanceImage] = server.split('|').map((i) => i.trim());
-		const API = await instanceAPI(instanceId);
+		const API = await getInstanceAPI(instanceId);
 
 		// Switch statement to determine the command to run
 		switch (command) {
@@ -153,15 +153,15 @@ module.exports = {
 
 						// Send the message to the server
 						await sendConsoleMessage(
-							API,
+							instanceId,
 							`tellraw @a [{"text":""},{"text":"[${hoverText}] ","color":"${color}","hoverEvent":{"action":"show_text","contents":[{"text":"Server ${hoverText}","color":"${color}"}]}},{"text":"${message}"}]`
 						);
 						// Play an alert sound
-						await alertSoundMC(API, type);
+						await alertSoundMC(instanceId, type);
 						break;
 
 					default:
-						await sendConsoleMessage(API, `say "[${type}] ${message}"`);
+						await sendConsoleMessage(instanceId, `say "[${type}] ${message}"`);
 						break;
 				}
 				await interaction.followUp({ content: `Message sent to ${friendlyName}` });
@@ -174,7 +174,7 @@ module.exports = {
 				await API.Core.GetUpdatesAsync();
 
 				// Execute the RCON command
-				await sendConsoleMessage(API, rconCmd);
+				await sendConsoleMessage(instanceId, rconCmd);
 
 				// Wait half a second for the command to be processed
 				await new Promise((resolve) => setTimeout(resolve, 500));

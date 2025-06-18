@@ -1,5 +1,5 @@
 const { Events, PermissionFlagsBits, Colors, EmbedBuilder, MessageFlags } = require('discord.js');
-const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { getInstanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { SERVER_IP } = process.env;
 
 module.exports = {
@@ -19,7 +19,7 @@ module.exports = {
 		// Check if the staff member has the manage_members permission
 		if (!staffMember.permissions.has(PermissionFlagsBits.ManageRoles)) return;
 
-		const API = await instanceAPI(instanceId);
+		const API = await getInstanceAPI(instanceId);
 		if (!API) interaction.followUp({ content: 'An error occurred while trying to fetch the instance API.', flags: MessageFlags.Ephemeral });
 
 		// GetUpdates to clear the console
@@ -33,18 +33,18 @@ module.exports = {
 			case 'accept':
 				try {
 					// Accept the whitelist request
-					await sendConsoleMessage(API, `whitelist add ${minecraftUsername.trim().toString()}`);
+					await sendConsoleMessage(instanceId, `whitelist add ${minecraftUsername.trim().toString()}`);
 
 					// Wait 1 second to allow the console to update
 					await new Promise((resolve) => setTimeout(resolve, 2000));
 
 					// Check the console for updates
-					const consoleResponse = await API.Core.GetUpdatesAsync();
+					const consoleResponse = await instanceId.Core.GetUpdatesAsync();
 					const consoleOutput = consoleResponse.ConsoleEntries.filter((i) => i.Contents === 'That player does not exist').sort((a, b) => a.Timestamp - b.Timestamp);
 
 					//! If the player does not exist, Fail the request
 					if (consoleOutput.length > 0) {
-						await sendConsoleMessage(API, `whitelist remove ${minecraftUsername.trim()}`);
+						await sendConsoleMessage(instanceId, `whitelist remove ${minecraftUsername.trim()}`);
 						await sendConsoleMessage(
 							API,
 							`tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Failed to add ","color":"dark_red"},{"text":"${minecraftUsername.trim()}","color":"aqua"}]`
@@ -66,7 +66,7 @@ module.exports = {
 					}
 
 					await sendConsoleMessage(
-						API,
+						instanceId,
 						`tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Added ","color":"green"},{"text":"${minecraftUsername.trim()}","color":"aqua"}]`
 					);
 
@@ -90,9 +90,9 @@ module.exports = {
 			case 'deny':
 				try {
 					// Show the deny message
-					await sendConsoleMessage(API, `whitelist remove ${minecraftUsername}`);
+					await sendConsoleMessage(instanceId, `whitelist remove ${minecraftUsername}`);
 					await sendConsoleMessage(
-						API,
+						instanceId,
 						`tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Denied ","color":"dark_red"},{"text":"${minecraftUsername.trim()}","color":"aqua"}]`
 					);
 

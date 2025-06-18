@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { mainAPI, instanceAPI } = require('../../functions/ampAPI/apiFunctions');
+const { mainAPI, getInstanceAPI } = require('../../functions/ampAPI/apiFunctions');
 const { serverLink } = require('../../functions/helpers/messageDiscord');
 const { queueTask } = require('../../functions/helpers/queueTask');
 

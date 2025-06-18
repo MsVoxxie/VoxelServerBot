@@ -10,7 +10,7 @@ function calculateSleepingPercentage(onlinePlayers, maxPlayers) {
 	return { sleepPercentage: roundedPercentage, requiredToSleep: required };
 }
 
-async function updateTypingScoreboard(channel, client, sendConsoleMessage, API) {
+async function updateTypingScoreboard(channel, client, sendConsoleMessage, instanceId) {
 	const typingUsers = [...client.typingState.values()].filter((entry) => entry.channel.id === channel.id).map((entry) => entry.user);
 
 	const names = await Promise.all(
@@ -34,11 +34,11 @@ async function updateTypingScoreboard(channel, client, sendConsoleMessage, API) 
 	const displayCommand = userCount === 0 ? 'scoreboard objectives setdisplay sidebar' : 'scoreboard objectives setdisplay sidebar chatlink_typing';
 
 	// Send the display update command to Discord
-	await sendConsoleMessage(API, displayCommand);
+	await sendConsoleMessage(instanceId, displayCommand);
 
 	// Send the updated scoreboard message
 	const scoreboardText = `{"text": "${displayText}"}`;
-	await sendConsoleMessage(API, `scoreboard objectives modify chatlink_typing displayname ${scoreboardText}`);
+	await sendConsoleMessage(instanceId, `scoreboard objectives modify chatlink_typing displayname ${scoreboardText}`);
 }
 
 module.exports = {

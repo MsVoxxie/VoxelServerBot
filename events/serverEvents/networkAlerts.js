@@ -1,4 +1,4 @@
-const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { getInstanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { alertSoundMC } = require('../../functions/helpers/messageFuncs');
 const { serverLink } = require('../../functions/helpers/messageDiscord');
 const { queueTask } = require('../../functions/helpers/queueTask');
@@ -24,19 +24,16 @@ module.exports = {
 				// Send to Discord
 				queueTask(instanceId, serverLink, 'SERVER', discordMessage, instanceId);
 
-				// Get AMP API
-				const API = await instanceAPI(instanceId);
-
 				if (instanceModule === 'Minecraft') {
 					const { color, hoverText, alertType } = getMCAlertStyle(type);
 
 					const tellraw = `tellraw @a [{"text":""},{"text":"[${hoverText}] ","color":"${color}","hoverEvent":{"action":"show_text","contents":[{"text":"Server","color":"${color}"}]}},{"text":"${serverMessage}"}]`;
 
-					queueTask(instanceId, sendConsoleMessage, API, tellraw);
-					queueTask(instanceId, alertSoundMC, API, alertType);
+					queueTask(instanceId, sendConsoleMessage, instanceId, tellraw);
+					queueTask(instanceId, alertSoundMC, instanceId, alertType);
 				} else {
 					// Fallback for non-Minecraft modules
-					queueTask(instanceId, sendConsoleMessage, API, `say "${serverMessage}"`);
+					queueTask(instanceId, sendConsoleMessage, instanceId, `say "${serverMessage}"`);
 				}
 			} catch (err) {
 				console.error(`Error sending network notice to ${instanceId}:`, err);

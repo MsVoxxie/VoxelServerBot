@@ -1,6 +1,6 @@
 const { Events } = require('discord.js');
 const { chatLink } = require('../../models');
-const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { getInstanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { updateTypingScoreboard } = require('../../functions/serverFuncs/minecraft');
 const { splitSentence } = require('../../functions/helpers/messageFuncs');
 
@@ -34,9 +34,6 @@ module.exports = {
 			const authorName = message.member.displayName;
 			const authorColor = message.member.displayHexColor;
 
-			// Grab the instance API
-			const API = await instanceAPI(chatLinkData.instanceId);
-
 			// Check if the instance module is Minecraft
 			if (chatLinkData.instanceModule === 'Minecraft') {
 				// Typing indicator
@@ -47,7 +44,7 @@ module.exports = {
 				}
 
 				// Update the scoreboard with the typing users
-				await updateTypingScoreboard(message.channel, client, sendConsoleMessage, API);
+				await updateTypingScoreboard(message.channel, client, sendConsoleMessage, chatLinkData.instanceId);
 
 				try {
 					for (let i = 0; i < messageParts.length; i++) {
@@ -60,13 +57,13 @@ module.exports = {
 
 						// Send each part of the message
 						await sendConsoleMessage(
-							API,
+							chatLinkData.instanceId,
 							`tellraw @a ["",{"text":"[D] ","color":"blue","hoverEvent":{"action":"show_text","contents":[{"text":"${message.guild.name}","color":"blue"}]}},{"text":"<"},{"text":"${authorName}","color":"${authorColor}"},{"text":">"},{"text":"${counterMessage}","italic":${shouldItalic}}]`
 						);
 
 						// Play a sound to get the attention of the players but randomize the pitch with a minimum of 0.8 and a maximum of 1.3
 						const pitch = Math.random() * (1.3 - 0.8) + 0.8;
-						await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${pitch} 0.25`);
+						await sendConsoleMessage(chatLinkData.instanceId, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${pitch} 0.25`);
 					}
 				} catch (error) {
 					continue;
@@ -78,7 +75,7 @@ module.exports = {
 
 					// Send each part of the message
 					for (let i = 0; i < messageParts.length; i++) {
-						await sendConsoleMessage(API, `say "[D] <${message.member.displayName}>${counter}${messageParts[i]}"`);
+						await sendConsoleMessage(chatLinkData.instanceId, `say "[D] <${message.member.displayName}>${counter}${messageParts[i]}"`);
 					}
 				} catch (error) {
 					continue;

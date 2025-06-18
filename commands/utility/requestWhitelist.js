@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { getInstanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { getConfigNode } = require('../../functions/ampAPI/instanceFunctions');
 
 module.exports = {
@@ -53,9 +53,8 @@ module.exports = {
 		await interaction.reply({ content: 'Your request has been sent, Please wait to be accepted.', flags: MessageFlags.Ephemeral });
 
 		// Send a message to the server
-		const API = await instanceAPI(instanceId);
 		await sendConsoleMessage(
-			API,
+			instanceId,
 			`tellraw @a ["","[",{"text":"Whitelist","color":"gold"},"] ",{"text":"Request Received ","color":"yellow"},"→ ",{"text":"${username}","color":"dark_purple"}]`
 		);
 	},

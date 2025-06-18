@@ -9,7 +9,7 @@
  */
 const { chatLink } = require('../../models');
 const { WebhookClient } = require('discord.js');
-const { instanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { getInstanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 
 // Function for sanity
 async function serverLink(USER = 'Placeholder', MESSAGE = 'Placeholder', INSTANCE = 'Placeholder', TYPE = 'Message', DUAL = false) {
@@ -51,20 +51,17 @@ async function serverLink(USER = 'Placeholder', MESSAGE = 'Placeholder', INSTANC
 		});
 
 		if (DUAL) {
-			// Fetch the instance API
-			const API = await instanceAPI(INSTANCE);
-
 			// Send the message to the server
 			if (chatLinkData.instanceModule === 'Minecraft') {
 				await sendConsoleMessage(
-					API,
+					INSTANCE,
 					`tellraw @a [{"text":""},{"text":"[S] ","color":"yellow","hoverEvent":{"action":"show_text","contents":[{"text":"Server Message","color":"yellow"}]}},{"text":"${MESSAGE}"}]`
 				);
 
 				// If the message is an alert, play a sound
-				await alertSoundMC(API, TYPE);
+				await alertSoundMC(INSTANCE, TYPE);
 			} else {
-				await sendConsoleMessage(API, `say "[${TYPE}] <${USER}> ${MESSAGE}"`);
+				await sendConsoleMessage(INSTANCE, `say "[${TYPE}] <${USER}> ${MESSAGE}"`);
 			}
 		}
 	}
@@ -74,25 +71,25 @@ module.exports = {
 	serverLink,
 };
 
-async function alertSoundMC(API, type = 'notice' || 'alert') {
+async function alertSoundMC(INSTANCE, type = 'notice' || 'alert') {
 	// Randomized variance added to the pitch, max of 0.2 and min of 0.1
 	const pitch = Math.random() * (0.2 - 0.1) + 0.1;
 
 	switch (type) {
 		case 'alert':
-			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${0.75 + pitch} 0.25`);
+			await sendConsoleMessage(INSTANCE, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${0.75 + pitch} 0.25`);
 			await new Promise((resolve) => setTimeout(resolve, 100));
-			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${0.75 + pitch} 0.25`);
+			await sendConsoleMessage(INSTANCE, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${0.75 + pitch} 0.25`);
 			await new Promise((resolve) => setTimeout(resolve, 250));
-			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${1 + pitch} 0.25`);
+			await sendConsoleMessage(INSTANCE, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${1 + pitch} 0.25`);
 			break;
 
 		case 'notice':
-			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${2 + pitch} 0.25`);
+			await sendConsoleMessage(INSTANCE, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${2 + pitch} 0.25`);
 			await new Promise((resolve) => setTimeout(resolve, 50));
-			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${2 + pitch} 0.25`);
+			await sendConsoleMessage(INSTANCE, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${2 + pitch} 0.25`);
 			await new Promise((resolve) => setTimeout(resolve, 50));
-			await sendConsoleMessage(API, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${1.5 + pitch} 0.25`);
+			await sendConsoleMessage(INSTANCE, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${1.5 + pitch} 0.25`);
 
 		default:
 			return;
