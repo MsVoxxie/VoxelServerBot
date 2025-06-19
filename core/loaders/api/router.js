@@ -7,6 +7,7 @@ const playerheads = require('./routes/playerheads');
 const network = require('./routes/network');
 const link = require('./routes/link');
 const auth = require('./routes/auth');
+const chat = require('./routes/chat');
 const ai = require('./routes/ai');
 
 // Middleware to inject client into request
@@ -23,6 +24,7 @@ router.use(playerheads);
 router.use(network);
 router.use(link);
 router.use(auth);
+router.use(chat);
 router.use(ai);
 
 module.exports = (client) => {

@@ -1,6 +1,8 @@
 const { getInstanceAPI, getMainAPI, sendConsoleMessage } = require('./apiFunctions');
 const { getImageSource } = require('../helpers/getSourceImage');
+const { chatLink } = require('../../models');
 const Logger = require('../logging/logger');
+
 const { SERVER_IP } = process.env;
 let last7DaysMsg;
 const sevenDaysCache = {};
@@ -310,6 +312,15 @@ async function getStatusPageData() {
 				const playersData = instancePlayers[index];
 				const icon = (await getImageSource(i.DisplayImageSource)) || null;
 
+				// Check if the instance has a bound chat-link
+				const isLinked = await getChatLinkByInstanceId(i.InstanceID);
+				if (isLinked) {
+					// set the instances linkStatus to true, false otherwise
+					i.linkStatus = true;
+				} else {
+					i.linkStatus = false;
+				}
+
 				// If the Description contains a date, extract it as a releaseDate and remove it from the description
 				let releaseDate = null;
 				const dateMatch = i.Description ? i.Description.match(/<t:(\d+)>/) : null;
@@ -382,6 +393,7 @@ async function getStatusPageData() {
 					suspended: i.Suspended,
 					server: safeServer(serverData, mainPort, SERVER_IP, currentTime),
 					players: playersData?.players ?? [],
+					linkStatus: i.linkStatus,
 				};
 			})
 		);
@@ -480,6 +492,11 @@ function safeServer(serverData, mainPort, SERVER_IP, currentTime) {
 		ip: SERVER_IP ?? '',
 		port: mainPort ?? null,
 	};
+}
+
+async function getChatLinkByInstanceId(instanceId) {
+	if (!instanceId) return null;
+	return await chatLink.findOne({ chatLinks: { $elemMatch: { instanceId: instanceId } } });
 }
 
 module.exports = {

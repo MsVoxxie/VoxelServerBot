@@ -3,6 +3,7 @@ const { getInstanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/a
 const { calculateSleepingPercentage } = require('../../functions/serverFuncs/minecraft');
 const { serverLink } = require('../../functions/helpers/messageDiscord');
 const { queueTask } = require('../../functions/helpers/queueTask');
+const { sendToWeb } = require('../../functions/helpers/toWeb');
 
 module.exports = {
 	name: 'userLeaves',
@@ -34,5 +35,10 @@ module.exports = {
 
 		// Send off the message to Discord
 		queueTask(INSTANCE, serverLink, USER, augmentedMessage, INSTANCE);
+		try {
+			sendToWeb(INSTANCE, USER, MESSAGE);
+		} catch (error) {
+			null;
+		}
 	},
 };
