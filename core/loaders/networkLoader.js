@@ -1,7 +1,20 @@
-module.exports = (client) => {
-	const si = require('systeminformation');
-	const ping = require('ping');
+const si = require('systeminformation');
+const ping = require('ping');
 
+// Exported mutable network state
+const network = {
+	externalPing: 0,
+	externalAvg: 0,
+	externalMedian: 0,
+	externalHistory: [],
+	networkAlive: true,
+	internalUp: 0,
+	internalDown: 0,
+	lastSpike: null,
+	lastSpikeTime: null,
+};
+
+module.exports = (client) => {
 	// Cooldown period for network alerts
 	const COOLDOWN_MS = 60 * 5 * 1000; // 5 minutes
 
@@ -83,36 +96,31 @@ module.exports = (client) => {
 
 		const medianPing = getMedianPing();
 		const shortAvg = getShortTermAverage();
-		// const isHighPing = pingMs > medianPing + RELATIVE_THRESHOLD || pingMs > ABSOLUTE_HIGH_MS;
-		const isHighPing = pingMs > ABSOLUTE_HIGH_MS; // median method was unreliable in some cases, looking into it.
+		const isHighPing = pingMs > ABSOLUTE_HIGH_MS;
 		const isStablePing = pingMs < STABLE_PING_MS;
 		const isSpike = pingMs > shortAvg + 15;
 
 		if (isHighPing) {
-			if (Date.now() - (client.network.lastSpikeTime || 0) < COOLDOWN_MS) return;
+			if (Date.now() - (network.lastSpikeTime || 0) < COOLDOWN_MS) return;
 
-			client.network.lastSpike = pingMs;
-			client.network.lastSpikeTime = Date.now();
+			network.lastSpike = pingMs;
+			network.lastSpikeTime = Date.now();
 
 			handleHighPing(pingMs, netIdle, details);
 		} else if (isStablePing) {
-			client.network.lastSpike = '✓ Stable';
+			network.lastSpike = '✓ Stable';
 			handleStablePing(pingMs, details);
 		} else {
-			client.network.lastSpike = pingMs;
+			network.lastSpike = pingMs;
 		}
 
-		if (client.debug) {
-			console.log(`[DEBUG] Ping ${pingMs} ms | Median ${medianPing.toFixed(1)} ms | Short Avg ${shortAvg.toFixed(1)} ms | Spike: ${isSpike ? 'YES' : 'NO'}`);
-		}
-
-		client.network.externalPing = pingMs.toFixed(1);
-		client.network.externalAvg = shortAvg.toFixed(1);
-		client.network.externalMedian = medianPing.toFixed(1);
-		client.network.externalHistory = pingHistory.slice(-MAX_HISTORY);
-		client.network.networkAlive = pingAlive;
-		client.network.internalUp = netRxMbps.toFixed(2);
-		client.network.internalDown = netTxMbps.toFixed(2);
+		network.externalPing = pingMs.toFixed(1);
+		network.externalAvg = shortAvg.toFixed(1);
+		network.externalMedian = medianPing.toFixed(1);
+		network.externalHistory = pingHistory.slice(-MAX_HISTORY);
+		network.networkAlive = pingAlive;
+		network.internalUp = netRxMbps.toFixed(2);
+		network.internalDown = netTxMbps.toFixed(2);
 	}
 
 	function handlePingFailure(details) {
@@ -128,7 +136,7 @@ module.exports = (client) => {
 	}
 
 	function resetPingFailureState() {
-		client.network.lastSpike = '× Disconnected';
+		network.lastSpike = '× Disconnected';
 		networkFailed = false;
 		failedPingCount = 0;
 	}
@@ -161,3 +169,6 @@ module.exports = (client) => {
 
 	setInterval(monitorNetwork, CHECK_INTERVAL_MS);
 };
+
+// Export the mutable network object
+module.exports.network = network;

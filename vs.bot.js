@@ -24,18 +24,6 @@ const client = new Client({
 	},
 });
 
-// Client Properties
-client.network = {
-	networkAlive: true,
-	externalPing: 0,
-	externalAvg: 0,
-	externalMedian: 0,
-	lastSpike: null,
-	lastSpikeTime: null,
-	internalUp: 0,
-	internalDown: 0,
-};
-
 client.experimentalFeatures = true;
 client.debug = false;
 client.colors = {

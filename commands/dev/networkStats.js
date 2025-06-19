@@ -16,7 +16,7 @@ module.exports = {
 		// Toggle ephemeral response if specified
 		const ephemeral = interaction.options.getBoolean('ephemeral') || false;
 
-		const { network } = client;
+		const { network } = require('../../core/loaders/networkLoader');
 		const embed = new EmbedBuilder()
 			.setColor(client.colors.base)
 			.setTitle('Network Statistics')
