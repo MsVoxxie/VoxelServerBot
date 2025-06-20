@@ -313,13 +313,11 @@ async function getStatusPageData() {
 				const icon = (await getImageSource(i.DisplayImageSource)) || null;
 
 				// Check if the instance has a bound chat-link
-				const isLinked = await getChatLinkByInstanceId(i.InstanceID);
-				if (isLinked) {
-					// set the instances linkStatus to true, false otherwise
-					i.linkStatus = true;
-				} else {
-					i.linkStatus = false;
-				}
+				const chatLink = await getChatLinkByInstanceId(i.InstanceID);
+				const addedEvents = chatLink?.addedEvents || [];
+				const hasChatEvent = addedEvents.includes('A player sends a chat message') || addedEvents.includes('A user sends a chat message');
+
+				i.linkStatus = !!chatLink && hasChatEvent;
 
 				// If the Description contains a date, extract it as a releaseDate and remove it from the description
 				let releaseDate = null;
@@ -496,7 +494,9 @@ function safeServer(serverData, mainPort, SERVER_IP, currentTime) {
 
 async function getChatLinkByInstanceId(instanceId) {
 	if (!instanceId) return null;
-	return await chatLink.findOne({ chatLinks: { $elemMatch: { instanceId: instanceId } } });
+	const doc = await chatLink.findOne({ chatLinks: { $elemMatch: { instanceId: instanceId } } });
+	if (!doc) return null;
+	return doc.chatLinks.find((link) => link.instanceId === instanceId) || null;
 }
 
 module.exports = {
