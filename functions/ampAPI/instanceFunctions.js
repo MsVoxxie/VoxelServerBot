@@ -356,19 +356,18 @@ async function getStatusPageData() {
 								const match = dayEntry.Contents.match(/^Day (\d+), (\d{2}:\d{2})/);
 								if (match) {
 									currentTime = { day: match[1], time: match[2] };
+									// Only update cache if we have valid data
+									sevenDaysCache[i.InstanceID] = {
+										timestamp: now,
+										currentTime,
+									};
 								}
 							}
-
-							sevenDaysCache[i.InstanceID] = {
-								timestamp: now,
-								currentTime,
-							};
+							// If no valid data, do NOT update the cache (keep previous value)
 						} catch (err) {
-							null;
+							// Optionally log error, but do NOT update the cache
 						}
 					}
-
-					// Use cached values (either just updated or from previous fetch)
 					currentTime = sevenDaysCache[i.InstanceID]?.currentTime ?? null;
 				}
 
