@@ -29,6 +29,10 @@ const chatLinkSchema = Schema({
 		type: String,
 		required: true,
 	},
+	addedEvents: {
+		type: Array,
+		default: [],
+	},
 });
 
 const chatLinkSchemas = Schema({

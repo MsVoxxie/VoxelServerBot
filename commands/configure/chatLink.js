@@ -33,10 +33,10 @@ module.exports = {
 		const checkServer = await chatLink.findOne({ chatLinks: { $elemMatch: { instanceId: server, channelId: channel.id } } });
 
 		// Define Arrays
-		const successfulAdditions = [];
-		const failedAdditions = [];
-		const successfulRemovals = [];
-		const failedRemovals = [];
+		let successfulAdditions = [];
+		let failedAdditions = [];
+		let successfulRemovals = [];
+		let failedRemovals = [];
 
 		// Define the list of jobs for the command to run
 		const jobList = [
@@ -464,6 +464,7 @@ module.exports = {
 							instanceFriendlyName: friendlyName,
 							instanceId: server,
 							channelId: channel.id,
+							addedEvents: successfulAdditions.map((e) => e.eventName),
 						},
 					},
 				},
