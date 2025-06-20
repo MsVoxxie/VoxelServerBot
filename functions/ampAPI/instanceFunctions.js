@@ -4,7 +4,6 @@ const { chatLink } = require('../../models');
 const Logger = require('../logging/logger');
 
 const { SERVER_IP } = process.env;
-let last7DaysMsg;
 const sevenDaysCache = {};
 
 //* Add an event trigger to an instance
@@ -343,7 +342,7 @@ async function getStatusPageData() {
 					const cache = sevenDaysCache[i.InstanceID] || {};
 					const now = Date.now();
 
-					if (!cache.timestamp || now - cache.timestamp > 5 * 60 * 1000) {
+					if (!cache.timestamp || now - cache.timestamp > 1 * 60 * 1000) {
 						try {
 							const sevenAPI = await getInstanceAPI(i.InstanceID);
 							await sendConsoleMessage(i.InstanceID, 'gettime');
