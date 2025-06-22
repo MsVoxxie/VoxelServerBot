@@ -221,9 +221,9 @@ async function getInstanceStatus(instanceId) {
 	const status = {
 		state: currentState[statusData.State],
 		module: moduleInfo.ModuleName,
-		cpu: statusData.Metrics['CPU Usage'],
-		memory: statusData.Metrics['Memory Usage'],
-		users: statusData.Metrics['Active Users'],
+		cpu: statusData.Metrics?.['CPU Usage'] || null,
+		memory: statusData.Metrics?.['Memory Usage'] || null,
+		users: statusData.Metrics?.['Active Users'] || null,
 		uptime: statusData.Uptime,
 		performance,
 	};
