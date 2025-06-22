@@ -186,7 +186,10 @@ async function getInstanceStatus(instanceId) {
 	if (!moduleInfo) return { desc: 'Failed to get module info.', success: false };
 
 	// Performance is variable and can be FPS or TPS, so we need to check for both
-	let performance = statusData.Metrics['TPS'] || statusData.Metrics['FPS'] || null;
+	let performance = null;
+	if (statusData.Metrics) {
+		performance = statusData.Metrics['TPS'] || statusData.Metrics['FPS'] || null;
+	}
 
 	// If the module is Minecraft set the performance to TPS, otherwise set it to FPS
 	if (performance) {
