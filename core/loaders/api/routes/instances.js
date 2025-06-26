@@ -1,13 +1,15 @@
 const { getStatusPageData } = require('../../../../functions/ampAPI/instanceFunctions');
+const { getClient } = require('../../../clientSingleton');
 const express = require('express');
 const router = express.Router();
 
 // This route is for the status page
 router.get('/v1/servers/:instanceId?', async (req, res) => {
 	try {
-		const data = await getStatusPageData();
+		const client = getClient();
+		const data = client.instanceData;
 		if (req.params.instanceId) {
-			const instance = data.instances.find((i) => i.instanceId === req.params.instanceId);
+			const instance = client.instanceData;
 			if (instance) {
 				const meta = buildMeta(instance);
 				res.render('status', { instances: [instance], meta });
@@ -27,7 +29,8 @@ router.get('/v1/servers/:instanceId?', async (req, res) => {
 // This route is for the API to grab the instance data
 router.get('/v1/server/data/instances/:instanceId?', async (req, res) => {
 	const { instanceId } = req.params;
-	const data = await getStatusPageData();
+	const client = getClient();
+	const data = client.instanceData;
 	if (instanceId) {
 		const instance = data.instances.find((i) => i.instanceId === instanceId);
 		if (instance) {

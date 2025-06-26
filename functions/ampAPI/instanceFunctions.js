@@ -1,4 +1,4 @@
-const { getInstanceAPI, getMainAPI, sendConsoleMessage } = require('./apiFunctions');
+const { getInstanceAPI, getMainAPI, sendConsoleMessage, mainAPI } = require('./apiFunctions');
 const { getImageSource } = require('../helpers/getSourceImage');
 const { chatLink } = require('../../models');
 const Logger = require('../logging/logger');
@@ -248,7 +248,7 @@ async function getOnlinePlayers(instanceId) {
 
 //* Get the status of every instance and it's server
 async function fetchInstanceStatuses() {
-	const instanceApi = await getMainAPI();
+	const instanceApi = await mainAPI();
 	const instances = await instanceApi.ADSModule.GetLocalInstancesAsync();
 	const filteredInstances = instances.filter((i) => i.InstanceName !== 'ADS01');
 
@@ -288,13 +288,18 @@ async function fetchInstanceStatuses() {
 
 //* Get the status page data for all instances
 async function getStatusPageData() {
-	const instanceApi = await getMainAPI();
+	const instanceApi = await mainAPI();
 	if (!instanceApi) {
 		return { instances: [], success: false };
 	}
 
 	try {
 		const instances = await instanceApi.ADSModule.GetLocalInstancesAsync();
+
+		if (!Array.isArray(instances)) {
+			Logger.error('GetLocalInstancesAsync did not return an array:', instances);
+			return { instances: [], success: false };
+		}
 
 		const filteredInstances = instances.filter(
 			(i) => i.InstanceName !== 'ADS01' && !(typeof i.WelcomeMessage === 'string' && i.WelcomeMessage.trim().toLowerCase() === 'hidden') && i.Running === true

@@ -7,6 +7,7 @@ dotenv.config();
 
 // Discord Classes
 const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
+const { getStatusPageData } = require('./functions/ampAPI/instanceFunctions');
 const TOKEN = process.env.DISCORD_TOKEN;
 
 // Define Client
@@ -51,6 +52,11 @@ require('./core/loaders/commandLoader')(client);
 require('./core/loaders/networkLoader')(client);
 require('./core/loaders/eventLoader')(client);
 
+// Every 5 seconds
+cron.schedule('*/5 * * * * *', async () => {
+	client.instanceData = await getStatusPageData();
+});
+
 // Every 1 minute
 cron.schedule('*/1 * * * *', async () => {
 	client.emit('oneMinute');
@@ -63,3 +69,7 @@ cron.schedule('*/5 * * * *', async () => {
 
 // Login
 client.login(TOKEN);
+
+// Add client to singleton
+const { setClient } = require('./core/clientSingleton');
+setClient(client);
