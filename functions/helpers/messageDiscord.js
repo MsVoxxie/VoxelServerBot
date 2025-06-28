@@ -34,6 +34,14 @@ async function serverLink(USER = 'Placeholder', MESSAGE = 'Placeholder', INSTANC
 				// Get the user avatar
 				userAvatar = `https://vsb.voxxie.me/v1/client/playerheads/${USER}`;
 			}
+		} else {
+			// If USER === 'SERVER' then ignore the avatar
+			if (USER === 'SERVER') {
+				userAvatar = '';
+			} else {
+				// Get the user avatar
+				userAvatar = `https://vsb.voxxie.me/v1/client/steamheads/${USER}`;
+			}
 		}
 
 		// Message to Send
