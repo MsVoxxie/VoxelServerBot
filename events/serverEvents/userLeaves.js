@@ -34,7 +34,7 @@ module.exports = {
 		}
 
 		// Send off the message to Discord
-		queueTask(INSTANCE, serverLink, USER, augmentedMessage, INSTANCE);
+		queueTask(INSTANCE, serverLink, USER, null, augmentedMessage, INSTANCE);
 		try {
 			sendToWeb(INSTANCE, USER, MESSAGE);
 		} catch (error) {

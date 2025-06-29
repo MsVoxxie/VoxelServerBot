@@ -13,11 +13,13 @@ router.post('/v1/server/link', async (req, res) => {
 	}
 
 	const rawEvent = req.body.EVENT;
+
 	const splitEvent = rawEvent.split('.')[2];
 	const formattedEvent = splitEvent.charAt(0).toLowerCase() + splitEvent.slice(1);
 
 	client.emit(formattedEvent, {
 		USER: req.body.USER,
+		UUID: req.body.UUID || null,
 		MESSAGE: req.body.MESSAGE.replace(/\s+/g, ' '),
 		INSTANCE: req.body.INSTANCE,
 		EVENT: formattedEvent,

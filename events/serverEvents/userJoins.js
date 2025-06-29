@@ -19,7 +19,9 @@ module.exports = {
 	runType: 'infinity',
 	async execute(client, data) {
 		// Split the data into variables
-		const { USER, INSTANCE, MESSAGE } = data;
+		const { USER, UUID, INSTANCE, MESSAGE } = data;
+		console.log(UUID);
+		
 		let augmentedMessage = MESSAGE;
 
 		// Dynamic sleepPercentage for minecraft servers, Experimental
@@ -45,7 +47,7 @@ module.exports = {
 		if (joinMessages.includes(MESSAGE) && !userJoinedSet.has(USER)) {
 			userJoinedSet.add(USER);
 			// Send off the message to Discord
-			queueTask(INSTANCE, serverLink, USER, augmentedMessage, INSTANCE);
+			queueTask(INSTANCE, serverLink, USER, UUID ? UUID : null, augmentedMessage, INSTANCE);
 			try {
 				sendToWeb(INSTANCE, USER, MESSAGE);
 			} catch (error) {

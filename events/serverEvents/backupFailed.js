@@ -9,7 +9,7 @@ module.exports = {
 		const { USER, INSTANCE, MESSAGE } = data;
 
 		// Send off the message to Discord
-		queueTask(INSTANCE, serverLink, USER, MESSAGE, INSTANCE);
+		queueTask(INSTANCE, serverLink, USER, null, MESSAGE, INSTANCE);
 
 		// Remove the instanceid from the backupTimers collection
 		if (client.backupTimers.has(INSTANCE)) {

@@ -12,7 +12,7 @@ const { WebhookClient } = require('discord.js');
 const { getInstanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 
 // Function for sanity
-async function serverLink(USER = 'Placeholder', MESSAGE = 'Placeholder', INSTANCE = 'Placeholder', TYPE = 'Message', DUAL = false) {
+async function serverLink(USER = 'Placeholder', UUID = null, MESSAGE = 'Placeholder', INSTANCE = 'Placeholder', TYPE = 'Message', DUAL = false) {
 	// Defintions
 	let userAvatar = '';
 
@@ -38,9 +38,9 @@ async function serverLink(USER = 'Placeholder', MESSAGE = 'Placeholder', INSTANC
 			// If USER === 'SERVER' then ignore the avatar
 			if (USER === 'SERVER') {
 				userAvatar = '';
-			} else {
+			} else if (UUID) {
 				// Get the user avatar
-				userAvatar = `https://vsb.voxxie.me/v1/client/steamheads/${USER}`;
+				userAvatar = `https://vsb.voxxie.me/v1/client/steamheads/${UUID.replace('Steam_', '')}`;
 			}
 		}
 

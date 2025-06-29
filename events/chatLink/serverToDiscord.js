@@ -33,6 +33,6 @@ module.exports = {
 		}
 
 		// Send webhook
-		await serverLink(USER, MESSAGE, data.INSTANCE);
+		await serverLink(USER, null, MESSAGE, data.INSTANCE);
 	},
 };

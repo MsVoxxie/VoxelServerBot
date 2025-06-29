@@ -21,6 +21,6 @@ module.exports = {
 		}
 
 		// Send off the message to Discord
-		queueTask(INSTANCE, serverLink, USER, MESSAGE, INSTANCE);
+		queueTask(INSTANCE, serverLink, USER, null, MESSAGE, INSTANCE);
 	},
 };

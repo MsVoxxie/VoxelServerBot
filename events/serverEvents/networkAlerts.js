@@ -22,7 +22,7 @@ module.exports = {
 		for (const { instanceId, instanceModule } of chatLinks) {
 			try {
 				// Send to Discord
-				queueTask(instanceId, serverLink, 'SERVER', discordMessage, instanceId);
+				queueTask(instanceId, serverLink, 'SERVER', null, discordMessage, instanceId);
 
 				if (instanceModule === 'Minecraft') {
 					const { color, hoverText, alertType } = getMCAlertStyle(type);
