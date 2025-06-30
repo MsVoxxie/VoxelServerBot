@@ -20,7 +20,6 @@ module.exports = {
 	async execute(client, data) {
 		// Split the data into variables
 		const { USER, UUID, INSTANCE, MESSAGE } = data;
-		console.log(UUID);
 		
 		let augmentedMessage = MESSAGE;
 

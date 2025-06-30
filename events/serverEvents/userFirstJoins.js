@@ -7,10 +7,10 @@ module.exports = {
 	runType: 'infinity',
 	async execute(client, data) {
 		// Split the data into variables
-		const { USER, INSTANCE, MESSAGE } = data;
+		const { USER, UUID, INSTANCE, MESSAGE } = data;
 
 		// Send off the message to Discord
-		queueTask(INSTANCE, serverLink, USER, null, MESSAGE, INSTANCE);
+		queueTask(INSTANCE, serverLink, USER, UUID ? UUID : null, MESSAGE, INSTANCE);
 		try {
 			sendToWeb(INSTANCE, USER, MESSAGE);
 		} catch (error) {
