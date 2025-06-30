@@ -20,7 +20,7 @@
     "path": "^0.12.7",
     "ping": "^0.4.4",
     "systeminformation": "^5.27.1",
-    "tailwindcss": "^4.1.8",
+    "tailwindcss": "^4.1.11",
     "ws": "^8.18.2"
   }
 }
