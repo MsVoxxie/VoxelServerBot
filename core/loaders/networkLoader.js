@@ -114,13 +114,13 @@ module.exports = (client) => {
 			network.lastSpike = pingMs;
 		}
 
-		network.externalPing = pingMs.toFixed(1);
-		network.externalAvg = shortAvg.toFixed(1);
-		network.externalMedian = medianPing.toFixed(1);
+		network.externalPing = pingMs.toFixed(0);
+		network.externalAvg = shortAvg.toFixed(0);
+		network.externalMedian = medianPing.toFixed(0);
 		network.externalHistory = pingHistory.slice(-MAX_HISTORY);
 		network.networkAlive = pingAlive;
-		network.internalUp = netRxMbps.toFixed(2);
-		network.internalDown = netTxMbps.toFixed(2);
+		network.internalUp = netRxMbps.toFixed(0);
+		network.internalDown = netTxMbps.toFixed(0);
 	}
 
 	function handlePingFailure(details) {
