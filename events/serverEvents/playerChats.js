@@ -14,7 +14,7 @@ module.exports = {
 		try {
 			sendToWeb(INSTANCE, USER, MESSAGE);
 		} catch (error) {
-			null;
+			console.log(error);
 		}
 	},
 };
