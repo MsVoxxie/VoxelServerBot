@@ -3,6 +3,7 @@ const { chatLink } = require('../../models');
 const { getInstanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
 const { updateTypingScoreboard } = require('../../functions/serverFuncs/minecraft');
 const { splitSentence } = require('../../functions/helpers/messageFuncs');
+const { sendToWeb } = require('../../functions/helpers/toWeb');
 
 module.exports = {
 	name: Events.MessageCreate,
@@ -65,6 +66,7 @@ module.exports = {
 						const pitch = Math.random() * (1.3 - 0.8) + 0.8;
 						await sendConsoleMessage(chatLinkData.instanceId, `playsound minecraft:block.note_block.pling player @a 0 0 0 1 ${pitch} 0.25`);
 					}
+					sendToWeb(chatLinkData.instanceId, `[Discord] ${message.member.displayName}`, message.content);
 				} catch (error) {
 					continue;
 				}
@@ -77,6 +79,7 @@ module.exports = {
 					for (let i = 0; i < messageParts.length; i++) {
 						await sendConsoleMessage(chatLinkData.instanceId, `say "[D] <${message.member.displayName}>${counter}${messageParts[i]}"`);
 					}
+					sendToWeb(chatLinkData.instanceId, `[Discord] ${message.member.displayName}`, message.content);
 				} catch (error) {
 					continue;
 				}

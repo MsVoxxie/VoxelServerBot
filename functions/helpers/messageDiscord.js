@@ -20,7 +20,7 @@ async function serverLink(USER = 'Placeholder', UUID = null, MESSAGE = 'Placehol
 	const chatlinkFetch = await chatLink.findOne({ 'chatLinks.instanceId': INSTANCE }).lean();
 	// Filter the chatLinks array in JavaScript to only return matching instanceIds
 	const matchingChatLinks = chatlinkFetch.chatLinks.filter((link) => link.instanceId === INSTANCE);
-	if (!matchingChatLinks.length) return;
+	if (!matchingChatLinks.length) return console.log(`No chat link found for instance ${INSTANCE}. Please check the database.`);
 
 	for (const chatLinkD of matchingChatLinks) {
 		const chatLinkData = chatLinkD;
