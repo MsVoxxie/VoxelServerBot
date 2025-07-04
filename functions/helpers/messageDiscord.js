@@ -31,16 +31,16 @@ async function serverLink(USER = 'Placeholder', UUID = null, MESSAGE = 'Placehol
 			if (USER === 'SERVER') {
 				userAvatar = '';
 			} else {
-				// Get the user avatar
-				userAvatar = `https://vsb.voxxie.me/v1/client/playerheads/${USER}`;
+				// Get the user avatar - URL encode the username to handle spaces
+				userAvatar = `https://vsb.voxxie.me/v1/client/playerheads/${encodeURIComponent(USER)}`;
 			}
 		} else {
 			// If USER === 'SERVER' then ignore the avatar
 			if (USER === 'SERVER') {
 				userAvatar = '';
 			} else if (UUID) {
-				// Get the user avatar
-				userAvatar = `https://vsb.voxxie.me/v1/client/steamheads/${UUID.replace('Steam_', '')}`;
+				// Get the user avatar - URL encode the username to handle spaces
+				userAvatar = `https://vsb.voxxie.me/v1/client/steamheads/${encodeURIComponent(UUID.replace('Steam_', ''))}`;
 			}
 		}
 

@@ -20,13 +20,12 @@ module.exports = {
 	async execute(client, data) {
 		// Split the data into variables
 		const { USER, UUID, INSTANCE, MESSAGE } = data;
-		
 		let augmentedMessage = MESSAGE;
 
 		// Dynamic sleepPercentage for minecraft servers, Experimental
 		if (client.experimentalFeatures) {
 			const instanceInfo = await getInstanceStatus(INSTANCE);
-			if (instanceInfo.status.module === 'MinecraftModule') {
+			if (instanceInfo.status.module !== 'MinecraftModule') {
 				// Calculate the sleeping percentage
 				const onlinePlayers = await getOnlinePlayers(INSTANCE);
 				const maxPlayers = instanceInfo.status.users.MaxValue;
