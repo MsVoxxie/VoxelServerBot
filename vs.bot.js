@@ -62,9 +62,9 @@ cron.schedule('*/1 * * * *', async () => {
 	client.emit('oneMinute');
 });
 
-// Every 5 minutes
-cron.schedule('*/5 * * * *', async () => {
-	client.emit('fiveMinutes');
+// Every 2 minutes
+cron.schedule('*/2 * * * *', async () => {
+	client.emit('twoMinutes');
 });
 
 // Login

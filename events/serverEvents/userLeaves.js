@@ -16,7 +16,7 @@ module.exports = {
 		// Dynamic sleepPercentage for minecraft servers, Experimental
 		if (client.experimentalFeatures) {
 			const instanceInfo = await getInstanceStatus(INSTANCE);
-			if (instanceInfo.status.module !== 'MinecraftModule') {
+			if (instanceInfo.status.module === 'MinecraftModule') {
 				// Calculate the sleeping percentage
 				const onlinePlayers = await getOnlinePlayers(INSTANCE);
 				const maxPlayers = instanceInfo.status.users.MaxValue;
