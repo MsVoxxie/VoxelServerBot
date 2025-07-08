@@ -13,6 +13,15 @@ module.exports = {
 		const { USER, UUID, INSTANCE, MESSAGE } = data;
 		let augmentedMessage = MESSAGE;
 
+		// Get the player's play time
+		const playKey = `${USER}:${INSTANCE}`;
+		const playTime = client.playTimers.get(playKey);
+
+		if (playTime) {
+			const playDuration = client.getDuration(playTime, Date.now());
+			augmentedMessage += `\n-# They played for ${playDuration.join(', ')}`;
+		}
+
 		// Dynamic sleepPercentage for minecraft servers, Experimental
 		if (client.experimentalFeatures) {
 			const instanceInfo = await getInstanceStatus(INSTANCE);
@@ -24,22 +33,12 @@ module.exports = {
 
 				// Augment the message with the sleep percentage
 				if (onlinePlayers.players.length >= 1) {
-					augmentedMessage = `${MESSAGE}\n-# ${onlinePlayers.players.length}/${maxPlayers} Players, sleepPercentage set to ${sleepPercentage}% (${requiredToSleep})`;
+					augmentedMessage += `\n-# ${onlinePlayers.players.length}/${maxPlayers} Players, sleepPercentage set to ${sleepPercentage}% (${requiredToSleep})`;
 				} else {
-					augmentedMessage = `${MESSAGE}\n-# Server is empty.`;
+					augmentedMessage += `\n-# Server is empty.`;
 				}
-
 				await sendConsoleMessage(INSTANCE, `gamerule playersSleepingPercentage ${sleepPercentage}`);
 			}
-		}
-
-		// Get the player's play time
-		const playKey = `${USER}:${INSTANCE}`;
-		const playTime = client.playTimers.get(playKey);
-
-		if (playTime) {
-			const playDuration = client.getDuration(playTime, Date.now());
-			augmentedMessage += `\n-# They played for ${playDuration.join(', ')}`;
 		}
 
 		// Send off the message to Discord
