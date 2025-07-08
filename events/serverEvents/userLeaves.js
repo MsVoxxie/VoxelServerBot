@@ -19,7 +19,18 @@ module.exports = {
 
 		if (playTime) {
 			const playDuration = client.getDuration(playTime, Date.now());
-			augmentedMessage += `\n-# They played for ${playDuration.join(', ')}`;
+			// Extract hours from the first duration part
+			let hours = 0;
+			if (playDuration && playDuration.length > 0) {
+				const match = playDuration[0].match(/^(\d+)\s+hour/);
+				if (match) hours = parseInt(match[1]);
+			}
+			let augment = '';
+			if (hours >= 10) augment = ' and should really get some rest...'; // extreme
+			else if (hours >= 8) augment = ' '; // absurd
+			else if (hours >= 6) augment = ' '; // mild
+			else if (hours >= 4) augment = ' '; // minor
+			augmentedMessage += `\n-# They played for ${playDuration.join(', ')}`//${augment}`; // I'll revisit this later
 		}
 
 		// Dynamic sleepPercentage for minecraft servers, Experimental
