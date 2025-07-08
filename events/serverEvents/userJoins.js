@@ -45,9 +45,11 @@ module.exports = {
 		if (joinMessages.includes(MESSAGE) && !userJoinedSet.has(USER)) {
 			userJoinedSet.add(USER);
 
+			// Use a string key for playTimers
+			const playKey = `${USER}:${INSTANCE}`;
 			// Start the users play timer if it doesn't exist
-			if (!client.playTimers.has({ USER, INSTANCE })) {
-				client.playTimers.set({ USER, INSTANCE }, Date.now());
+			if (!client.playTimers.has(playKey)) {
+				client.playTimers.set(playKey, Date.now());
 			}
 
 			// Send off the message to Discord
