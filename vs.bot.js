@@ -37,6 +37,7 @@ client.colors = {
 // Define Collections
 client.backupTimers = new Collection();
 client.typingState = new Collection();
+client.playTimers = new Collection();
 client.cooldowns = new Collection();
 client.commands = new Collection();
 client.events = new Collection();

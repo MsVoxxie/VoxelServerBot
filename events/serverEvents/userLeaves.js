@@ -33,8 +33,17 @@ module.exports = {
 			}
 		}
 
+		// Get the player's play time
+		const playTime = client.playTimers.get({ USER, INSTANCE });
+		if (playTime) {
+			const playDuration = client.getDuration(playTime, Date.now());
+			augmentedMessage += `\n-# Session duration: ${playDuration.join(', ')}`;
+		}
+
 		// Send off the message to Discord
 		queueTask(INSTANCE, serverLink, USER, UUID ? UUID : null, augmentedMessage, INSTANCE);
+		// Remove the user's play timer
+		client.playTimers.delete({ USER, INSTANCE });
 		try {
 			sendToWeb(INSTANCE, USER, MESSAGE);
 		} catch (error) {

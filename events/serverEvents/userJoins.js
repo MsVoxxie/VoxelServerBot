@@ -44,6 +44,12 @@ module.exports = {
 
 		if (joinMessages.includes(MESSAGE) && !userJoinedSet.has(USER)) {
 			userJoinedSet.add(USER);
+
+			// Start the users play timer if it doesn't exist
+			if (!client.playTimers.has({ USER, INSTANCE })) {
+				client.playTimers.set({ USER, INSTANCE }, Date.now());
+			}
+
 			// Send off the message to Discord
 			queueTask(INSTANCE, serverLink, USER, UUID ? UUID : null, augmentedMessage, INSTANCE);
 			try {
