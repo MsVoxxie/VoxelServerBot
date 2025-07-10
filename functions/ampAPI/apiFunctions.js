@@ -3,26 +3,28 @@ const Logger = require('../logging/logger');
 let mainAPIInstance = null;
 const instanceAPIInstances = {}; // Cache for instance APIs
 
-// Load API for the main instance
-async function mainAPI() {
-	const { AMP_URI, AMP_USER, AMP_PASS } = process.env;
-	const API = new ampAPI.AMPAPI(`${AMP_URI}`);
+async function createAMPAPI({ uri, user, pass }) {
+	const API = new ampAPI.AMPAPI(uri);
 	try {
 		let APIInitOK = await API.initAsync();
 		if (!APIInitOK) return Logger.error('Stage 1 API init Failed');
-		const loginResult = await API.Core.LoginAsync(AMP_USER, AMP_PASS, '', false);
+		const loginResult = await API.Core.LoginAsync(user, pass, '', false);
 		if (!loginResult.success) return Logger.error('API Login Failed');
 		API.sessionId = loginResult.sessionID;
 		APIInitOK = await API.initAsync();
 		if (!APIInitOK) return Logger.error('Stage 2 API init Failed');
-		// Logger.success('AMP API Initialized');
 		return API;
 	} catch (err) {
 		return null;
 	}
 }
 
-// Get the main API instance, initializing it if not already done
+// Load API for the main instance
+async function mainAPI() {
+	const { AMP_URI, AMP_USER, AMP_PASS } = process.env;
+	return createAMPAPI({ uri: AMP_URI, user: AMP_USER, pass: AMP_PASS });
+}
+
 async function getMainAPI() {
 	if (mainAPIInstance) return mainAPIInstance;
 	mainAPIInstance = await mainAPI();
@@ -33,20 +35,8 @@ async function getMainAPI() {
 async function instanceAPI(instanceID) {
 	const { AMP_URI, AMP_USER, AMP_PASS } = process.env;
 	if (!instanceID) throw new Error('A valid InstanceID must be provided.');
-	const API = new ampAPI.AMPAPI(`${AMP_URI}/API/ADSModule/Servers/${instanceID}`);
-	try {
-		let APIInitOK = await API.initAsync();
-		if (!APIInitOK) return Logger.error('Stage 1 API init Failed');
-		const loginResult = await API.Core.LoginAsync(AMP_USER, AMP_PASS, '', false);
-		if (!loginResult.success) return Logger.error('API Login Failed');
-		API.sessionId = loginResult.sessionID;
-		APIInitOK = await API.initAsync();
-		if (!APIInitOK) return Logger.error('Stage 2 API init Failed');
-		if (!API) throw new Error('Invalid API or the instance is offline.');
-		return API;
-	} catch (err) {
-		return null;
-	}
+	const uri = `${AMP_URI}/API/ADSModule/Servers/${instanceID}`;
+	return createAMPAPI({ uri, user: AMP_USER, pass: AMP_PASS });
 }
 
 // Get the instance API, initializing it if not already done
