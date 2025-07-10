@@ -31,6 +31,9 @@ router.get('/v1/server/data/instances/:instanceId?', async (req, res) => {
 	const { instanceId } = req.params;
 	const client = getClient();
 	const data = client.instanceData;
+	if (!data || !data.instances) {
+		return res.status(404).send('No instances found');
+	}
 	if (instanceId) {
 		const instance = data.instances.find((i) => i.instanceId === instanceId);
 		if (instance) {
