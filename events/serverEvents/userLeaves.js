@@ -9,40 +9,53 @@ module.exports = {
 	name: 'userLeaves',
 	runType: 'infinity',
 	async execute(client, data) {
-		// Split the data into variables
 		const { USER, UUID, INSTANCE, MESSAGE } = data;
 		let augmentedMessage = MESSAGE;
 
-		// Get the player's play time
 		const playKey = `${USER}:${INSTANCE}`;
-		const playTime = client.playTimers.get(playKey);
+		const playData = client.playTimers.get(playKey);
 
-		if (playTime) {
-			const playDuration = client.getDuration(playTime, Date.now());
-			// Extract hours from the first duration part
+		// Bounce quick leaves
+		const bounceThreshold = 5 * 60 * 1000;
+		if (playData && Date.now() - playData.time < bounceThreshold && Array.isArray(playData.sentMessages)) {
+			const { WebhookClient } = require('discord.js');
+			console.log('Quick leave detected for', USER, 'in', INSTANCE, 'bouncing messages');
+
+			for (const msg of playData.sentMessages) {
+				try {
+					const webhook = new WebhookClient({ id: msg.webhookId, token: msg.webhookToken });
+					await webhook.deleteMessage(msg.id).catch(() => {});
+				} catch (e) {
+					null;
+				}
+			}
+			client.playTimers.delete(playKey);
+			return;
+		}
+
+		// Augments
+		if (playData) {
+			const playDuration = client.getDuration(playData.time, Date.now());
 			let hours = 0;
 			if (playDuration && playDuration.length > 0) {
 				const match = playDuration[0].match(/^(\d+)\s+hour/);
 				if (match) hours = parseInt(match[1]);
 			}
 			let augment = '';
-			if (hours >= 10) augment = ' and should really get some rest...'; // extreme
-			else if (hours >= 8) augment = ' '; // absurd
-			else if (hours >= 6) augment = ' '; // mild
-			else if (hours >= 4) augment = ' '; // minor
-			augmentedMessage += `\n-# They played for ${playDuration.join(', ')}`//${augment}`; // I'll revisit this later
+			if (hours >= 10) augment = ' and should really get some rest...';
+			else if (hours >= 8) augment = ' ';
+			else if (hours >= 6) augment = ' ';
+			else if (hours >= 4) augment = ' ';
+			augmentedMessage += `\n-# They played for ${playDuration.join(', ')}`;
 		}
 
-		// Dynamic sleepPercentage for minecraft servers, Experimental
 		if (client.experimentalFeatures) {
 			const instanceInfo = await getInstanceStatus(INSTANCE);
 			if (instanceInfo.status.module === 'MinecraftModule') {
-				// Calculate the sleeping percentage
 				const onlinePlayers = await getOnlinePlayers(INSTANCE);
 				const maxPlayers = instanceInfo.status.users.MaxValue;
 				const { sleepPercentage, requiredToSleep } = calculateSleepingPercentage(onlinePlayers.players.length, maxPlayers);
 
-				// Augment the message with the sleep percentage
 				if (onlinePlayers.players.length >= 1) {
 					augmentedMessage += `\n-# ${onlinePlayers.players.length}/${maxPlayers} Players, sleepPercentage set to ${sleepPercentage}% (${requiredToSleep})`;
 				} else {
@@ -52,9 +65,9 @@ module.exports = {
 			}
 		}
 
-		// Send off the message to Discord
+		console.log(USER, UUID, augmentedMessage, INSTANCE);
+
 		queueTask(INSTANCE, serverLink, USER, UUID ? UUID : null, augmentedMessage, INSTANCE);
-		// Remove the user's play timer
 		client.playTimers.delete(playKey);
 		try {
 			sendToWeb(INSTANCE, USER, MESSAGE);

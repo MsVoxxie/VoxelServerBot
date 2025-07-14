@@ -42,18 +42,27 @@ module.exports = {
 		// Allow only the first join message to be sent for each user
 		const joinMessages = ['has connected', 'joined for the first time'];
 
+		if (!client.joinMessages) client.joinMessages = new Map();
+
 		if (joinMessages.includes(MESSAGE) && !userJoinedSet.has(USER)) {
 			userJoinedSet.add(USER);
 
-			// Use a string key for playTimers
 			const playKey = `${USER}:${INSTANCE}`;
-			// Start the users play timer if it doesn't exist
-			if (!client.playTimers.has(playKey)) {
-				client.playTimers.set(playKey, Date.now());
+
+			let playData = client.playTimers.get(playKey);
+			if (!playData) {
+				playData = { time: Date.now(), sentMessages: [] };
+				client.playTimers.set(playKey, playData);
 			}
 
-			// Send off the message to Discord
-			queueTask(INSTANCE, serverLink, USER, UUID ? UUID : null, augmentedMessage, INSTANCE);
+			console.log(USER, UUID, augmentedMessage, INSTANCE);
+
+			const sentMessages = await queueTask(INSTANCE, serverLink, USER, UUID ? UUID : null, augmentedMessage, INSTANCE);
+			if (Array.isArray(sentMessages) && sentMessages.length > 0) {
+				playData.sentMessages = sentMessages; // Store array of {id, webhookId, webhookToken}
+				client.playTimers.set(playKey, playData); // Update the map
+			}
+
 			try {
 				sendToWeb(INSTANCE, USER, MESSAGE);
 			} catch (error) {

@@ -13,14 +13,12 @@ const { getInstanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/a
 
 // Function for sanity
 async function serverLink(USER = 'Placeholder', UUID = null, MESSAGE = 'Placeholder', INSTANCE = 'Placeholder', TYPE = 'Message', DUAL = false) {
-	// Defintions
 	let userAvatar = '';
-
-	// Fetch the instance ID from the database
 	const chatlinkFetch = await chatLink.findOne({ 'chatLinks.instanceId': INSTANCE }).lean();
-	// Filter the chatLinks array in JavaScript to only return matching instanceIds
 	const matchingChatLinks = chatlinkFetch.chatLinks.filter((link) => link.instanceId === INSTANCE);
 	if (!matchingChatLinks.length) return console.log(`No chat link found for instance ${INSTANCE}. Please check the database.`);
+
+	const sentMessages = [];
 
 	for (const chatLinkD of matchingChatLinks) {
 		const chatLinkData = chatLinkD;
@@ -46,16 +44,18 @@ async function serverLink(USER = 'Placeholder', UUID = null, MESSAGE = 'Placehol
 
 		// Message to Send
 		let message = `${MESSAGE.replace(/^<@!?(\d+)>$/, '<[MENTION REDACTED]>')}`;
-		// if (USER !== 'MinecraftPro87') { //! disable ai formatting
-		// 	message = MESSAGE.replace(/#/, '## [Q] ');
-		// }
 
 		// Create and Send
 		const webhook = new WebhookClient({ id: chatLinkData.webhookId, token: chatLinkData.webhookToken });
-		await webhook.send({
+		const sentMsg = await webhook.send({
 			username: `${USER} | ${chatLinkData.instanceFriendlyName}`,
 			avatarURL: userAvatar,
 			content: message,
+		});
+		sentMessages.push({
+			id: sentMsg.id,
+			webhookId: chatLinkData.webhookId,
+			webhookToken: chatLinkData.webhookToken,
 		});
 
 		if (DUAL) {
@@ -73,6 +73,8 @@ async function serverLink(USER = 'Placeholder', UUID = null, MESSAGE = 'Placehol
 			}
 		}
 	}
+
+	return sentMessages; // Array of {id, webhookId, webhookToken}
 }
 
 module.exports = {
