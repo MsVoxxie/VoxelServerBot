@@ -1,5 +1,5 @@
 const { getInstanceStatus, getOnlinePlayers } = require('../../functions/ampAPI/instanceFunctions');
-const { getInstanceAPI, sendConsoleMessage } = require('../../functions/ampAPI/apiFunctions');
+const { getInstanceAPI, sendConsoleMessage, getSevenDaysToDieTime } = require('../../functions/ampAPI/apiFunctions');
 const { calculateSleepingPercentage } = require('../../functions/serverFuncs/minecraft');
 const { serverLink } = require('../../functions/helpers/messageDiscord');
 const { queueTask } = require('../../functions/helpers/queueTask');
