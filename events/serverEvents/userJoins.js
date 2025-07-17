@@ -33,14 +33,14 @@ module.exports = {
 
 					// Augment the message with the sleep percentage
 					if (onlinePlayers.players.length >= 2) {
-						augmentedMessage = `${MESSAGE}\n-# ${onlinePlayers.players.length}/${maxPlayers} Players, sleepPercentage set to ${sleepPercentage}% (${requiredToSleep})`;
+						augmentedMessage += `\n-# ${onlinePlayers.players.length}/${maxPlayers} Players, sleepPercentage set to ${sleepPercentage}% (${requiredToSleep})`;
 					}
 					await sendConsoleMessage(INSTANCE, `gamerule playersSleepingPercentage ${sleepPercentage}`);
 					break;
 
 				case 'Seven Days To Die':
 					const curTime = await getSevenDaysToDieTime(INSTANCE);
-					if (curTime) augmentedMessage = `${MESSAGE}\n-# Day ${curTime.day}, Time: ${curTime.time}`;
+					if (curTime) augmentedMessage += `\n-# Day ${curTime.day}, Time: ${curTime.time}`;
 					break;
 				default:
 					break;

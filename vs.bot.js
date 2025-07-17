@@ -38,6 +38,7 @@ client.colors = {
 client.backupTimers = new Collection();
 client.typingState = new Collection();
 client.playTimers = new Collection();
+client.crashCount = new Collection();
 client.cooldowns = new Collection();
 client.commands = new Collection();
 client.events = new Collection();
@@ -66,6 +67,11 @@ cron.schedule('*/1 * * * *', async () => {
 // Every 2 minutes
 cron.schedule('*/2 * * * *', async () => {
 	client.emit('twoMinutes');
+});
+
+// Every Hour
+cron.schedule('0 * * * *', async () => {
+	client.emit('hourly');
 });
 
 // Login

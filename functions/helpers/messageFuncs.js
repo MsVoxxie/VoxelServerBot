@@ -50,7 +50,31 @@ async function alertSoundMC(instanceId, type = 'notice' || 'alert') {
 	}
 }
 
+// Handle crash counter
+function handleCrashCounter(client, instanceId, augmentedMessage) {
+	// Increment the crash count for the instance
+	if (!client.crashCount.has(instanceId)) {
+		client.crashCount.set(instanceId, 0);
+	}
+	let crashCount = client.crashCount.get(instanceId);
+	client.crashCount.set(instanceId, crashCount + 1);
+	crashCount = client.crashCount.get(instanceId);
+	let augment = '';
+
+	const messages = [
+		` [${crashCount}] We'll be right back!`,
+		` [${crashCount}] Hopefully this is temporary?`,
+		` [${crashCount}] ...Well, crap?`,
+		` [${crashCount}] Yell at <@101789503634554880> to fix it...`,
+		` [${crashCount}] <@101789503634554880> We've got a problem!`,
+	];
+	const index = Math.min(crashCount - 1, messages.length - 1);
+	augment = messages[index >= 0 ? index : 0];
+	return augmentedMessage + `\n-# ${augment}`;
+}
+
 module.exports = {
 	splitSentence,
 	alertSoundMC,
+	handleCrashCounter,
 };

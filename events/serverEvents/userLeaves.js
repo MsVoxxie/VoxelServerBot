@@ -67,7 +67,7 @@ module.exports = {
 				}
 				case 'Seven Days To Die': {
 					const curTime = await getSevenDaysToDieTime(INSTANCE);
-					if (curTime) augmentedMessage = `${MESSAGE}\n-# Day ${curTime.day}, Time: ${curTime.time}`;
+					if (curTime) augmentedMessage += `\n-# Day ${curTime.day}, Time: ${curTime.time}`;
 					break;
 				}
 				default:

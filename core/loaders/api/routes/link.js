@@ -26,7 +26,7 @@ router.post('/v1/server/link', async (req, res) => {
 	});
 
 	client.emit('receivedChat', req.body);
-	await saveEvent(formattedEvent);
+	await saveEvent(formattedEvent, rawEvent);
 	res.status(200).send({ message: 'Success!' });
 });
 
