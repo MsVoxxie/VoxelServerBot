@@ -51,21 +51,29 @@ module.exports = {
 
 		if (client.experimentalFeatures) {
 			const instanceInfo = await getInstanceStatus(INSTANCE);
-			if (instanceInfo.status.module === 'MinecraftModule') {
-				const onlinePlayers = await getOnlinePlayers(INSTANCE);
-				const maxPlayers = instanceInfo.status.users.MaxValue;
-				const { sleepPercentage, requiredToSleep } = calculateSleepingPercentage(onlinePlayers.players.length, maxPlayers);
+			switch (instanceInfo.status.moduleName || instanceInfo.status.module) {
+				case 'MinecraftModule': {
+					const onlinePlayers = await getOnlinePlayers(INSTANCE);
+					const maxPlayers = instanceInfo.status.users.MaxValue;
+					const { sleepPercentage, requiredToSleep } = calculateSleepingPercentage(onlinePlayers.players.length, maxPlayers);
 
-				if (onlinePlayers.players.length >= 1) {
-					augmentedMessage += `\n-# ${onlinePlayers.players.length}/${maxPlayers} Players, sleepPercentage set to ${sleepPercentage}% (${requiredToSleep})`;
-				} else {
-					augmentedMessage += `\n-# Server is empty.`;
+					if (onlinePlayers.players.length >= 1) {
+						augmentedMessage += `\n-# ${onlinePlayers.players.length}/${maxPlayers} Players, sleepPercentage set to ${sleepPercentage}% (${requiredToSleep})`;
+					} else {
+						augmentedMessage += `\n-# Server is empty.`;
+					}
+					await sendConsoleMessage(INSTANCE, `gamerule playersSleepingPercentage ${sleepPercentage}`);
+					break;
 				}
-				await sendConsoleMessage(INSTANCE, `gamerule playersSleepingPercentage ${sleepPercentage}`);
+				case 'Seven Days To Die': {
+					const curTime = await getSevenDaysToDieTime(INSTANCE);
+					if (curTime) augmentedMessage = `${MESSAGE}\n-# Day ${curTime.day}, Time: ${curTime.time}`;
+					break;
+				}
+				default:
+					break;
 			}
 		}
-
-		console.log(USER, UUID, augmentedMessage, INSTANCE);
 
 		queueTask(INSTANCE, serverLink, USER, UUID ? UUID : null, augmentedMessage, INSTANCE);
 		client.playTimers.delete(playKey);

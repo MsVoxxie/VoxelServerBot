@@ -1,4 +1,4 @@
-const { getInstanceAPI, getMainAPI, sendConsoleMessage, mainAPI } = require('./apiFunctions');
+const { getInstanceAPI, getMainAPI, sendConsoleMessage, mainAPI, getSevenDaysToDieTime } = require('./apiFunctions');
 const { getImageSource } = require('../helpers/getSourceImage');
 const { chatLink } = require('../../models');
 const Logger = require('../logging/logger');
@@ -177,12 +177,9 @@ async function getInstanceStatus(instanceId) {
 	const API = await getInstanceAPI(instanceId);
 	if (!API) return { desc: 'Invalid instanceId.', success: false };
 
-	// Get the status of the instance
-	const statusData = await API.Core.GetStatusAsync();
+	// Get the status of the instance and module info in parallel
+	const [statusData, moduleInfo] = await Promise.all([API.Core.GetStatusAsync(), API.Core.GetModuleInfoAsync()]);
 	if (!statusData) return { desc: 'Failed to get status data.', success: false };
-
-	// Get module info
-	const moduleInfo = await API.Core.GetModuleInfoAsync();
 	if (!moduleInfo) return { desc: 'Failed to get module info.', success: false };
 
 	// Performance is variable and can be FPS or TPS, so we need to check for both
@@ -221,6 +218,7 @@ async function getInstanceStatus(instanceId) {
 	const status = {
 		state: currentState[statusData.State],
 		module: moduleInfo.ModuleName,
+		moduleName: moduleInfo.AppName || null,
 		cpu: statusData.Metrics?.['CPU Usage'] || null,
 		memory: statusData.Metrics?.['Memory Usage'] || null,
 		users: statusData.Metrics?.['Active Users'] || null,
@@ -352,28 +350,14 @@ async function getStatusPageData() {
 
 					if (!cache.timestamp || now - cache.timestamp > 1 * 60 * 1000) {
 						try {
-							const sevenAPI = await getInstanceAPI(i.InstanceID);
-							await sendConsoleMessage(i.InstanceID, 'gettime');
-							await sevenAPI.Core.GetUpdatesAsync();
-							await new Promise((resolve) => setTimeout(resolve, 500));
-							const consoleResponse = await sevenAPI.Core.GetUpdatesAsync();
-							const consoleOutput = consoleResponse.ConsoleEntries;
-
-							const dayEntry = consoleOutput.find((ent) => typeof ent.Contents === 'string' && /^Day \d+, \d{2}:\d{2}/.test(ent.Contents));
-							if (dayEntry) {
-								const match = dayEntry.Contents.match(/^Day (\d+), (\d{2}:\d{2})/);
-								if (match) {
-									currentTime = { day: match[1], time: match[2] };
-									// Only update cache if we have valid data
-									sevenDaysCache[i.InstanceID] = {
-										timestamp: now,
-										currentTime,
-									};
-								}
-							}
-							// If no valid data, do NOT update the cache (keep previous value)
+							currentTime = await getSevenDaysToDieTime(i.InstanceID);
+							// Update cache with the current time
+							sevenDaysCache[i.InstanceID] = {
+								timestamp: now,
+								currentTime,
+							};
 						} catch (err) {
-							// Optionally log error, but do NOT update the cache
+							null; // If there's an error, we just skip updating the cache
 						}
 					}
 					currentTime = sevenDaysCache[i.InstanceID]?.currentTime ?? null;

@@ -105,6 +105,31 @@ async function sendConsoleMessage(instanceID, Message) {
 	await API.Core.SendConsoleMessageAsync(Message);
 }
 
+// Fetch Seven Days to Die time
+function getSevenDaysToDieTime(instanceID) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const API = await getInstanceAPI(instanceID);
+			await sendConsoleMessage(instanceID, 'gettime');
+			await API.Core.GetUpdatesAsync();
+			await new Promise((res) => setTimeout(res, 500));
+			const consoleResponse = await API.Core.GetUpdatesAsync();
+			const consoleOutput = consoleResponse.ConsoleEntries;
+			const dayEntry = consoleOutput.find((ent) => typeof ent.Contents === 'string' && /^Day \d+, \d{2}:\d{2}/.test(ent.Contents));
+			if (dayEntry) {
+				const match = dayEntry.Contents.match(/^Day (\d+), (\d{2}:\d{2})/);
+				if (match) {
+					const currentTime = { day: match[1], time: match[2] };
+					return resolve(currentTime);
+				}
+			}
+			resolve(null);
+		} catch (err) {
+			reject(err);
+		}
+	});
+}
+
 module.exports = {
 	mainAPI,
 	getMainAPI,
@@ -114,4 +139,5 @@ module.exports = {
 	fetchTriggerId,
 	fetchTriggerTaskId,
 	sendConsoleMessage,
+	getSevenDaysToDieTime,
 };
