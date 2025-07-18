@@ -67,7 +67,8 @@ module.exports = {
 				}
 				case 'Seven Days To Die': {
 					const curTime = await getSevenDaysToDieTime(INSTANCE);
-					if (curTime) augmentedMessage += `\n-# Day ${curTime.day}, Time: ${curTime.time}`;
+					const isBadNight = curTime.day % 7 === 0 ? `***${curTime.day}***` : `${curTime.day}`;
+					if (curTime) augmentedMessage += `\n-# Day ${isBadNight}, Time: ${curTime.time}`;
 					break;
 				}
 				default:
