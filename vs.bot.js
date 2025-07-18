@@ -69,6 +69,11 @@ cron.schedule('*/2 * * * *', async () => {
 	client.emit('twoMinutes');
 });
 
+// Every 15 minutes
+cron.schedule('*/15 * * * *', async () => {
+	client.emit('fifteenMinutes');
+});
+
 // Every Hour
 cron.schedule('0 * * * *', async () => {
 	client.emit('hourly');
